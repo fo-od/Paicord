@@ -1,11 +1,12 @@
 import SwiftUI
 
-@available(macOS, unavailable)
+#if canImport(UIKit)
+@available(macOS, unavailable) // idk why this didnt work
 @available(iOS 17.0, *)
 struct SlideoverDoubleView<Primary: View, Secondary: View>: View {
 	@Binding var swap: Bool
-	@ViewBuilder var primary: () -> Primary
-	@ViewBuilder var secondary: () -> Secondary
+	var primary: Primary
+	var secondary: Secondary
 
 	@State private var dragOffset: CGFloat = 0
 	private let animationDuration: Double = 0.2
@@ -13,21 +14,32 @@ struct SlideoverDoubleView<Primary: View, Secondary: View>: View {
 
 	@Environment(\.slideoverDisabled) var slideoverDisabled
 
+	init(
+		swap: Binding<Bool>,
+		@ViewBuilder primary: () -> Primary,
+		@ViewBuilder secondary: () -> Secondary
+	) {
+		self._swap = swap
+		self.primary = primary()
+		self.secondary = secondary()
+	}
+
 	var body: some View {
 		ZStack {
-			primary()
+			primary
 				.frame(maxWidth: .infinity, maxHeight: .infinity)
-				.background(.background)
-			
-			// paul hudson said this fixes swift 6 concurrency issues with visualEffect
-			// since its closure doesn't always run on the main thread.
+			//
+			//			// paul hudson said this fixes swift 6 concurrency issues with visualEffect
+			//			// since its closure doesn't always run on the main thread.
 			let swap = swap
 			let dragOffset = dragOffset
-			secondary()
+			secondary
 				.frame(maxWidth: .infinity, maxHeight: .infinity)
 				.background(.background)
+				.shadow(radius: 10)
 				.visualEffect { vs, proxy in
-					vs.offset(x: swap ? dragOffset : proxy.size.width + dragOffset)
+					vs
+						.offset(x: swap ? dragOffset : proxy.size.width + 10 + dragOffset)
 				}
 		}
 		.onGeometryChange(for: CGFloat.self, of: { $0.size.width }) {
@@ -38,7 +50,7 @@ struct SlideoverDoubleView<Primary: View, Secondary: View>: View {
 				.onChanged { drag in
 					guard !slideoverDisabled else { return }
 					let translation = drag.translation.width
-					
+
 					if swap {
 						self.dragOffset = translation < 0 ? 0 : translation
 					} else {
@@ -92,6 +104,7 @@ extension View {
 	}
 }
 
+@available(macOS, unavailable)
 #Preview {
 	struct PreviewWrapper: View {
 		@State var current: Bool = true
@@ -100,6 +113,8 @@ extension View {
 				Text("im 1")
 					.font(.largeTitle)
 					.foregroundColor(.white)
+					.frame(maxWidth: .infinity, maxHeight: .infinity)
+					.background(.appBackground)
 			} secondary: {
 				Text("im 2")
 					.font(.largeTitle)
@@ -109,3 +124,4 @@ extension View {
 	}
 	return PreviewWrapper()
 }
+#endif

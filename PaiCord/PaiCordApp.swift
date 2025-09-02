@@ -9,6 +9,7 @@ import SwiftUI
 
 @main
 struct PaiCordApp: App {
+	
 	var body: some Scene {
 		WindowGroup {
 			ContentView()
@@ -24,4 +25,8 @@ struct ContentView: View {
 			LargeBaseplate()
 		#endif
 	}
+}
+
+#Preview {
+	ContentView()
 }

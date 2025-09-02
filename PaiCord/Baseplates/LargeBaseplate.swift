@@ -7,8 +7,19 @@
 
 import SwiftUI
 
+#if canImport(AppKit)
 struct LargeBaseplate: View {
 	var body: some View {
-		Text("soon")
+		NavigationSplitView {
+			
+		} detail: {
+			
+		}
+
 	}
 }
+
+#Preview {
+	ContentView()
+}
+#endif

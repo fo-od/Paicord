@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+#if canImport(UIKit)
 struct SmallBaseplate: View {
 	@SceneStorage("Baseplate.ChatVisibility") private var chatVisibility = false
 
@@ -18,19 +19,25 @@ struct SmallBaseplate: View {
 		SlideoverDoubleView(swap: $chatVisibility) {
 			TabView(selection: $currentTab) {
 				HomeView()
-					.tabItem {
-						Label("Home", systemImage: "house")
-					}
+					.frame(maxWidth: .infinity, maxHeight: .infinity)
+					.background(.appBackground)
+					.toolbarBackground(.tabBarBackground, for: .tabBar)
+					.toolbarBackground(.visible, for: .tabBar)
+					.tabItem { Label("Home", systemImage: "house") }
 					.tag(CurrentTab.home)
 				NotificationsView()
-					.tabItem {
-						Label("Notifications", systemImage: "bell")
-					}
+					.frame(maxWidth: .infinity, maxHeight: .infinity)
+					.background(.appBackground)
+					.toolbarBackground(.tabBarBackground, for: .tabBar)
+					.toolbarBackground(.visible, for: .tabBar)
+					.tabItem { Label("Notifications", systemImage: "bell") }
 					.tag(CurrentTab.notifications)
 				ProfileView()
-					.tabItem {
-						Label("Profile", systemImage: "person.circle")
-					}
+					.frame(maxWidth: .infinity, maxHeight: .infinity)
+					.background(.appBackground)
+					.toolbarBackground(.tabBarBackground, for: .tabBar)
+					.toolbarBackground(.visible, for: .tabBar)
+					.tabItem { Label("Profile", systemImage: "person.circle") }
 					.tag(CurrentTab.profile)
 			}
 		} secondary: {
@@ -47,3 +54,4 @@ struct SmallBaseplate: View {
 #Preview {
 	ContentView()
 }
+#endif

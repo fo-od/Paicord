@@ -16,6 +16,11 @@
 		AA10971A2E64C181005BC3D2 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10970D2E64C181005BC3D2 /* ProfileView.swift */; };
 		AA10971B2E64C181005BC3D2 /* PaiCordApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1097122E64C181005BC3D2 /* PaiCordApp.swift */; };
 		AA10971D2E64C18C005BC3D2 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10971C2E64C189005BC3D2 /* ChatView.swift */; };
+		AA9C81832E6660BE0086B1DA /* ServerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9C81822E6660BE0086B1DA /* ServerButton.swift */; };
+		AA9C81862E66670E0086B1DA /* CornerRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9C81852E66670E0086B1DA /* CornerRadius.swift */; };
+		AA9C818C2E6702930086B1DA /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = AA9C818B2E6702930086B1DA /* SwiftUIIntrospect */; };
+		AAEEC71F2E65120000EB5FC9 /* AuthenticationStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEEC71E2E6511F800EB5FC9 /* AuthenticationStorage.swift */; };
+		AAEEC7222E6515C400EB5FC9 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = AAEEC7212E6515C400EB5FC9 /* KeychainAccess */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +35,9 @@
 		AA1097112E64C181005BC3D2 /* PaiCord.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaiCord.entitlements; sourceTree = "<group>"; };
 		AA1097122E64C181005BC3D2 /* PaiCordApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaiCordApp.swift; sourceTree = "<group>"; };
 		AA10971C2E64C189005BC3D2 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		AA9C81822E6660BE0086B1DA /* ServerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerButton.swift; sourceTree = "<group>"; };
+		AA9C81852E66670E0086B1DA /* CornerRadius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerRadius.swift; sourceTree = "<group>"; };
+		AAEEC71E2E6511F800EB5FC9 /* AuthenticationStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationStorage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,6 +45,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA9C818C2E6702930086B1DA /* SwiftUIIntrospect in Frameworks */,
+				AAEEC7222E6515C400EB5FC9 /* KeychainAccess in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,12 +126,63 @@
 			children = (
 				AA1097122E64C181005BC3D2 /* PaiCordApp.swift */,
 				AA1097072E64C181005BC3D2 /* Baseplates */,
-				AA1097082E64C181005BC3D2 /* Chat */,
-				AA10970F2E64C181005BC3D2 /* Tabs */,
+				AA9C81802E665E190086B1DA /* Common */,
+				AA9C817F2E665E0A0086B1DA /* macOS */,
+				AA9C817E2E665E010086B1DA /* iOS */,
+				AAEEC71D2E6511E700EB5FC9 /* Storage */,
 				AA1097102E64C181005BC3D2 /* Assets.xcassets */,
 				AA1097112E64C181005BC3D2 /* PaiCord.entitlements */,
 			);
 			path = PaiCord;
+			sourceTree = "<group>";
+		};
+		AA9C817E2E665E010086B1DA /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				AA10970F2E64C181005BC3D2 /* Tabs */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		AA9C817F2E665E0A0086B1DA /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = macOS;
+			sourceTree = "<group>";
+		};
+		AA9C81802E665E190086B1DA /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				AA9C81842E6667050086B1DA /* Utilities */,
+				AA9C81812E6660AB0086B1DA /* Components */,
+				AA1097082E64C181005BC3D2 /* Chat */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		AA9C81812E6660AB0086B1DA /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				AA9C81822E6660BE0086B1DA /* ServerButton.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		AA9C81842E6667050086B1DA /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				AA9C81852E66670E0086B1DA /* CornerRadius.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		AAEEC71D2E6511E700EB5FC9 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				AAEEC71E2E6511F800EB5FC9 /* AuthenticationStorage.swift */,
+			);
+			path = Storage;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -141,6 +202,8 @@
 			);
 			name = PaiCord;
 			packageProductDependencies = (
+				AAEEC7212E6515C400EB5FC9 /* KeychainAccess */,
+				AA9C818B2E6702930086B1DA /* SwiftUIIntrospect */,
 			);
 			productName = PaiCord;
 			productReference = AA1096DB2E63BE84005BC3D2 /* PaiCord.app */;
@@ -170,6 +233,10 @@
 			);
 			mainGroup = AA1096D22E63BE84005BC3D2;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AAEEC7202E6515C400EB5FC9 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
+				AA9C818A2E6702930086B1DA /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AA1096DC2E63BE84005BC3D2 /* Products */;
 			projectDirPath = "";
@@ -199,8 +266,11 @@
 				AA1097152E64C181005BC3D2 /* LargeBaseplate.swift in Sources */,
 				AA1097162E64C181005BC3D2 /* SlideoverDoubleView.swift in Sources */,
 				AA1097172E64C181005BC3D2 /* SmallBaseplate.swift in Sources */,
+				AAEEC71F2E65120000EB5FC9 /* AuthenticationStorage.swift in Sources */,
 				AA1097182E64C181005BC3D2 /* HomeView.swift in Sources */,
 				AA10971D2E64C18C005BC3D2 /* ChatView.swift in Sources */,
+				AA9C81862E66670E0086B1DA /* CornerRadius.swift in Sources */,
+				AA9C81832E6660BE0086B1DA /* ServerButton.swift in Sources */,
 				AA1097192E64C181005BC3D2 /* NotificationsView.swift in Sources */,
 				AA10971A2E64C181005BC3D2 /* ProfileView.swift in Sources */,
 				AA10971B2E64C181005BC3D2 /* PaiCordApp.swift in Sources */,
@@ -426,6 +496,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA9C818A2E6702930086B1DA /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/swiftui-introspect";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
+		AAEEC7202E6515C400EB5FC9 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA9C818B2E6702930086B1DA /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA9C818A2E6702930086B1DA /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
+			productName = SwiftUIIntrospect;
+		};
+		AAEEC7212E6515C400EB5FC9 /* KeychainAccess */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAEEC7202E6515C400EB5FC9 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
+			productName = KeychainAccess;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AA1096D32E63BE84005BC3D2 /* Project object */;
 }
