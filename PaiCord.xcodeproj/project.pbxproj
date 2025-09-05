@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5783AA902E6B8F6500F73F6D /* MeshGradient in Frameworks */ = {isa = PBXBuildFile; productRef = 5783AA8F2E6B8F6500F73F6D /* MeshGradient */; };
+		5783AA922E6B8F6500F73F6D /* MeshGradientCHeaders in Frameworks */ = {isa = PBXBuildFile; productRef = 5783AA912E6B8F6500F73F6D /* MeshGradientCHeaders */; };
+		5783AA942E6B8FD100F73F6D /* MeshGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5783AA932E6B8FCD00F73F6D /* MeshGradient.swift */; };
 		578E1CE12E67781700C6DEA3 /* GradientText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 578E1CE02E67780B00C6DEA3 /* GradientText.swift */; };
 		57A4E70B2E6B315F00470131 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A4E70A2E6B315C00470131 /* LoginView.swift */; };
 		57A4E70E2E6B400F00470131 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 57A4E70D2E6B400F00470131 /* SDWebImageSwiftUI */; };
@@ -29,6 +32,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5783AA932E6B8FCD00F73F6D /* MeshGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshGradient.swift; sourceTree = "<group>"; };
 		578E1CE02E67780B00C6DEA3 /* GradientText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientText.swift; sourceTree = "<group>"; };
 		57A4E70A2E6B315C00470131 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		57A4E7142E6B44C200470131 /* CGSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGSize.swift; sourceTree = "<group>"; };
@@ -54,8 +58,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				57A4E70E2E6B400F00470131 /* SDWebImageSwiftUI in Frameworks */,
+				5783AA902E6B8F6500F73F6D /* MeshGradient in Frameworks */,
 				AA9C818C2E6702930086B1DA /* SwiftUIIntrospect in Frameworks */,
 				AAEEC7222E6515C400EB5FC9 /* KeychainAccess in Frameworks */,
+				5783AA922E6B8F6500F73F6D /* MeshGradientCHeaders in Frameworks */,
 				57A4E7112E6B411A00470131 /* SDWebImageSVGCoder in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -83,6 +89,7 @@
 			isa = PBXGroup;
 			children = (
 				57A4E70A2E6B315C00470131 /* LoginView.swift */,
+				5783AA932E6B8FCD00F73F6D /* MeshGradient.swift */,
 			);
 			path = Login;
 			sourceTree = "<group>";
@@ -251,6 +258,8 @@
 				AA9C818B2E6702930086B1DA /* SwiftUIIntrospect */,
 				57A4E70D2E6B400F00470131 /* SDWebImageSwiftUI */,
 				57A4E7102E6B411A00470131 /* SDWebImageSVGCoder */,
+				5783AA8F2E6B8F6500F73F6D /* MeshGradient */,
+				5783AA912E6B8F6500F73F6D /* MeshGradientCHeaders */,
 			);
 			productName = PaiCord;
 			productReference = AA1096DB2E63BE84005BC3D2 /* Paicord.app */;
@@ -271,7 +280,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AA1096D62E63BE84005BC3D2 /* Build configuration list for PBXProject "Paicord" */;
+			buildConfigurationList = AA1096D62E63BE84005BC3D2 /* Build configuration list for PBXProject "PaiCord" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -285,6 +294,7 @@
 				AA9C818A2E6702930086B1DA /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 				57A4E70C2E6B400F00470131 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 				57A4E70F2E6B411A00470131 /* XCRemoteSwiftPackageReference "SDWebImageSVGCoder" */,
+				5783AA8E2E6B8F6500F73F6D /* XCRemoteSwiftPackageReference "MeshGradient" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AA1096DC2E63BE84005BC3D2 /* Products */;
@@ -320,6 +330,7 @@
 				AA10971D2E64C18C005BC3D2 /* ChatView.swift in Sources */,
 				AA9C81862E66670E0086B1DA /* CornerRadius.swift in Sources */,
 				AA9C81832E6660BE0086B1DA /* ServerButton.swift in Sources */,
+				5783AA942E6B8FD100F73F6D /* MeshGradient.swift in Sources */,
 				578E1CE12E67781700C6DEA3 /* GradientText.swift in Sources */,
 				AA1097192E64C181005BC3D2 /* NotificationsView.swift in Sources */,
 				57A4E7152E6B44C900470131 /* CGSize.swift in Sources */,
@@ -531,7 +542,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AA1096D62E63BE84005BC3D2 /* Build configuration list for PBXProject "Paicord" */ = {
+		AA1096D62E63BE84005BC3D2 /* Build configuration list for PBXProject "PaiCord" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AA1096E52E63BE8C005BC3D2 /* Debug */,
@@ -552,6 +563,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		5783AA8E2E6B8F6500F73F6D /* XCRemoteSwiftPackageReference "MeshGradient" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/patskovn/MeshGradient";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		57A4E70C2E6B400F00470131 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI";
@@ -587,6 +606,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		5783AA8F2E6B8F6500F73F6D /* MeshGradient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5783AA8E2E6B8F6500F73F6D /* XCRemoteSwiftPackageReference "MeshGradient" */;
+			productName = MeshGradient;
+		};
+		5783AA912E6B8F6500F73F6D /* MeshGradientCHeaders */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5783AA8E2E6B8F6500F73F6D /* XCRemoteSwiftPackageReference "MeshGradient" */;
+			productName = MeshGradientCHeaders;
+		};
 		57A4E70D2E6B400F00470131 /* SDWebImageSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 57A4E70C2E6B400F00470131 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;

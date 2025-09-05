@@ -1,5 +1,5 @@
 {
-  "originHash" : "bca786109a040c0fc173e1db9ed5082990d76c7bc7ab115dab5e1b5c1847c380",
+  "originHash" : "20d8734977b9ee9cd09e66a4a882f38c6aa2fb6d895926ce46ef91822a1085b0",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -26,6 +26,15 @@
       "state" : {
         "branch" : "master",
         "revision" : "e0c7eebc5a4465a3c4680764f26b7a61f567cdaf"
+      }
+    },
+    {
+      "identity" : "meshgradient",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/patskovn/MeshGradient",
+      "state" : {
+        "branch" : "main",
+        "revision" : "f16b544336b7bdaf7e3eba4ac6cba50e1160220e"
       }
     },
     {
