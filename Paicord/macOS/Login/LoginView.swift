@@ -63,7 +63,7 @@ struct LoginView: View {
           .buttonStyle(.plain)
           .foregroundStyle(.hyperlink)
           .disabled(login.isEmpty)
-          .onHover { self.forgotPasswordPopover = $0 }
+		  .onHover { self.forgotPasswordPopover = login.isEmpty ? $0 : false }
           .popover(isPresented: $forgotPasswordPopover) {
             Text("Enter a valid login above to send a reset link!")
               .padding()
