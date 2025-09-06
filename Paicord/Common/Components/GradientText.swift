@@ -36,14 +36,12 @@ struct Test: View {
         .scaleEffect(1.01)
       }
       .offset(x: -offset)
-      .onAppear {
-        withAnimation(
-          .linear(duration: animationDuration).repeatForever(
-            autoreverses: false)
-        ) {
-          offset = width
-        }
-      }
+      .animation(
+        .linear(duration: animationDuration)
+          .repeatForever(autoreverses: false),
+        value: offset
+      )
+      .onAppear { offset = width }
       .ignoresSafeArea()
     }
   }

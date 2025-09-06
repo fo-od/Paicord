@@ -105,9 +105,29 @@ public enum Payloads {
       validateCharacterCountInRange(code, min: 6, max: 6, name: "code")
     }
 
-    public enum MFAType: String, Sendable {
+    public enum MFAType: String, Sendable, Codable {
       case totp, sms, backup, /* webauthn, */ password
     }
+  }
+  
+  public struct LogoutSessions: Sendable, Encodable, ValidatablePayload {
+    public var session_id_hashes: [String]
+    
+    public init(session_id_hashes: [String]) {
+      self.session_id_hashes = session_id_hashes
+    }
+    
+    public func validate() -> [ValidationFailure] { }
+  }
+  
+  public struct ForgotPassword: Sendable, Encodable, ValidatablePayload {
+    public var login: String
+    
+    public init(login: String) {
+      self.login = login
+    }
+    
+    public func validate() -> [ValidationFailure] { }
   }
 
   /// An attachment object, but for sending.

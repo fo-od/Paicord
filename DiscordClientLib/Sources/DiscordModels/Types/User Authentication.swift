@@ -21,6 +21,16 @@ public struct UserAuthenticationSessions: Sendable, Codable {
   }
 }
 
+public struct MFAVerificationRequest: Sendable, Codable {
+  public var ticket: String
+  public var methods: [MFAMethod]
+  
+  public struct MFAMethod: Sendable, Codable {
+    public var type: Payloads.AuthenticationMFA.MFAType
+    public var backup_codes_allowed: Bool
+  }
+}
+
 public struct UserAuthentication: Sendable, Codable {
   public var user_id: UserSnowflake
   public var token: Secret?
