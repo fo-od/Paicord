@@ -2,12 +2,12 @@
 //  MeshGradient.swift
 //  Paicord
 //
-//  Created by Lakhan Lothiyi on 05/09/2025.
+// Created by Lakhan Lothiyi on 05/09/2025.
+// Copyright © 2025 Lakhan Lothiyi.
 //
 
 import MeshGradient
 import simd
-
 import protocol SwiftUI.View
 import struct SwiftUICore.Environment
 import struct SwiftUICore.EnvironmentValues

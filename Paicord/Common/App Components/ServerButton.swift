@@ -2,7 +2,8 @@
 //  ServerButton.swift
 //  PaiCord
 //
-//  Created by Lakhan Lothiyi on 02/09/2025.
+// Created by Lakhan Lothiyi on 02/09/2025.
+// Copyright © 2025 Lakhan Lothiyi.
 //
 
 import SwiftUI

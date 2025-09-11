@@ -2,7 +2,8 @@
 //  NotificationsView.swift
 //  PaiCord
 //
-//  Created by Lakhan Lothiyi on 31/08/2025.
+// Created by Lakhan Lothiyi on 31/08/2025.
+// Copyright © 2025 Lakhan Lothiyi.
 //
 
 import SwiftUI

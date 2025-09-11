@@ -5,6 +5,6 @@
       location = "container:PaiCord.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:DiscordClientLib">
+      location = "group:PaicordLib">
    </FileRef>
 </Workspace>

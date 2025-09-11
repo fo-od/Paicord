@@ -2,7 +2,8 @@
 //  String+LocalizedError.swift
 //  Paicord
 //
-//  Created by Lakhan Lothiyi on 06/09/2025.
+// Created by Lakhan Lothiyi on 06/09/2025.
+// Copyright © 2025 Lakhan Lothiyi.
 //
 
 import Foundation

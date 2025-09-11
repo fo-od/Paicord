@@ -1,5 +1,5 @@
 {
-  "originHash" : "20d8734977b9ee9cd09e66a4a882f38c6aa2fb6d895926ce46ef91822a1085b0",
+  "originHash" : "facb14d986e936f4d1aa343008591a94d70effd0dc96a5760d92901d127a9999",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "e1caa19077dda4b00441142ef57da3db02acd466",
         "version" : "1.4.2"
+      }
+    },
+    {
+      "identity" : "hcaptcha",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/llsc12/hcaptcha",
+      "state" : {
+        "branch" : "master",
+        "revision" : "014fc084e09640190fa21b7716519c056c021477"
       }
     },
     {
@@ -269,6 +278,15 @@
       "state" : {
         "revision" : "807f73ce09a9b9723f12385e592b4e0aaebd3336",
         "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "swiftuix",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftUIX/SwiftUIX",
+      "state" : {
+        "branch" : "master",
+        "revision" : "56175334751a03f80d3a650c497b8525237d4e43"
       }
     },
     {
