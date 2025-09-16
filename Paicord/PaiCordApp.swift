@@ -128,7 +128,12 @@ struct PaiCordApp: App {
 		.commands {
 			CommandMenu("Account") {
 				Button("Log Out") {
-					gatewayStore.logOut()
+					Task {
+						if let current = gatewayStore.accounts.currentAccount {
+							gatewayStore.accounts.removeAccount(current)
+							await gatewayStore.logOut()
+						}
+					}
 				}
 			}
 		}

@@ -65,6 +65,11 @@ final class GatewayStore {
 		setupEventHandling()
 		await gateway?.connect()
 	}
+	
+	/// Disconnects from the gateway. You must remove the current account from TokenStore before calling this.
+	func logOut() async {
+		await disconnectIfNeeded()
+	}
 
 	private func setupEventHandling() {
 		eventTask = Task { @MainActor in

@@ -197,28 +197,27 @@ struct LoginView: View {
 			.padding(.bottom)
 
 		VStack(spacing: 10) {
-			ForEach(gw.accounts.accounts, id: \.user.id) { account in
-				Button {
-					gw.accounts.currentAccountID = account.user.id
-				} label: {
-					HStack {
-						WebImage(url: account.user.avatarURL)
-							.resizable()
-							.scaledToFill()
-							.frame(width: 40, height: 40)
-							.clipShape(Circle())
-							.padding(.trailing, 10)
-						Text(account.user.username)
-							.font(.title3)
-						Spacer()
+			ScrollView {
+				VStack(spacing: 10) {
+					ForEach(gw.accounts.accounts) { account in
+						Button {
+							gw.accounts.currentAccountID = account.user.id
+						} label: {
+							HStack {
+								Text(account.user.username)
+									.font(.title3)
+								Spacer()
+							}
+							.padding(10)
+							.frame(maxWidth: .infinity)
+							.background(.primaryButtonBackground)
+							.clipShape(.rounded)
+						}
+						.buttonStyle(.borderless)
 					}
-					.padding(10)
-					.frame(maxWidth: .infinity)
-					.background(.primaryButton)
-					.clipShape(.rounded)
 				}
-				.buttonStyle(.borderless)
 			}
+			.frame(maxHeight: 200)
 
 			Button {
 				withAnimation {

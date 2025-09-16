@@ -12,7 +12,10 @@ struct SettingsView: View {
 	@Environment(GatewayStore.self) var gs
 	var body: some View {
 		AsyncButton("Log out") {
-			try await gs.
+			if let current = gs.accounts.currentAccount {
+				gs.accounts.removeAccount(current)
+				await gs.logOut()
+			}
 		} catch: {
 			print("failed to logout: \(String(describing: $0))")
 		}

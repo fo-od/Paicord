@@ -91,7 +91,9 @@ final class TokenStore {
 		try? keychain.set(encoded, key: accountDataKey)
 	}
 
-	struct AccountData: Codable, Equatable {
+	struct AccountData: Codable, Equatable, Identifiable, Sendable {
+		var id: UserSnowflake { user.id }
+		
 		var user: DiscordUser
 		var token: Secret
 
