@@ -45,8 +45,7 @@ struct PaiCordApp: App {
 					if gatewayStore.state != .connected {
 						ConnectionStateView(state: gatewayStore.state)
 							.transition(
-								.opacity.combined(with: .scale(scale: 1.1)).animation(
-									.easeInOut(duration: 0.5))
+								.opacity.combined(with: .scale(scale: 1.1))
 							)
 							.task {
 								await gatewayStore.connectIfNeeded()
@@ -66,6 +65,9 @@ struct PaiCordApp: App {
 
 				}
 			}
+			.animation(
+				.default, value: gatewayStore.state != .connected
+			)
 			.fontDesign(.rounded)
 			.sheet(item: $captchaChallenge) { challenge in
 				CaptchaSheet(challenge: challenge) { submitData in
@@ -113,9 +115,15 @@ struct PaiCordApp: App {
 					Button("OK", role: .cancel) {
 						appState.error = nil
 					}
+					Button("Details") {
+						appState.showingErrorSheet = true
+						appState.showingError = false
+					}
 				},
 				message: {
 					if let error = appState.error as? DiscordHTTPErrorResponse {
+						Text(error.description)
+					} else if let error = appState.error as? DiscordHTTPError {
 						Text(error.description)
 					} else if let error = appState.error {
 						Text(error.localizedDescription)
@@ -123,9 +131,22 @@ struct PaiCordApp: App {
 						Text("An unknown error occurred.")
 					}
 				})
+			.sheet(isPresented: $appState.showingErrorSheet) {
+				ScrollView {
+					if let error = appState.error as? DiscordHTTPErrorResponse {
+						Text(error.description)
+					} else if let error = appState.error as? DiscordHTTPError {
+						Text(error.description)
+					} else if let error = appState.error {
+						Text(error.localizedDescription)
+					} else {
+						Text("An unknown error occurred.")
+					}
+				}
+			}
 		}
 		#if os(macOS)
-		.windowToolbarStyle(.unifiedCompact)
+			.windowToolbarStyle(.unifiedCompact)
 		#endif
 		.commands {
 			CommandMenu("Account") {
@@ -154,6 +175,7 @@ final class PaicordAppState {
 	var selectedChannel: ChannelSnowflake? = nil  // idk man
 
 	var showingError = false
+	var showingErrorSheet = false
 	var error: Error? = nil {
 		didSet {
 			showingError = error != nil

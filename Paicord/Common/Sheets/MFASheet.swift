@@ -49,7 +49,6 @@ struct MFASheet: View {
 					}
 				}
 				.padding(25)
-				.frame(maxWidth: .infinity, maxHeight: .infinity)
 			}
 
 			VStack {
@@ -102,22 +101,26 @@ struct MFASheet: View {
 
 	@ViewBuilder
 	var form: some View {
-		if chosenMethod != nil {
-			VStack {
-				Text("Enter your authentication code")
-					.foregroundStyle(.secondary)
-					.font(.caption)
+		if let chosenMethod {
+			switch chosenMethod.type {
+			case .totp:
+				VStack {
+					Text("Enter your authentication code")
+						.foregroundStyle(.secondary)
+						.font(.caption)
 
-				SixDigitInput(input: $input) {
-					let input = $0
-					self.taskInProgress = true
-					self.mfaTask = .init {
-						defer { self.taskInProgress = false }
-						try? await Task.sleep(for: .seconds(2))
-						print("auth \(input)")
+					SixDigitInput(input: $input) {
+						let input = $0
+						self.taskInProgress = true
+						self.mfaTask = .init {
+							defer { self.taskInProgress = false }
+							try? await Task.sleep(for: .seconds(2))
+							print("auth \(input)")
+						}
 					}
+					.disabled(taskInProgress)
 				}
-				.disabled(taskInProgress)
+			default: Text("wip bro go do totp")
 			}
 		}
 	}
@@ -134,7 +137,7 @@ struct MFASheet: View {
 				),
 				.init(
 					type: .sms
-				)
+				),
 			]
 		)
 	) {

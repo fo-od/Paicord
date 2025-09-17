@@ -11,6 +11,7 @@ import SwiftUI
 
 struct ConnectionStateView: View {
 	var state: GatewayState
+	@Environment(GatewayStore.self) var gs
 	var body: some View {
 		ZStack(alignment: .bottom) {
 			VStack {
@@ -37,6 +38,12 @@ struct ConnectionStateView: View {
 				switch state {
 				case .stopped:
 					Text("Something really bad has happened, gateway connections disabled.\nPlease report this.")
+					AsyncButton("Log Out") {
+						if let account = gs.accounts.currentAccount {
+							gs.accounts.removeAccount(account)
+							await gs.logOut()
+						}
+					} catch: { _ in }
 				case .configured:
 					Text("Awaiting READY")
 				default: EmptyView()

@@ -25,7 +25,7 @@ public struct UserAuthenticationSessions: Sendable, Codable {
 }
 
 public struct UserAuthentication: Sendable, Codable {
-  public var user_id: UserSnowflake
+  public var user_id: UserSnowflake? // only sent on login, not verifyMFALogin
   public var token: Secret?
   public var ticket: Secret?
   
