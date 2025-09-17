@@ -262,7 +262,7 @@ public struct ClientConfiguration: Sendable {
 		func shouldRetry(
 			status: HTTPResponseStatus, retriesSoFar times: Int, challengeSolved: Bool
 		) -> Bool {
-			(challengeSolved && times <= 1)
+			(challengeSolved && times < 1)
 				|| self.maxRetries > times && self.statuses.contains(status)
 		}
 	}

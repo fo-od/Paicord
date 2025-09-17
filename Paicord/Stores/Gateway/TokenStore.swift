@@ -18,8 +18,15 @@ final class TokenStore {
 
 	/// If this is nil, there is no logged-in account.
 	var currentAccountID: UserSnowflake? {
-		get { _currentAccountID }
-		set { _currentAccountID = newValue }
+		get {
+			access(keyPath: \.currentAccountID)
+			return _currentAccountID
+		}
+		set {
+			withMutation(keyPath: \.currentAccountID) {
+				_currentAccountID = newValue
+			}
+		}
 	}
 
 	/// Returns the current account (if one is set)

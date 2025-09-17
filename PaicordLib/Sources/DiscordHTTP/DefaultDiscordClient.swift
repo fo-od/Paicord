@@ -563,7 +563,7 @@ public struct DefaultDiscordClient: DiscordClient {
 			)
 			request.headers = overrideHeaders ?? req.headers
 			request.headers.add(name: "User-Agent", value: userAgent)
-			if self.authentication.userMode {
+			if authentication.userMode {
 				try self.addUserHeaders(&request.headers)
 				await _cookieStore.applyCookies(to: &request.headers)
 			}
