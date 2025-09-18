@@ -30,6 +30,14 @@
 		57E05C592E6C6AE400B81AA7 /* Design Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E05C582E6C6ADF00B81AA7 /* Design Constants.swift */; };
 		57E05C5B2E6C745900B81AA7 /* String+LocalizedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E05C5A2E6C745300B81AA7 /* String+LocalizedError.swift */; };
 		57E05C5D2E6CBCDC00B81AA7 /* GatewayStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E05C5C2E6CBCD700B81AA7 /* GatewayStore.swift */; };
+		57F5AF472E7CAD2500AD5674 /* Challenges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F5AF462E7CAD2500AD5674 /* Challenges.swift */; };
+		57F5AF492E7CB13100AD5674 /* PaicordAppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F5AF482E7CB13100AD5674 /* PaicordAppState.swift */; };
+		57F5AF4B2E7CB13F00AD5674 /* AccountCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F5AF4A2E7CB13F00AD5674 /* AccountCommands.swift */; };
+		57F5AF4D2E7CB14A00AD5674 /* PaicordSheetsAlerts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F5AF4C2E7CB14A00AD5674 /* PaicordSheetsAlerts.swift */; };
+		57F5AF4F2E7CB14F00AD5674 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F5AF4E2E7CB14F00AD5674 /* RootView.swift */; };
+		57F5AF512E7CBC7700AD5674 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F5AF502E7CBC7700AD5674 /* LoginViewModel.swift */; };
+		57F5AF532E7CBDD000AD5674 /* AccountPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F5AF522E7CBDD000AD5674 /* AccountPicker.swift */; };
+		57F5AF552E7CBDF400AD5674 /* MFAView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F5AF542E7CBDF400AD5674 /* MFAView.swift */; };
 		AA1097142E64C181005BC3D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA1097102E64C181005BC3D2 /* Assets.xcassets */; };
 		AA1097152E64C181005BC3D2 /* LargeBaseplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1097042E64C181005BC3D2 /* LargeBaseplate.swift */; };
 		AA1097162E64C181005BC3D2 /* SlideoverDoubleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1097052E64C181005BC3D2 /* SlideoverDoubleView.swift */; };
@@ -62,6 +70,14 @@
 		57E05C582E6C6ADF00B81AA7 /* Design Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Design Constants.swift"; sourceTree = "<group>"; };
 		57E05C5A2E6C745300B81AA7 /* String+LocalizedError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+LocalizedError.swift"; sourceTree = "<group>"; };
 		57E05C5C2E6CBCD700B81AA7 /* GatewayStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayStore.swift; sourceTree = "<group>"; };
+		57F5AF462E7CAD2500AD5674 /* Challenges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Challenges.swift; sourceTree = "<group>"; };
+		57F5AF482E7CB13100AD5674 /* PaicordAppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaicordAppState.swift; sourceTree = "<group>"; };
+		57F5AF4A2E7CB13F00AD5674 /* AccountCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCommands.swift; sourceTree = "<group>"; };
+		57F5AF4C2E7CB14A00AD5674 /* PaicordSheetsAlerts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaicordSheetsAlerts.swift; sourceTree = "<group>"; };
+		57F5AF4E2E7CB14F00AD5674 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		57F5AF502E7CBC7700AD5674 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
+		57F5AF522E7CBDD000AD5674 /* AccountPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountPicker.swift; sourceTree = "<group>"; };
+		57F5AF542E7CBDF400AD5674 /* MFAView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFAView.swift; sourceTree = "<group>"; };
 		AA1096DB2E63BE84005BC3D2 /* Paicord.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Paicord.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA1097042E64C181005BC3D2 /* LargeBaseplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeBaseplate.swift; sourceTree = "<group>"; };
 		AA1097052E64C181005BC3D2 /* SlideoverDoubleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideoverDoubleView.swift; sourceTree = "<group>"; };
@@ -117,7 +133,10 @@
 		57A4E7092E6B315700470131 /* Login */ = {
 			isa = PBXGroup;
 			children = (
+				57F5AF542E7CBDF400AD5674 /* MFAView.swift */,
+				57F5AF522E7CBDD000AD5674 /* AccountPicker.swift */,
 				57A4E70A2E6B315C00470131 /* LoginView.swift */,
+				57F5AF502E7CBC7700AD5674 /* LoginViewModel.swift */,
 				5783AA932E6B8FCD00F73F6D /* MeshGradient.swift */,
 			);
 			path = Login;
@@ -190,6 +209,19 @@
 				AAEEC71E2E6511F800EB5FC9 /* TokenStore.swift */,
 			);
 			path = Gateway;
+			sourceTree = "<group>";
+		};
+		57F5AF452E7CAD0F00AD5674 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				AA1097122E64C181005BC3D2 /* PaiCordApp.swift */,
+				57F5AF4E2E7CB14F00AD5674 /* RootView.swift */,
+				57F5AF4C2E7CB14A00AD5674 /* PaicordSheetsAlerts.swift */,
+				57F5AF482E7CB13100AD5674 /* PaicordAppState.swift */,
+				57F5AF462E7CAD2500AD5674 /* Challenges.swift */,
+				57F5AF4A2E7CB13F00AD5674 /* AccountCommands.swift */,
+			);
+			path = App;
 			sourceTree = "<group>";
 		};
 		AA1096D22E63BE84005BC3D2 = {
@@ -265,7 +297,7 @@
 		AA1097132E64C181005BC3D2 /* Paicord */ = {
 			isa = PBXGroup;
 			children = (
-				AA1097122E64C181005BC3D2 /* PaiCordApp.swift */,
+				57F5AF452E7CAD0F00AD5674 /* App */,
 				AA1097072E64C181005BC3D2 /* Baseplates */,
 				AA9C81802E665E190086B1DA /* Common */,
 				AA9C817E2E665E010086B1DA /* iOS */,
@@ -431,16 +463,24 @@
 				AA9C81832E6660BE0086B1DA /* ServerButton.swift in Sources */,
 				57A55C572E7560CF005C8226 /* Markdown.swift in Sources */,
 				57DA042C2E79B26200DB4C7C /* AsyncButton.swift in Sources */,
+				57F5AF492E7CB13100AD5674 /* PaicordAppState.swift in Sources */,
 				5724CD6F2E733D0E00931FEF /* MFASheet.swift in Sources */,
 				57E05C592E6C6AE400B81AA7 /* Design Constants.swift in Sources */,
+				57F5AF4D2E7CB14A00AD5674 /* PaicordSheetsAlerts.swift in Sources */,
 				57E05C5D2E6CBCDC00B81AA7 /* GatewayStore.swift in Sources */,
+				57F5AF552E7CBDF400AD5674 /* MFAView.swift in Sources */,
 				5783AA942E6B8FD100F73F6D /* MeshGradient.swift in Sources */,
 				57A55C622E7563D6005C8226 /* Test.swift in Sources */,
 				57DA042A2E79894500DB4C7C /* ConnectionStateView.swift in Sources */,
+				57F5AF512E7CBC7700AD5674 /* LoginViewModel.swift in Sources */,
 				578E1CE12E67781700C6DEA3 /* GradientText.swift in Sources */,
 				AA1097192E64C181005BC3D2 /* NotificationsView.swift in Sources */,
+				57F5AF472E7CAD2500AD5674 /* Challenges.swift in Sources */,
 				57A4E7152E6B44C900470131 /* CGSize.swift in Sources */,
+				57F5AF4F2E7CB14F00AD5674 /* RootView.swift in Sources */,
 				57A4E70B2E6B315F00470131 /* LoginView.swift in Sources */,
+				57F5AF532E7CBDD000AD5674 /* AccountPicker.swift in Sources */,
+				57F5AF4B2E7CB13F00AD5674 /* AccountCommands.swift in Sources */,
 				57AA8A032E7875D100B4CA9C /* Sidebar.swift in Sources */,
 				AA10971A2E64C181005BC3D2 /* ProfileView.swift in Sources */,
 				AA10971B2E64C181005BC3D2 /* PaiCordApp.swift in Sources */,

@@ -1,0 +1,57 @@
+//
+//  PaiCordApp.swift
+//  PaiCord
+//
+//  Created by Lakhan Lothiyi on 31/08/2025.
+//  Copyright © 2025 Lakhan Lothiyi. All rights reserved.
+//
+
+import Logging
+import PaicordLib
+import SDWebImageSVGCoder
+@_spi(Advanced) import SwiftUIIntrospect
+import SwiftUIX
+
+@main
+struct PaiCordApp: App {
+	let gatewayStore = GatewayStore()
+	var appState = PaicordAppState()
+	var challenges = Challenges()
+
+	@Environment(\.userInterfaceIdiom) var idiom
+
+	init() {
+		// Set up svg support
+		let SVGCoder = SDImageSVGCoder.shared
+		SDImageCodersManager.shared.addCoder(SVGCoder)
+
+		DiscordGlobalConfiguration.makeLogger = { loggerLabel in
+			var logger = Logger(label: loggerLabel)
+			logger.logLevel = .trace
+			return logger
+		}
+	}
+
+	var body: some Scene {
+		WindowGroup {
+			RootView(
+				gatewayStore: gatewayStore,
+				appState: appState
+			)
+			.environment(challenges)
+			.environment(appState)
+			.environment(gatewayStore)
+		}
+		#if os(macOS)
+			.windowToolbarStyle(.unifiedCompact)
+		#endif
+		.commands {
+			AccountCommands(gatewayStore: gatewayStore)
+		}
+		#if os(macOS)
+			Settings {
+				SettingsView()
+			}
+		#endif
+	}
+}

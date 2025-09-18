@@ -47,8 +47,8 @@ struct HomeView: View {
 			}
 			.background {
 				Color.tableBackground
-					.roundedCorners(radius: 30, corners: .topLeft)
 			}
+			.roundedCorners(radius: 30, corners: .topLeft)
 		}
 		.padding(.top, 4)
 	}

@@ -12,12 +12,12 @@ class ClientConfigurationTests: XCTestCase {
     func testRetryPolicyShouldRetry() throws {
         do {
             let policy = RetryPolicy.default
-            XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 0))
-            XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 1))
-            XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 2))
-            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 3))
-            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 4))
-            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 100000))
+					XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 0, challengeSolved: false))
+            XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 1, challengeSolved: false))
+            XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 2, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 3, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 4, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 100000, challengeSolved: false))
         }
 
         do {
@@ -26,19 +26,19 @@ class ClientConfigurationTests: XCTestCase {
                 maxRetries: 5
             )
 
-            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 0))
-            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 1))
-            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 2))
-            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 3))
-            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 4))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 5))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 6))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 7))
-            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 100000))
+					XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 0, challengeSolved: false))
+            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 1, challengeSolved: false))
+            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 2, challengeSolved: false))
+            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 3, challengeSolved: false))
+            XCTAssertTrue(policy.shouldRetry(status: .badGateway, retriesSoFar: 4, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 5, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 6, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 7, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .badGateway, retriesSoFar: 100000, challengeSolved: false))
 
-            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 0))
-            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 1))
-            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 2))
+					XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 0, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 1, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 2, challengeSolved: false))
         }
 
         do {
@@ -46,15 +46,15 @@ class ClientConfigurationTests: XCTestCase {
             policy.statuses.insert(.serviceUnavailable)
             policy.maxRetries = 1
 
-            XCTAssertTrue(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 0))
-            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 1))
-            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 2))
-            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 10))
-            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 100000))
+            XCTAssertTrue(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 0, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 1, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 2, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 10, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .serviceUnavailable, retriesSoFar: 100000, challengeSolved: false))
 
-            XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 0))
-            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 1))
-            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 2))
+            XCTAssertTrue(policy.shouldRetry(status: .internalServerError, retriesSoFar: 0, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 1, challengeSolved: false))
+            XCTAssertFalse(policy.shouldRetry(status: .internalServerError, retriesSoFar: 2, challengeSolved: false))
         }
     }
 

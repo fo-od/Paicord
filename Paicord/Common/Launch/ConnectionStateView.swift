@@ -24,7 +24,7 @@ struct ConnectionStateView: View {
 					.font(.title2)
 					.fontWeight(.bold)
 				
-				Text(loadingString)
+				Text(Self.loadingString)
 					.foregroundStyle(.secondary)
 					.padding(5)
 			}
@@ -55,7 +55,7 @@ struct ConnectionStateView: View {
 		}
 	}
 	
-	var loadingString: AttributedString = [
+	static let loadingString: AttributedString = [
 		"X-Super-Properties!",
 		"Constructing ViewModels...",
 		"Locating closest Genius Bar...",
