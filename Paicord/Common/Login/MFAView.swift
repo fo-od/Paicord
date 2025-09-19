@@ -22,18 +22,20 @@ struct MFAView: View {
 	@State var mfaTask: Task<Void, Never>? = nil
 	@State var taskInProgress: Bool = false
 
-	@State var chosenMethod: Payloads.MFASubmitData.MFAKind? = nil
+	@Binding var chosenMethod: Payloads.MFASubmitData.MFAKind?
 	@State var input: String = ""
 
 	init(
 		authentication: UserAuthentication,
 		fingerprint: String,
 		loginClient: any DiscordClient,
+		chosenMethod: Binding<Payloads.MFASubmitData.MFAKind?>,
 		onFinish: @escaping (Secret?) -> Void
 	) {
 		self.authentication = authentication
 		self.fingerprint = fingerprint
 		self.loginClient = loginClient
+		self._chosenMethod = chosenMethod
 		self.onFinish = onFinish
 		self.options = MFAView.Options(from: authentication)
 	}
@@ -63,7 +65,8 @@ struct MFAView: View {
 						.transition(.offset(x: -100).combined(with: .opacity))
 					}
 					if chosenMethod != nil {
-						form.transition(.offset(x: 100).combined(with: .opacity))
+						form
+							.transition(.offset(x: 100).combined(with: .opacity))
 					}
 				}
 				.padding(25)

@@ -19,6 +19,9 @@ struct LoginView: View {
 	@FocusState var loginFocused: Bool
 	@FocusState var passwordFocused: Bool
 
+	// used for form background animation
+	@State var chosenMFAMethod: Payloads.MFASubmitData.MFAKind?
+
 	var body: some View {
 		ZStack {
 			MeshGradientBackground()
@@ -36,6 +39,7 @@ struct LoginView: View {
 								authentication: mfa,
 								fingerprint: fingerprint,
 								loginClient: viewModel.loginClient,
+								chosenMethod: $chosenMFAMethod,
 								onFinish: viewModel.finishMFA(token:)
 							)
 						} else {
@@ -67,6 +71,7 @@ struct LoginView: View {
 		.animation(.default, value: viewModel.handleMFA == nil)
 		.animation(.default, value: viewModel.gw?.accounts.accounts.isEmpty)
 		.animation(.default, value: viewModel.addingNewAccount)
+		.animation(.default, value: chosenMFAMethod)
 		.task {
 			viewModel.gw = gw
 			viewModel.appState = appState
@@ -117,7 +122,8 @@ struct LoginForm: View {
 					.overlay {
 						RoundedRectangle()
 							.stroke(
-								passwordFocused ? .primaryButton : .clear, lineWidth: 1
+								passwordFocused ? .primaryButton : .clear,
+								lineWidth: 1
 							)
 							.fill(.clear)
 					}
@@ -131,7 +137,7 @@ struct LoginForm: View {
 	}
 }
 
-fileprivate struct ForgotPasswordButton: View {
+private struct ForgotPasswordButton: View {
 	@Bindable var viewModel: LoginViewModel
 
 	var body: some View {
@@ -152,14 +158,15 @@ fileprivate struct ForgotPasswordButton: View {
 			Text("Enter a valid login above to send a reset link!").padding()
 		}
 		.alert(
-			"Forgot Password", isPresented: $viewModel.forgotPasswordSent,
+			"Forgot Password",
+			isPresented: $viewModel.forgotPasswordSent,
 			actions: { Button("Dismiss", role: .cancel) {} },
 			message: { Text("You will receive a password reset form shortly!") }
 		)
 	}
 }
 
-fileprivate struct LoginButton: View {
+private struct LoginButton: View {
 	@Bindable var viewModel: LoginViewModel
 
 	var body: some View {
