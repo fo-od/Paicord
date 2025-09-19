@@ -6,6 +6,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: macos-latest
@@ -20,8 +24,8 @@ jobs:
 
       - name: Install ldid
         run: |
-            curl -LO https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_x86_64
-            sudo install -m755 ldid_macosx_x86_64 /usr/local/bin/ldid
+          curl -LO https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_x86_64
+          sudo install -m755 ldid_macosx_x86_64 /usr/local/bin/ldid
 
       - name: Cache Xcode DerivedData
         uses: actions/cache@v4
@@ -33,7 +37,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-deriveddata-
 
-      # macOS build (.app)
       - name: Build macOS .app
         run: |
           xcodebuild -workspace Paicord.xcworkspace \
@@ -47,8 +50,6 @@ jobs:
         run: |
           mkdir -p output
           cp -R build-mac/Build/Products/Release/Paicord.app output/Paicord-macOS.app
-          cd output
-          zip -r Paicord-macOS.zip Paicord-macOS.app
 
       # iOS build (.ipa)
       - name: Build iOS .ipa
@@ -63,7 +64,7 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY=""
 
-      - name: Package .ipa (strip, ldid, zip)
+      - name: Archive .ipa
         run: |
           set -e
           APP_PATH="build-ios/Build/Products/Release-iphoneos/Paicord.app"
@@ -90,13 +91,12 @@ jobs:
           mkdir -p output
           mv Paicord.ipa output/Paicord-iOS.ipa
 
-      # Upload artifacts and get download URLs
       - name: Upload macOS Artifact
         id: upload-macos
         uses: actions/upload-artifact@v4
         with:
           name: Paicord-macOS
-          path: output/Paicord-macOS.zip
+          path: output/Paicord-macOS.app
 
       - name: Upload iOS Artifact
         id: upload-ios
@@ -126,7 +126,7 @@ jobs:
 
           # Nightly.link URLs for artifacts
           nightly_mac_url="https://nightly.link/llsc12/Paicord/actions/runs/${GITHUB_RUN_ID}/Paicord-macOS.zip?h=${NIGHTLY_LINK_TOKEN}"
-          nightly_ios_url="https://nightly.link/llsc12/Paicord/actions/runs/${GITHUB_RUN_ID}/Paicord-iOS.ipa?h=${NIGHTLY_LINK_TOKEN}"
+          nightly_ios_url="https://nightly.link/llsc12/Paicord/actions/runs/${GITHUB_RUN_ID}/Paicord-iOS.zip?h=${NIGHTLY_LINK_TOKEN}"
           echo "nightly_mac_url=$nightly_mac_url" >> $GITHUB_OUTPUT
           echo "nightly_ios_url=$nightly_ios_url" >> $GITHUB_OUTPUT
 
