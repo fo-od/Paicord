@@ -23,7 +23,7 @@ jobs:
         with:
           path: |
             build-mac
-            ~/Library/Developer/Xcode/DerivedData
+            build-ios
           key: ${{ runner.os }}-deriveddata-${{ hashFiles('**/Podfile.lock', '**/Package.resolved', '.github/workflows/build.yml') }}
           restore-keys: |
             ${{ runner.os }}-deriveddata-
@@ -54,6 +54,7 @@ jobs:
             -scheme Paicord \
             -configuration Release \
             -destination "generic/platform=iOS" \
+            -derivedDataPath build-ios \
             -archivePath build-ios/Paicord.xcarchive \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
           xcodebuild -exportArchive \
