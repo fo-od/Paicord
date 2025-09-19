@@ -108,6 +108,8 @@ jobs:
 
       # Gather commit info and artifact sizes
       - name: Gather Info for Discord Embed
+        env:
+          NIGHTLY_LINK_TOKEN: ${{ secrets.NIGHTLY_LINK_TOKEN }}
         id: info
         run: |
           # Commit info
