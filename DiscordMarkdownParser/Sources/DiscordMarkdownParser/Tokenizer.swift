@@ -60,6 +60,7 @@ public enum TokenType: String, CaseIterable, Sendable, Equatable {
 
 	// Block quotes
 	case blockQuoteMarker  // >
+	case multilineBlockQuoteMarker  // >>>
 
 	// Tables (GFM)
 	case pipe  // |
@@ -95,7 +96,7 @@ public enum TokenType: String, CaseIterable, Sendable, Equatable {
 
 	// Special
 	case eof  // End of file
-	case footnoteHeaderMarker // Discord '-#' footnote header
+	case footnoteHeaderMarker  // Discord '-#' footnote header
 }
 
 // MARK: - Tokenizer
@@ -124,10 +125,19 @@ public final class MarkdownTokenizer {
 	/// Tokenize the entire input into a sequence of tokens
 	public func tokenize() -> [Token] {
 		var tokens: [Token] = []
-
 		while !isAtEnd {
 			if let token = nextToken() {
 				tokens.append(token)
+				
+				// hacky check for blockquote after newline, sorry.
+				if token.type == .newline && !isAtEnd {
+					if currentChar == ">" {
+						tokens.append(tokenizeBlockQuote())
+						if !isAtEnd && currentChar.isWhitespace {
+							tokens.append(tokenizeWhitespace())
+						}
+					}
+				}
 			}
 		}
 
@@ -292,11 +302,15 @@ public final class MarkdownTokenizer {
 		// Discord footnote header: -#
 		if currentChar == "-" && peek() == "#" {
 			let startLocation = currentLocation
-			advance() // "-"
-			advance() // "#"
+			advance()  // "-"
+			advance()  // "#"
 			// Must be followed by whitespace or end of line
 			if isAtEnd || currentChar.isWhitespace {
-				return Token(type: .footnoteHeaderMarker, content: "-#", location: startLocation)
+				return Token(
+					type: .footnoteHeaderMarker,
+					content: "-#",
+					location: startLocation
+				)
 			} else {
 				// Not a valid footnote header, backtrack and treat as text
 				position = startLocation.offset
@@ -421,7 +435,10 @@ public final class MarkdownTokenizer {
 		}
 
 		return Token(
-			type: .atxHeaderStart, content: content, location: startLocation)
+			type: .atxHeaderStart,
+			content: content,
+			location: startLocation
+		)
 	}
 
 	private func tokenizeBacktick() -> Token {
@@ -502,7 +519,10 @@ public final class MarkdownTokenizer {
 		advance()  // ]
 
 		return Token(
-			type: .taskListMarker, content: content, location: startLocation)
+			type: .taskListMarker,
+			content: content,
+			location: startLocation
+		)
 	}
 
 	/// Check if we're in a context where task list markers are valid
@@ -567,6 +587,16 @@ public final class MarkdownTokenizer {
 
 	private func tokenizeBlockQuote() -> Token {
 		let startLocation = currentLocation
+		
+		// Check if this is a multiline block quote (>>>)
+		if peek() == ">" && peek(2) == ">" {
+			advance()  // First >
+			advance()  // Second >
+			advance()  // Third >
+			return Token(type: .multilineBlockQuoteMarker, content: ">>>", location: startLocation)
+		}
+		
+		// Single block quote
 		advance()
 		return Token(type: .blockQuoteMarker, content: ">", location: startLocation)
 	}
@@ -773,7 +803,10 @@ public final class MarkdownTokenizer {
 				advance()
 
 				return Token(
-					type: .channelMention, content: content, location: startLocation)
+					type: .channelMention,
+					content: content,
+					location: startLocation
+				)
 			}
 		}
 
@@ -807,7 +840,10 @@ public final class MarkdownTokenizer {
 					advance()
 
 					return Token(
-						type: .timestamp, content: content, location: startLocation)
+						type: .timestamp,
+						content: content,
+						location: startLocation
+					)
 				}
 			}
 		}
@@ -849,7 +885,10 @@ public final class MarkdownTokenizer {
 					advance()
 
 					return Token(
-						type: .customEmoji, content: content, location: startLocation)
+						type: .customEmoji,
+						content: content,
+						location: startLocation
+					)
 				}
 			}
 		}
@@ -862,15 +901,15 @@ public final class MarkdownTokenizer {
 	}
 
 	private func isAutolink() -> Bool {
-//		return remaining.hasPrefix("http://") || remaining.hasPrefix("https://")
-//					|| remaining.contains("@")
-		
+		//		return remaining.hasPrefix("http://") || remaining.hasPrefix("https://")
+		//					|| remaining.contains("@")
+
 		// Only match valid URLs or valid emails
 		let remaining = String(characters[position...])
 		if remaining.hasPrefix("http://") || remaining.hasPrefix("https://") {
 			return true
 		}
-		
+
 		// Better email check
 		let emailRegex = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
 		if remaining.range(of: emailRegex, options: .regularExpression) != nil {
@@ -934,7 +973,10 @@ public final class MarkdownTokenizer {
 		}
 
 		return Token(
-			type: .listMarker, content: String(char), location: startLocation)
+			type: .listMarker,
+			content: String(char),
+			location: startLocation
+		)
 	}
 
 	private func tokenizeNumberedList() -> Token? {
@@ -1028,7 +1070,8 @@ public final class MarkdownTokenizer {
 		return Token(
 			type: .indentedCodeBlock,
 			content: String(repeating: " ", count: spaceCount),
-			location: startLocation)
+			location: startLocation
+		)
 	}
 
 	private func tokenizeFencedCodeBlock() -> Token? {
@@ -1219,7 +1262,10 @@ public final class MarkdownTokenizer {
 				}
 			}
 			return Token(
-				type: .everyoneMention, content: content, location: startLocation)
+				type: .everyoneMention,
+				content: content,
+				location: startLocation
+			)
 		}
 
 		// Check for @here
@@ -1232,7 +1278,10 @@ public final class MarkdownTokenizer {
 				}
 			}
 			return Token(
-				type: .hereMention, content: content, location: startLocation)
+				type: .hereMention,
+				content: content,
+				location: startLocation
+			)
 		}
 
 		// Not a special mention, treat as text
@@ -1255,8 +1304,10 @@ public final class TokenStream {
 	public var current: Token {
 		guard position < tokens.count else {
 			return Token(
-				type: .eof, content: "",
-				location: SourceLocation(line: 0, column: 0, offset: 0))
+				type: .eof,
+				content: "",
+				location: SourceLocation(line: 0, column: 0, offset: 0)
+			)
 		}
 		return tokens[position]
 	}
@@ -1266,8 +1317,10 @@ public final class TokenStream {
 		let pos = position + offset
 		guard pos >= 0 && pos < tokens.count else {
 			return Token(
-				type: .eof, content: "",
-				location: SourceLocation(line: 0, column: 0, offset: 0))
+				type: .eof,
+				content: "",
+				location: SourceLocation(line: 0, column: 0, offset: 0)
+			)
 		}
 		return tokens[pos]
 	}

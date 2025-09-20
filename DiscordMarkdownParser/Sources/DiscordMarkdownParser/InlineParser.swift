@@ -328,6 +328,12 @@ public final class InlineParser {
 						sourceLocation: startLocation
 					)
 				}
+				if delimiterChar == "*" && delimiterCount == 3 && closingCount == 3 {
+					return AST.BoldNode(
+						children: [AST.ItalicNode(children: content, sourceLocation: startLocation)],
+						sourceLocation: startLocation
+					)
+				}
 				// Standard Markdown: double asterisk is bold
 				if delimiterChar == "*" && delimiterCount >= 2 && closingCount >= 2 {
 					let extraDelimiters = closingCount - 2

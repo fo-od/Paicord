@@ -15,7 +15,8 @@ public final class BlockParser {
 
 	/// Initialize with token stream and configuration
 	public init(
-		tokenStream: TokenStream, configuration: DiscordMarkdownParser.Configuration
+		tokenStream: TokenStream,
+		configuration: DiscordMarkdownParser.Configuration
 	) {
 		self.tokenStream = tokenStream
 		self.configuration = configuration
@@ -42,7 +43,8 @@ public final class BlockParser {
 				&& Date().timeIntervalSince(startTime) > maxParsingTime
 			{
 				throw MarkdownParsingError.parsingFailed(
-					"Parsing timeout: document too complex or infinite loop detected")
+					"Parsing timeout: document too complex or infinite loop detected"
+				)
 			}
 
 			// Position-based protection (detect if parser is stuck)
@@ -68,7 +70,8 @@ public final class BlockParser {
 				// Consecutive nil blocks protection
 				if consecutiveNilBlocks >= maxConsecutiveNilBlocks {
 					throw MarkdownParsingError.parsingFailed(
-						"Too many consecutive nil blocks: possible infinite loop in parser")
+						"Too many consecutive nil blocks: possible infinite loop in parser"
+					)
 				}
 			}
 		}
@@ -95,6 +98,9 @@ public final class BlockParser {
 		switch token.type {
 		case .atxHeaderStart:
 			return try parseATXHeading()
+
+		case .multilineBlockQuoteMarker:
+			return try parseMultilineBlockQuote()
 
 		case .blockQuoteMarker:
 			return try parseBlockQuote()
@@ -131,10 +137,13 @@ public final class BlockParser {
 	private func parseFootnoteHeader() throws -> AST.FootnoteNode {
 		let startLocation = tokenStream.current.location
 		// Consume '-' and '#' tokens
-		tokenStream.consume() // '-'
-		tokenStream.consume() // '#'
+		_ = tokenStream.consume()  // '-'
+		_ = tokenStream.consume()  // '#'
 		skipWhitespace()
-		let inlineParser = InlineParser(tokenStream: tokenStream, configuration: configuration)
+		let inlineParser = InlineParser(
+			tokenStream: tokenStream,
+			configuration: configuration
+		)
 		let children = try inlineParser.parseInlines(until: [.newline, .eof])
 		return AST.FootnoteNode(children: children, sourceLocation: startLocation)
 	}
@@ -151,7 +160,9 @@ public final class BlockParser {
 
 		// Use the inline parser to properly handle the heading content
 		let inlineParser = InlineParser(
-			tokenStream: tokenStream, configuration: configuration)
+			tokenStream: tokenStream,
+			configuration: configuration
+		)
 		let children = try inlineParser.parseInlines(until: [.newline, .eof])
 
 		return AST.HeadingNode(
@@ -190,7 +201,8 @@ public final class BlockParser {
 		// A valid setext underline must be at least 3 consecutive '=' or '-' characters
 		// and must not include other characters.
 		let trimmedContent = underlineToken.content.trimmingCharacters(
-			in: .whitespaces)
+			in: .whitespaces
+		)
 		let isLevel1 =
 			trimmedContent.allSatisfy { $0 == "=" } && trimmedContent.count >= 3
 		let isLevel2 =
@@ -208,7 +220,8 @@ public final class BlockParser {
 		let textContent = textTokens.map { $0.content }.joined()
 		let children = [
 			AST.TextNode(
-				content: textContent.trimmingCharacters(in: .whitespacesAndNewlines))
+				content: textContent.trimmingCharacters(in: .whitespacesAndNewlines)
+			)
 		]
 
 		return AST.HeadingNode(
@@ -222,22 +235,88 @@ public final class BlockParser {
 
 	private func parseBlockQuote() throws -> AST.BlockQuoteNode {
 		let startLocation = tokenStream.current.location
-		var children: [ASTNode] = []
+
+		// Collect all lines of the block quote instead
+		var blockQuoteLines: [String] = []
 
 		while !tokenStream.isAtEnd && tokenStream.check(.blockQuoteMarker) {
 			tokenStream.advance()  // consume >
 			skipWhitespace()
 
-			// Parse the content of this line
-			if let block = try parseBlock() {
-				children.append(block)
+			// Collect all tokens on this line
+			var lineContent = ""
+			while !tokenStream.isAtEnd && !tokenStream.check(.newline) {
+				lineContent += tokenStream.current.content
+				tokenStream.advance()
 			}
 
-			// Look for continuation
-			skipWhitespaceAndNewlines()
+			blockQuoteLines.append(lineContent)
+
+			// Consume newline if present
+			_ = tokenStream.match(.newline)
+			// Repeat
 		}
 
-		return AST.BlockQuoteNode(children: children, sourceLocation: startLocation)
+		let blockQuoteContent = blockQuoteLines.joined(separator: "\n")
+
+		// Create new tokenizer and parser for block quote content
+		let contentTokenizer = MarkdownTokenizer(blockQuoteContent)
+		let contentTokens = contentTokenizer.tokenize()
+		let contentTokenStream = TokenStream(contentTokens)
+		let contentParser = BlockParser(
+			tokenStream: contentTokenStream,
+			configuration: configuration
+		)
+
+		// Parse the content as a sub doc
+		let contentDocument = try contentParser.parseDocument()
+
+		// This prevents the block quote children blocks from having blockquote tokens incorrectly.
+		// Fixes testBlockQuoteWithNestedElements
+
+		return AST.BlockQuoteNode(
+			children: contentDocument.children,
+			sourceLocation: startLocation
+		)
+	}
+
+	private func parseMultilineBlockQuote() throws -> AST.BlockQuoteNode {
+		let startLocation = tokenStream.current.location
+		
+		// Consume the >>> token
+		tokenStream.advance()
+		skipWhitespace()
+		
+		// Collect all remaining content until end of input
+		var allContent = ""
+		
+		// First, collect the rest of the current line
+		while !tokenStream.isAtEnd && !tokenStream.check(.newline) {
+			allContent += tokenStream.current.content
+			tokenStream.advance()
+		}
+		
+		// Then collect all remaining lines
+		while !tokenStream.isAtEnd {
+			if tokenStream.check(.newline) {
+				allContent += "\n"
+				tokenStream.advance()
+			} else {
+				allContent += tokenStream.current.content
+				tokenStream.advance()
+			}
+		}
+		
+		// Create a new tokenizer and parser for the multiline block quote content
+		let contentTokenizer = MarkdownTokenizer(allContent)
+		let contentTokens = contentTokenizer.tokenize()
+		let contentTokenStream = TokenStream(contentTokens)
+		let contentParser = BlockParser(tokenStream: contentTokenStream, configuration: configuration)
+		
+		// Parse the content as a mini-document
+		let contentDocument = try contentParser.parseDocument()
+		
+		return AST.BlockQuoteNode(children: contentDocument.children, sourceLocation: startLocation)
 	}
 
 	// MARK: - List Parsers
@@ -298,13 +377,16 @@ public final class BlockParser {
 
 		// Parse inline content for the first line
 		let inlineParser = InlineParser(
-			tokenStream: tokenStream, configuration: configuration)
+			tokenStream: tokenStream,
+			configuration: configuration
+		)
 		let inlineNodes = try inlineParser.parseInlines(until: [.newline, .eof])
 
 		// Create paragraph for first line if not empty
 		if !inlineNodes.isEmpty {
 			children.append(
-				AST.ParagraphNode(children: inlineNodes, sourceLocation: startLocation))
+				AST.ParagraphNode(children: inlineNodes, sourceLocation: startLocation)
+			)
 		}
 
 		// Skip the newline if present
@@ -549,11 +631,15 @@ public final class BlockParser {
 
 		// Use inline parser to properly handle inline elements like code spans, emphasis, etc.
 		let inlineParser = InlineParser(
-			tokenStream: tokenStream, configuration: configuration)
+			tokenStream: tokenStream,
+			configuration: configuration
+		)
 		let inlineNodes = try inlineParser.parseInlines(until: [.newline, .eof])
 
 		return AST.ParagraphNode(
-			children: inlineNodes, sourceLocation: startLocation)
+			children: inlineNodes,
+			sourceLocation: startLocation
+		)
 	}
 
 	private func isBlockBoundary() -> Bool {
@@ -590,4 +676,3 @@ public final class BlockParser {
 		}
 	}
 }
-

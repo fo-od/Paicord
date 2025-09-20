@@ -25,8 +25,6 @@ final class DiscordMarkdownParserTests: XCTestCase {
 		let document = try await parser.parseToAST("")
 		XCTAssertEqual(document.children.count, 0)
 	}
-	
-	
 
 	func testUserMentionParsing() async throws {
 		let document = try await parser.parseToAST("<@1016895892055396484>")
@@ -544,11 +542,12 @@ final class DiscordMarkdownParserTests: XCTestCase {
 	func testCodeBlockEdgeCases() async throws {
 		// Empty code block
 		let markdown = """
-```
-```
-"""
+			```
+			```
+			"""
 		let document = try await parser.parseToAST(markdown)
-		guard let codeBlockNode = document.children.first as? AST.CodeBlockNode else {
+		guard let codeBlockNode = document.children.first as? AST.CodeBlockNode
+		else {
 			XCTFail("No code block node found")
 			return
 		}
@@ -558,15 +557,16 @@ final class DiscordMarkdownParserTests: XCTestCase {
 
 		// Code block with trailing newlines
 		let markdownWithTrailingNewlines = """
-```
-line 1
+			```
+			line 1
 
-line 3
+			line 3
 
-```
-"""
+			```
+			"""
 		let document2 = try await parser.parseToAST(markdownWithTrailingNewlines)
-		guard let codeBlockNode2 = document2.children.first as? AST.CodeBlockNode else {
+		guard let codeBlockNode2 = document2.children.first as? AST.CodeBlockNode
+		else {
 			XCTFail("No code block node found for trailing newlines")
 			return
 		}
@@ -575,20 +575,33 @@ line 3
 		XCTAssertTrue(codeBlockNode2.isFenced)
 	}
 
-	// MARK: - Additional Discord Markdown Tests
-
 	func testBlockQuoteWithNestedElements() async throws {
-		let markdown = "> # Header\n> ||spoiler||\n> ```swift\n> code\n> ```\n> <@1016895892055396484>"
+		let markdown = """
+			> # Header
+			> ||spoiler||
+			> ```swift
+			> code
+			> ```
+			> <@1016895892055396484>
+			"""
 		let document = try await parser.parseToAST(markdown)
-		guard let blockQuoteNode = document.children.first as? AST.BlockQuoteNode else {
+		guard let blockQuoteNode = document.children.first as? AST.BlockQuoteNode
+		else {
 			XCTFail("No block quote node found")
 			return
 		}
 		// Should contain a heading, spoiler, code block, and mention
 		let headingNode = blockQuoteNode.children.first { $0.nodeType == .heading }
-		let spoilerNode = blockQuoteNode.children.first { $0.nodeType == .spoiler }
-		let codeBlockNode = blockQuoteNode.children.first { $0.nodeType == .codeBlock }
-		let mentionNode = blockQuoteNode.children.first { $0.nodeType == .userMention }
+		let spoilerNode = blockQuoteNode.children.first {
+			$0.nodeType == .paragraph
+		}  // text will be in paragraph, inside is spoiler
+		.flatMap { $0.children.first { $0.nodeType == .spoiler } }
+		let codeBlockNode = blockQuoteNode.children.first {
+			$0.nodeType == .codeBlock
+		}
+		let mentionNode = blockQuoteNode.children.last {
+			$0.nodeType == .paragraph && ($0.children.first?.nodeType == .userMention)
+		}
 		XCTAssertNotNil(headingNode)
 		XCTAssertNotNil(spoilerNode)
 		XCTAssertNotNil(codeBlockNode)
@@ -596,14 +609,22 @@ line 3
 	}
 
 	func testMaskedLinksWithTooltipAndNoEmbed() async throws {
-		let markdown = "[tooltip link](https://example.org \"tooltips?\")\n[no embed tooltip link](<https://example.org> \"tooltip and no embed\")"
+		let markdown =
+			"[tooltip link](https://example.org \"tooltips?\")\n[no embed tooltip link](<https://example.org> \"tooltip and no embed\")"
 		let document = try await parser.parseToAST(markdown)
-		guard let paragraphNode = document.children.first as? AST.ParagraphNode else {
+		guard let paragraphNode = document.children.first as? AST.ParagraphNode
+		else {
 			XCTFail("No paragraph node found")
 			return
 		}
-		let linkNode1 = paragraphNode.children.first(where: { ($0 as? AST.LinkNode)?.url == "https://example.org" }) as? AST.LinkNode
-		let linkNode2 = paragraphNode.children.first(where: { ($0 as? AST.LinkNode)?.url == "https://example.org" }) as? AST.LinkNode
+		let linkNode1 =
+			paragraphNode.children.first(where: {
+				($0 as? AST.LinkNode)?.url == "https://example.org"
+			}) as? AST.LinkNode
+		let linkNode2 =
+			paragraphNode.children.first(where: {
+				($0 as? AST.LinkNode)?.url == "https://example.org"
+			}) as? AST.LinkNode
 		XCTAssertNotNil(linkNode1)
 		XCTAssertNotNil(linkNode2)
 		XCTAssertEqual(linkNode1?.title, "tooltips?")
@@ -613,41 +634,88 @@ line 3
 	func testAutolinkedUrlsEmailsPhones() async throws {
 		let markdown = "<https://google.com> <email@email.com> <tel:+999123456789>"
 		let document = try await parser.parseToAST(markdown)
-		guard let paragraphNode = document.children.first as? AST.ParagraphNode else {
+		guard let paragraphNode = document.children.first as? AST.ParagraphNode
+		else {
 			XCTFail("No paragraph node found")
 			return
 		}
-		let urlNode = paragraphNode.children.first(where: { ($0 as? AST.TextNode)?.content == "https://google.com" }) as? AST.TextNode
-		let emailNode = paragraphNode.children.first(where: { ($0 as? AST.TextNode)?.content == "email@email.com" }) as? AST.TextNode
-		let phoneNode = paragraphNode.children.first(where: { ($0 as? AST.TextNode)?.content == "tel:+999123456789" }) as? AST.TextNode
+		let urlNode =
+			paragraphNode.children.first(where: {
+				($0 as? AST.TextNode)?.content == "https://google.com"
+			}) as? AST.TextNode
+		let emailNode =
+			paragraphNode.children.first(where: {
+				($0 as? AST.TextNode)?.content == "email@email.com"
+			}) as? AST.TextNode
+		let phoneNode =
+			paragraphNode.children.first(where: {
+				($0 as? AST.TextNode)?.content == "tel:+999123456789"
+			}) as? AST.TextNode
 		XCTAssertNotNil(urlNode)
 		XCTAssertNotNil(emailNode)
 		XCTAssertNotNil(phoneNode)
 	}
 
 	func testMultilineBlockQuote() async throws {
-		let markdown = ">>> This is a\nmultiline block quote\nwith **bold** and `code`"
+		let markdown = """
+			>>> This is a
+			multiline block quote
+			with **bold** and `code`
+			"""
 		let document = try await parser.parseToAST(markdown)
-		guard let blockQuoteNode = document.children.first as? AST.BlockQuoteNode else {
+		guard let blockQuoteNode = document.children.first as? AST.BlockQuoteNode
+		else {
 			XCTFail("No multiline block quote node found")
 			return
 		}
-		let hasBold = blockQuoteNode.children.contains { $0.nodeType == .strongEmphasis }
-		let hasCodeSpan = blockQuoteNode.children.contains { $0.nodeType == .codeSpan }
+
+		let hasBold = blockQuoteNode.children
+			.compactMap { $0 as? AST.ParagraphNode }
+			.flatMap { $0.children }
+			.contains { $0.nodeType == .strongEmphasis }
+
+		let hasCodeSpan = blockQuoteNode.children
+			.compactMap { $0 as? AST.ParagraphNode }
+			.flatMap { $0.children }
+			.contains { $0.nodeType == .codeSpan }
+
 		XCTAssertTrue(hasBold)
 		XCTAssertTrue(hasCodeSpan)
 	}
 
 	func testListWithNestedFormatting() async throws {
-		let markdown = "- <@1016895892055396484>\n- **bold**\n- <:smile:123456>"
+		let markdown = """
+			- <@1016895892055396484>
+			- **bold**
+			- <:smile:123456>
+			"""
 		let document = try await parser.parseToAST(markdown)
 		guard let listNode = document.children.first as? AST.ListNode else {
 			XCTFail("No list node found")
 			return
 		}
-		let hasMention = listNode.children.flatMap { $0.children }.contains { $0.nodeType == .userMention }
-		let hasBold = listNode.children.flatMap { $0.children }.contains { $0.nodeType == .strongEmphasis }
-		let hasEmoji = listNode.children.flatMap { $0.children }.contains { $0.nodeType == .customEmoji }
+
+		let hasMention = listNode.children
+			.compactMap { $0 as? AST.ListItemNode }
+			.flatMap { $0.children }
+			.compactMap { $0 as? AST.ParagraphNode }
+			.flatMap { $0.children }
+			.contains { $0.nodeType == .userMention }
+
+		let hasBold = listNode.children
+			.compactMap { $0 as? AST.ListItemNode }
+			.flatMap { $0.children }
+			.compactMap { $0 as? AST.ParagraphNode }
+			.flatMap { $0.children }
+			.contains { $0.nodeType == .strongEmphasis }
+
+		let hasEmoji = listNode.children
+			.compactMap { $0 as? AST.ListItemNode }
+			.flatMap { $0.children }
+			.compactMap { $0 as? AST.ParagraphNode }
+			.flatMap { $0.children }
+			.contains { $0.nodeType == .customEmoji }
+
 		XCTAssertTrue(hasMention)
 		XCTAssertTrue(hasBold)
 		XCTAssertTrue(hasEmoji)
@@ -656,22 +724,29 @@ line 3
 	func testInlineStylingCombinations() async throws {
 		let markdown = "__***bold underlined italics***__"
 		let document = try await parser.parseToAST(markdown)
-		guard let paragraphNode = document.children.first as? AST.ParagraphNode else {
+		guard let paragraphNode = document.children.first as? AST.ParagraphNode
+		else {
 			XCTFail("No paragraph node found")
 			return
 		}
-		let underlineNode = paragraphNode.children.first { $0.nodeType == .underline }
+		let underlineNode = paragraphNode.children.first {
+			$0.nodeType == .underline
+		}
 		XCTAssertNotNil(underlineNode)
 		if let underlineNode = underlineNode {
-			let boldNode = underlineNode.children.first { $0.nodeType == .strongEmphasis }
+			let boldNode = underlineNode.children.first {
+				$0.nodeType == .strongEmphasis
+			}
 			XCTAssertNotNil(boldNode)
 			if let boldNode = boldNode {
 				let italicNode = boldNode.children.first { $0.nodeType == .emphasis }
 				XCTAssertNotNil(italicNode)
 				if let italicNode = italicNode {
-					let textNode = italicNode.children.first { $0.nodeType == .text } as? AST.TextNode
-					XCTAssertNotNil(textNode)
-					XCTAssertEqual(textNode?.content, "bold underlined italics")
+					let textContent = italicNode.children
+						.compactMap { $0 as? AST.TextNode }
+						.map { $0.content }
+						.joined()
+					XCTAssertEqual(textContent, "bold underlined italics")
 				}
 			}
 		}
@@ -680,14 +755,19 @@ line 3
 	func testSpoilerWithNestedElements() async throws {
 		let markdown = "||<@1016895892055396484> **bold**||"
 		let document = try await parser.parseToAST(markdown)
-		guard let paragraphNode = document.children.first as? AST.ParagraphNode else {
+		guard let paragraphNode = document.children.first as? AST.ParagraphNode
+		else {
 			XCTFail("No paragraph node found")
 			return
 		}
-		let spoilerNode = paragraphNode.children.first(where: { $0.nodeType == .spoiler }) as? AST.SpoilerNode
+		let spoilerNode =
+			paragraphNode.children.first(where: { $0.nodeType == .spoiler })
+			as? AST.SpoilerNode
 		XCTAssertNotNil(spoilerNode)
-		let hasMention = spoilerNode?.children.contains { $0.nodeType == .userMention } ?? false
-		let hasBold = spoilerNode?.children.contains { $0.nodeType == .strongEmphasis } ?? false
+		let hasMention =
+			spoilerNode?.children.contains { $0.nodeType == .userMention } ?? false
+		let hasBold =
+			spoilerNode?.children.contains { $0.nodeType == .strongEmphasis } ?? false
 		XCTAssertTrue(hasMention)
 		XCTAssertTrue(hasBold)
 	}
@@ -695,11 +775,14 @@ line 3
 	func testCodeBlockInsideBlockQuote() async throws {
 		let markdown = "> ```\n> code\n> ```"
 		let document = try await parser.parseToAST(markdown)
-		guard let blockQuoteNode = document.children.first as? AST.BlockQuoteNode else {
+		guard let blockQuoteNode = document.children.first as? AST.BlockQuoteNode
+		else {
 			XCTFail("No block quote node found")
 			return
 		}
-		let codeBlockNode = blockQuoteNode.children.first(where: { $0.nodeType == .codeBlock }) as? AST.CodeBlockNode
+		let codeBlockNode =
+			blockQuoteNode.children.first(where: { $0.nodeType == .codeBlock })
+			as? AST.CodeBlockNode
 		XCTAssertNotNil(codeBlockNode)
 		XCTAssertEqual(codeBlockNode?.content, "code\n")
 	}
@@ -707,12 +790,18 @@ line 3
 	func testFootnoteSubtextStyling() async throws {
 		let markdown = "-# subtext or footnote or whatever!"
 		let document = try await parser.parseToAST(markdown)
-		guard let footnoteNode = document.children.first(where: { $0.nodeType.rawValue == "footnote" }) else {
+		guard
+			let footnoteNode = document.children.first(where: {
+				$0.nodeType.rawValue == "footnote"
+			})
+		else {
 			XCTFail("No footnote node found")
 			return
 		}
-		let textNode = footnoteNode.children.first(where: { $0.nodeType == .text }) as? AST.TextNode
+		let textNode =
+			footnoteNode.children.first(where: { $0.nodeType == .text })
+			as? AST.TextNode
 		XCTAssertNotNil(textNode)
-		XCTAssertEqual(textNode?.content, "subtext") // first word in content only
+		XCTAssertEqual(textNode?.content, "subtext")  // first word in content only
 	}
 }
