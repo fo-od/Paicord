@@ -118,10 +118,12 @@ public final class InlineParser {
 	
 	/// Parse a single inline element
 	private func parseInline() throws -> [ASTNode] {
+		if shouldConsolidateAsText(tokenStream.current.type) {
+			return [try parseConsolidatedText()]
+		}
+		
 		let token = tokenStream.current
 		switch token.type {
-		case .text, .whitespace:
-			return [AST.TextNode(content: tokenStream.consume().content)]
 		case .asterisk:
 			// Handle emphasis and strong emphasis with *
 			if let emphasisNode = try parseEmphasisOrStrong(delimiter: "*") {
@@ -960,6 +962,43 @@ public final class InlineParser {
 			tokenStream.setPosition(startPosition)
 			return nil
 		}
+	}
+	
+	// MARK: - Text Consolidation
+	
+	/// Check if a token type should be consolidated as text
+	private func shouldConsolidateAsText(_ tokenType: TokenType) -> Bool {
+		switch tokenType {
+		case .text, .whitespace:
+			return true
+		default:
+			// Look ahead to see if this token will fail to parse as markdown
+			// and should be consolidated with adjacent text
+			return wouldFallbackToText(tokenType)
+		}
+	}
+	
+	/// Check if a token type would fall back to creating a text node
+	private func wouldFallbackToText(_ tokenType: TokenType) -> Bool {
+		switch tokenType {
+		case .exclamation, .rightBracket, .leftParen, .rightParen:
+			return true // These typically become text
+		default:
+			return false // Don't try to lookahead parse for other types to avoid side effects
+		}
+	}
+	
+	/// Parse and consolidate consecutive text-producing tokens
+	private func parseConsolidatedText() throws -> AST.TextNode {
+		var content = ""
+		let startLocation = tokenStream.current.location
+		
+		while !tokenStream.isAtEnd && shouldConsolidateAsText(tokenStream.current.type) {
+			let token = tokenStream.consume()
+			content += token.content
+		}
+		
+		return AST.TextNode(content: content, sourceLocation: startLocation)
 	}
 	
 }

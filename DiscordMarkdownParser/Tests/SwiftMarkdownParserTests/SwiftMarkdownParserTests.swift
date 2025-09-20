@@ -481,12 +481,8 @@ final class DiscordMarkdownParserTests: XCTestCase {
 			XCTFail("No paragraph node found")
 			return
 		}
-		let textNode =
-			paragraphNode.children.first(where: {
-				($0 as? AST.TextNode)?.content.contains("``") == true
-			}) as? AST.TextNode
-		XCTAssertNotNil(textNode)
-		XCTAssertEqual(textNode?.content, "``")
+		let textNode = paragraphNode.children.first as? AST.TextNode
+		XCTAssertEqual(textNode?.content, "This is an empty code span: ``.")
 
 		// Nested backticks (should parse correctly)
 		let doc2 = try await parser.parseToAST(
@@ -804,7 +800,7 @@ final class DiscordMarkdownParserTests: XCTestCase {
 			footnoteNode.children.first(where: { $0.nodeType == .text })
 			as? AST.TextNode
 		XCTAssertNotNil(textNode)
-		XCTAssertEqual(textNode?.content, "subtext")  // first word in content only
+		XCTAssertEqual(textNode?.content, "subtext or footnote or whatever!")  // first word in content only
 	}
 
 	func testTeto() async throws {

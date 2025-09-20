@@ -92,7 +92,7 @@ public final class DiscordMarkdownParser: Sendable {
 			)
 		}
 
-		return finalDocument.withCoalescedTextNodes()
+		return finalDocument
 	}
 
 	/// Process AST nodes to parse inline content and GFM extensions
