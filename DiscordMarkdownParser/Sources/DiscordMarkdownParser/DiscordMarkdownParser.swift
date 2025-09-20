@@ -70,33 +70,43 @@ public final class DiscordMarkdownParser: Sendable {
 		let tokenStream = TokenStream(tokenizer.tokenize())
 
 		let blockParser = BlockParser(
-			tokenStream: tokenStream, configuration: configuration)
+			tokenStream: tokenStream,
+			configuration: configuration
+		)
 		let document = try blockParser.parseDocument()
 
 		let inlineParser = InlineParser(
-			tokenStream: tokenStream, configuration: configuration)
+			tokenStream: tokenStream,
+			configuration: configuration
+		)
 
 		// Post-process AST to resolve inline content
 		let processedDocument = try await processNodeForInlineContent(
-			document, using: inlineParser)
+			document,
+			using: inlineParser
+		)
 
 		guard let finalDocument = processedDocument as? AST.DocumentNode else {
 			throw MarkdownParsingError.invalidASTConstruction(
-				"Root node must be a DocumentNode")
+				"Root node must be a DocumentNode"
+			)
 		}
 
-		return finalDocument
+		return finalDocument.withCoalescedTextNodes()
 	}
 
 	/// Process AST nodes to parse inline content and GFM extensions
 	private func processNodesForInlineContent(
-		_ nodes: [ASTNode], using inlineParser: InlineParser
+		_ nodes: [ASTNode],
+		using inlineParser: InlineParser
 	) async throws -> [ASTNode] {
 		var processedNodes: [ASTNode] = []
 
 		for node in nodes {
 			let processedNode = try await processNodeForInlineContent(
-				node, using: inlineParser)
+				node,
+				using: inlineParser
+			)
 			processedNodes.append(processedNode)
 		}
 
@@ -105,71 +115,44 @@ public final class DiscordMarkdownParser: Sendable {
 
 	/// Process a single AST node for inline content and GFM extensions
 	private func processNodeForInlineContent(
-		_ node: ASTNode, using inlineParser: InlineParser
+		_ node: ASTNode,
+		using inlineParser: InlineParser
 	) async throws -> ASTNode {
 
 		if let fragment = node as? AST.FragmentNode {
 			let processedChildren = try await processNodesForInlineContent(
-				fragment.children, using: inlineParser)
+				fragment.children,
+				using: inlineParser
+			)
 			return AST.FragmentNode(
-				children: processedChildren, sourceLocation: fragment.sourceLocation)
+				children: processedChildren,
+				sourceLocation: fragment.sourceLocation
+			)
 		}
-
-		//    // Handle GFM table nodes - process their cells for inline content
-		//    if let tableNode = node as? AST.GFMTableNode {
-		//      let processedRows = try await processNodesForInlineContent(
-		//        tableNode.rows, using: inlineParser)
-		//      return AST.GFMTableNode(
-		//        rows: processedRows.compactMap { $0 as? AST.GFMTableRowNode },
-		//        alignments: tableNode.alignments,
-		//        sourceLocation: tableNode.sourceLocation
-		//      )
-		//    }
-		//
-		//    if let tableRowNode = node as? AST.GFMTableRowNode {
-		//      let processedCells = try await processNodesForInlineContent(
-		//        tableRowNode.cells, using: inlineParser)
-		//      return AST.GFMTableRowNode(
-		//        cells: processedCells.compactMap { $0 as? AST.GFMTableCellNode },
-		//        isHeader: tableRowNode.isHeader,
-		//        sourceLocation: tableRowNode.sourceLocation
-		//      )
-		//    }
-		//
-		//    if let tableCellNode = node as? AST.GFMTableCellNode {
-		//      // Parse table cell content as inline markdown
-		//      if !tableCellNode.content.isEmpty {
-		//        let inlineNodes = try inlineParser.parseInlineContent(
-		//          tableCellNode.content)
-		//        let enhancedNodes = try await parseInlineContentWithGFM(
-		//          inlineNodes, using: inlineParser)
-		//        return AST.GFMTableCellNode(
-		//          children: enhancedNodes,
-		//          isHeader: tableCellNode.isHeader,
-		//          alignment: tableCellNode.alignment,
-		//          sourceLocation: tableCellNode.sourceLocation
-		//        )
-		//      }
-		//      return tableCellNode
-		//    }
 
 		switch node.nodeType {
 		case .paragraph:
 			if let paragraphNode = node as? AST.ParagraphNode {
 				return try await processParagraphForInlineContent(
-					paragraphNode, using: inlineParser)
+					paragraphNode,
+					using: inlineParser
+				)
 			}
 
 		case .heading:
 			if let headingNode = node as? AST.HeadingNode {
 				return try await processHeadingForInlineContent(
-					headingNode, using: inlineParser)
+					headingNode,
+					using: inlineParser
+				)
 			}
 
 		case .blockQuote:
 			if let blockQuoteNode = node as? AST.BlockQuoteNode {
 				let processedChildren = try await processNodesForInlineContent(
-					blockQuoteNode.children, using: inlineParser)
+					blockQuoteNode.children,
+					using: inlineParser
+				)
 				return AST.BlockQuoteNode(
 					children: processedChildren,
 					sourceLocation: blockQuoteNode.sourceLocation
@@ -179,13 +162,17 @@ public final class DiscordMarkdownParser: Sendable {
 		case .list:
 			if let listNode = node as? AST.ListNode {
 				return try await processListForInlineContent(
-					listNode, using: inlineParser)
+					listNode,
+					using: inlineParser
+				)
 			}
 
 		case .listItem:
 			if let listItemNode = node as? AST.ListItemNode {
 				return try await processListItemForInlineContent(
-					listItemNode, using: inlineParser)
+					listItemNode,
+					using: inlineParser
+				)
 			}
 
 		//    case .taskListItem:
@@ -198,9 +185,13 @@ public final class DiscordMarkdownParser: Sendable {
 			// For other node types, process children if they exist
 			if !node.children.isEmpty {
 				let processedChildren = try await processNodesForInlineContent(
-					node.children, using: inlineParser)
+					node.children,
+					using: inlineParser
+				)
 				return createNodeWithProcessedChildren(
-					node, children: processedChildren)
+					node,
+					children: processedChildren
+				)
 			}
 		}
 
@@ -209,11 +200,14 @@ public final class DiscordMarkdownParser: Sendable {
 
 	/// Process paragraph for inline content and GFM extensions
 	private func processParagraphForInlineContent(
-		_ paragraph: AST.ParagraphNode, using inlineParser: InlineParser
+		_ paragraph: AST.ParagraphNode,
+		using inlineParser: InlineParser
 	) async throws -> ASTNode {
 		// Parse inline content with GFM extensions
 		let inlineNodes = try await parseInlineContentWithGFM(
-			paragraph.children, using: inlineParser)
+			paragraph.children,
+			using: inlineParser
+		)
 
 		return AST.ParagraphNode(
 			children: inlineNodes,
@@ -223,10 +217,13 @@ public final class DiscordMarkdownParser: Sendable {
 
 	/// Process heading for inline content
 	private func processHeadingForInlineContent(
-		_ heading: AST.HeadingNode, using inlineParser: InlineParser
+		_ heading: AST.HeadingNode,
+		using inlineParser: InlineParser
 	) async throws -> ASTNode {
 		let inlineNodes = try await parseInlineContentWithGFM(
-			heading.children, using: inlineParser)
+			heading.children,
+			using: inlineParser
+		)
 
 		return AST.HeadingNode(
 			level: heading.level,
@@ -237,23 +234,28 @@ public final class DiscordMarkdownParser: Sendable {
 
 	/// Process list for GFM task lists and inline content
 	private func processListForInlineContent(
-		_ list: AST.ListNode, using inlineParser: InlineParser
+		_ list: AST.ListNode,
+		using inlineParser: InlineParser
 	) async throws -> ASTNode {
 		var processedItems: [ASTNode] = []
 
 		for item in list.items {
 			// Check if this is a task list item
 			if let listItemNode = item as? AST.ListItemNode,
-				let paragraphNode = listItemNode.children.first as? AST.ParagraphNode
+				let _ = listItemNode.children.first as? AST.ParagraphNode
 			{
 				// Regular list item - process normally
 				let processedItem = try await processListItemForInlineContent(
-					listItemNode, using: inlineParser)
+					listItemNode,
+					using: inlineParser
+				)
 				processedItems.append(processedItem)
 			} else {
 				// Regular list item (not containing a paragraph or different structure)
 				let processedItem = try await processNodeForInlineContent(
-					item, using: inlineParser)
+					item,
+					using: inlineParser
+				)
 				processedItems.append(processedItem)
 			}
 		}
@@ -268,10 +270,13 @@ public final class DiscordMarkdownParser: Sendable {
 
 	/// Process list item for inline content
 	private func processListItemForInlineContent(
-		_ listItem: AST.ListItemNode, using inlineParser: InlineParser
+		_ listItem: AST.ListItemNode,
+		using inlineParser: InlineParser
 	) async throws -> ASTNode {
 		let processedChildren = try await processNodesForInlineContent(
-			listItem.children, using: inlineParser)
+			listItem.children,
+			using: inlineParser
+		)
 
 		return AST.ListItemNode(
 			children: processedChildren,
@@ -332,22 +337,29 @@ public final class DiscordMarkdownParser: Sendable {
 
 	/// Parse inline content with GFM extensions (strikethrough, autolinks)
 	private func parseInlineContentWithGFM(
-		_ nodes: [ASTNode], using inlineParser: InlineParser
+		_ nodes: [ASTNode],
+		using inlineParser: InlineParser
 	) async throws -> [ASTNode] {
 		var result: [ASTNode] = []
 
 		for node in nodes {
 			if let textNode = node as? AST.TextNode {
 				let enhancedNodes = try await parseGFMInlineExtensions(
-					textNode.content, using: inlineParser)
+					textNode.content,
+					using: inlineParser
+				)
 				result.append(contentsOf: enhancedNodes)
 			} else {
 				// Process children if they exist
 				if !node.children.isEmpty {
 					let processedChildren = try await parseInlineContentWithGFM(
-						node.children, using: inlineParser)
+						node.children,
+						using: inlineParser
+					)
 					let newNode = createNodeWithProcessedChildren(
-						node, children: processedChildren)
+						node,
+						children: processedChildren
+					)
 					result.append(newNode)
 				} else {
 					result.append(node)
@@ -360,7 +372,8 @@ public final class DiscordMarkdownParser: Sendable {
 
 	/// Parse GFM inline extensions (strikethrough, autolinks) in text
 	private func parseGFMInlineExtensions(
-		_ text: String, using inlineParser: InlineParser
+		_ text: String,
+		using inlineParser: InlineParser
 	) async throws -> [ASTNode] {
 		// First parse regular inline content
 		var nodes = try inlineParser.parseInlineContent(text)
@@ -374,7 +387,8 @@ public final class DiscordMarkdownParser: Sendable {
 
 	/// Enhance nodes with strikethrough parsing
 	private func enhanceWithStrikethrough(
-		_ nodes: [ASTNode], using inlineParser: InlineParser
+		_ nodes: [ASTNode],
+		using inlineParser: InlineParser
 	) async throws -> [ASTNode] {
 		var result: [ASTNode] = []
 
@@ -384,7 +398,8 @@ public final class DiscordMarkdownParser: Sendable {
 			{
 
 				let strikethroughNodes = inlineParser.parseGFMStrikethrough(
-					textNode.content)
+					textNode.content
+				)
 				if !strikethroughNodes.isEmpty {
 					result.append(contentsOf: strikethroughNodes)
 				} else {
@@ -400,7 +415,8 @@ public final class DiscordMarkdownParser: Sendable {
 
 	/// Enhance nodes with autolink parsing
 	private func enhanceWithAutolinks(
-		_ nodes: [ASTNode], using inlineParser: InlineParser
+		_ nodes: [ASTNode],
+		using inlineParser: InlineParser
 	) async throws -> [ASTNode] {
 		var result: [ASTNode] = []
 
@@ -425,7 +441,8 @@ public final class DiscordMarkdownParser: Sendable {
 
 	/// Create a new node with processed children
 	private func createNodeWithProcessedChildren(
-		_ originalNode: ASTNode, children: [ASTNode]
+		_ originalNode: ASTNode,
+		children: [ASTNode]
 	) -> ASTNode {
 		switch originalNode.nodeType {
 		case .document:
@@ -532,5 +549,27 @@ public enum MarkdownParserError: Error, LocalizedError, Sendable {
 		case .internalError(let message):
 			return "Internal parser error: \(message)"
 		}
+	}
+}
+
+/// Link reference definition
+public struct LinkReference: Sendable, Equatable {
+	/// The URL of the link
+	public let url: String
+
+	/// Optional title for the link
+	public let title: String?
+
+	/// Source location where the reference was defined
+	public let sourceLocation: SourceLocation?
+
+	public init(
+		url: String,
+		title: String? = nil,
+		sourceLocation: SourceLocation? = nil
+	) {
+		self.url = url
+		self.title = title
+		self.sourceLocation = sourceLocation
 	}
 }
