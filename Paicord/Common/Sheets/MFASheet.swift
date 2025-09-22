@@ -60,7 +60,6 @@ struct MFASheet: View {
 				.foregroundStyle(.secondary)
 			}
 		}
-		.padding()
 		.padding(.top, 15)
 		.frame(maxWidth: .infinity, maxHeight: .infinity)
 		.background(.appBackground)
@@ -72,7 +71,7 @@ struct MFASheet: View {
 				} label: {
 					// chevron left
 					Image(systemName: "chevron.left")
-						.padding(10)
+						.padding(5)
 						.background(.primaryButtonBackground)
 						.clipShape(.circle)
 				}

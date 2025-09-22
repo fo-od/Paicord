@@ -46,7 +46,7 @@ struct PaiCordApp: App {
 			.environment(gatewayStore)
 		}
 		#if os(macOS)
-			.windowToolbarStyle(.unifiedCompact)
+		.windowToolbarStyle(.unified)
 		#endif
 		.commands {
 			AccountCommands(gatewayStore: gatewayStore)

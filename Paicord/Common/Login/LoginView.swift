@@ -25,7 +25,9 @@ struct LoginView: View {
 	var body: some View {
 		ZStack {
 			MeshGradientBackground()
+				.ignoresSafeArea()
 				.frame(maxWidth: .infinity, maxHeight: .infinity)
+				
 
 			if viewModel.loginClient != nil {
 				VStack {
@@ -66,7 +68,6 @@ struct LoginView: View {
 				.transition(.scale(scale: 0.8).combined(with: .opacity))
 			}
 		}
-		.ignoresSafeArea()
 		.animation(.default, value: viewModel.loginClient == nil)
 		.animation(.default, value: viewModel.handleMFA == nil)
 		.animation(.default, value: viewModel.gw?.accounts.accounts.isEmpty)

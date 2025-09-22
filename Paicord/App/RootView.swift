@@ -4,8 +4,9 @@
 //
 //  Created by Lakhan Lothiyi on 18/09/2025.
 //  Copyright © 2025 Lakhan Lothiyi.
-//  
+//
 
+@_spi(Advanced) import SwiftUIIntrospect
 import SwiftUIX
 
 // Handles using phone suitable layout or desktop suitable layout
@@ -15,6 +16,10 @@ struct RootView: View {
 	@Bindable var appState: PaicordAppState
 	@Environment(Challenges.self) var challenges
 	@Environment(\.userInterfaceIdiom) var idiom
+
+	#if os(macOS)
+		@Weak var window: NSWindow?
+	#endif
 
 	var body: some View {
 		Group {
@@ -48,6 +53,18 @@ struct RootView: View {
 		.environment(gatewayStore)
 		.environment(appState)
 		.onAppear { setupGatewayCallbacks() }
+		#if os(macOS)
+			.introspect(.window, on: .macOS(.v14...)) { window in
+				self.window = window
+				updateWindow(window)
+			}
+			.onAppear {
+				updateWindow(window)
+			}
+			.onChange(of: gatewayStore.accounts.currentAccountID) {
+				updateWindow(window)
+			}
+		#endif
 	}
 
 	// MARK: - Gateway Callbacks
@@ -60,4 +77,19 @@ struct RootView: View {
 			await challenges.presentMFA(mfaData)
 		}
 	}
+
+	// MARK: - Helpers
+	#if os(macOS)
+		func updateWindow(_ window: NSWindow?) {
+			guard let window else { return }
+			// copy swiftui's windowStyle hidden title bar style if we are logging in (currentAccountID is nil)
+			if gatewayStore.accounts.currentAccountID == nil {
+				window.titleVisibility = .hidden
+				window.titlebarAppearsTransparent = true
+			} else {
+				window.titleVisibility = .visible
+				window.titlebarAppearsTransparent = false
+			}
+		}
+	#endif
 }

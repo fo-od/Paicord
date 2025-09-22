@@ -33,12 +33,14 @@ final class LoginViewModel {
 
 	@MainActor
 	func fingerprintSetup() async {
+		self.fingerprint = UserDefaults.standard.string(forKey: "Authentication.Fingerprint")
 		do {
 			if self.fingerprint == nil {
 				let request = try await loginClient.getExperiments()
 				try request.guardSuccess()
 				let data = try request.decode()
 				self.fingerprint = data.fingerprint
+				UserDefaults.standard.set(data.fingerprint, forKey: "Authentication.Fingerprint")
 			}
 		} catch {
 			self.appState.error = error

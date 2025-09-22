@@ -19,7 +19,7 @@ struct LargeBaseplate: View {
 		}
 		.inspector(isPresented: $showingInspector) {
 			Text("gm")
-				.inspectorColumnWidth(min: 180, ideal: 200, max: 260)
+				.inspectorColumnWidth(min: 240, ideal: 260, max: 280)
 		}
 		.toolbar {
 			Button {

@@ -72,7 +72,6 @@ struct MFAView: View {
 				.padding(25)
 			}
 		}
-		.padding()
 		.padding(.top, 15)
 		.minHeight(200)
 		.maxWidth(.infinity)
@@ -86,7 +85,7 @@ struct MFAView: View {
 				}
 			} label: {
 				Image(systemName: chosenMethod != nil ? "chevron.left" : "xmark")
-					.padding(10)
+					.padding(5)
 					.background(.primaryButtonBackground)
 					.clipShape(.circle)
 					.contentTransition(.symbolEffect(.replace))
