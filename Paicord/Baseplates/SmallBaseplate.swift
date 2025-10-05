@@ -6,23 +6,26 @@
 // Copyright © 2025 Lakhan Lothiyi.
 //
 
-import SwiftUIX
 import PaicordLib
+import SwiftUIX
 
 @available(macOS, unavailable)
 struct SmallBaseplate: View {
 	@Bindable var appState: PaicordAppState
 	@Environment(GatewayStore.self) var gw
-	@State private var store: ChannelStore?
+
+	@State var currentGuildStore: GuildStore? = nil
+	@State var currentChannelStore: ChannelStore? = nil
+
 	@State private var currentTab: CurrentTab = .home
 	var disableSlideover: Bool {
 		self.currentTab != .home
 	}
-	
+
 	var body: some View {
 		SlideoverDoubleView(swap: $appState.chatOpen) {
 			TabView(selection: $currentTab) {
-				HomeView()
+				HomeView(guild: currentGuildStore)
 					.frame(maxWidth: .infinity, maxHeight: .infinity)
 					.background(.appBackground)
 					.toolbarBackground(.tabBarBackground, for: .tabBar)
@@ -45,18 +48,33 @@ struct SmallBaseplate: View {
 					.tag(CurrentTab.profile)
 			}
 		} secondary: {
-			if let store {
-				ChatView(vm: store)
+			if let currentChannelStore {
+				ChatView(vm: currentChannelStore)
 			} else {
-				ActivityIndicator()
+				Text(":3")
+					.font(.largeTitle)
+					.foregroundStyle(.secondary)
 			}
 		}
 		.slideoverDisabled(disableSlideover)
-		.task(id: appState.selectedChannel) {
-			if let selected = appState.selectedChannel {
-				self.store = gw.getChannelStore(for: selected)
+		.task(id: appState.selectedGuild) {
+			if let selected = appState.selectedGuild {
+				self.currentGuildStore = gw.getGuildStore(for: selected)
 			} else {
-				self.store = nil
+				self.currentGuildStore = nil
+			}
+		}
+		.task(id: appState.selectedChannel) {
+			defer { print("selected channel \(String(describing: self.currentChannelStore))") }
+			if let selected = appState.selectedChannel {
+				// there is a likelihood that currentGuildStore is wrong when this runs
+				// but i dont think it will be a problem maybe.
+				self.currentChannelStore = gw.getChannelStore(
+					for: selected,
+					from: self.currentGuildStore
+				)
+			} else {
+				self.currentChannelStore = nil
 			}
 		}
 	}

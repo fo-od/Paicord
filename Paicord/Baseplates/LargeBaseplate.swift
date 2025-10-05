@@ -13,10 +13,10 @@ struct LargeBaseplate: View {
 	@Environment(GatewayStore.self) var gw
 	@Environment(PaicordAppState.self) var appState
 	@State var showingInspector = true
-	
+
 	@State var currentGuildStore: GuildStore? = nil
 	@State var currentChannelStore: ChannelStore? = nil
-	
+
 	var body: some View {
 		NavigationSplitView {
 			SidebarView(currentGuildStore: $currentGuildStore)
@@ -54,7 +54,10 @@ struct LargeBaseplate: View {
 			if let selected = appState.selectedChannel {
 				// there is a likelihood that currentGuildStore is wrong when this runs
 				// but i dont think it will be a problem maybe.
-				self.currentChannelStore = gw.getChannelStore(for: selected, from: self.currentGuildStore)
+				self.currentChannelStore = gw.getChannelStore(
+					for: selected,
+					from: self.currentGuildStore
+				)
 			} else {
 				self.currentChannelStore = nil
 			}

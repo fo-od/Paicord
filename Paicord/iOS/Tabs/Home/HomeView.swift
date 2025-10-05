@@ -13,6 +13,8 @@ import SwiftUIX
 struct HomeView: View {
 	@Environment(GatewayStore.self) var gw
 	@Environment(PaicordAppState.self) var appState
+	
+	var guild: GuildStore?
 
 	var body: some View {
 		HStack(spacing: 0) {
@@ -23,8 +25,7 @@ struct HomeView: View {
 				}
 
 			Group {
-				if let guildID = appState.selectedGuild {
-					let guild = gw.getGuildStore(for: guildID)
+				if let guild {
 					GuildView(guild: guild)
 				} else {
 					DMsView()
