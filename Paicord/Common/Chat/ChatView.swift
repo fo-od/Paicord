@@ -94,6 +94,7 @@ struct ChatView: View {
 		}
 		.scrollContentBackground(.hidden)
 		.scrollDismissesKeyboard(.interactively)
+		#if os(iOS)
 		.toolbar {
 			ToolbarItem(placement: .topBarLeading) {
 				Button {
@@ -103,6 +104,7 @@ struct ChatView: View {
 				}
 			}
 		}
+		#endif
 		.toolbar {
 			ToolbarItem(placement: .navigation) {
 				if let name = vm.channel?.name {
@@ -138,7 +140,11 @@ struct ChatView: View {
 			self.inline = inline
 		}
 		
+		#if os(iOS)
 		let avatarSize: CGFloat = 45
+		#elseif os(macOS)
+		let avatarSize: CGFloat = 35
+		#endif
 
 		var body: some View {
 			Group {
@@ -166,7 +172,7 @@ struct ChatView: View {
 								// |
 
 								ReplyLine()
-									.padding(.leading, 22)  // align with pfp
+									.padding(.leading, avatarSize / 2)  // align with pfp
 
 								Text("\(ref.author?.username ?? "Unknown") • \(ref.content)")
 									.font(.caption)

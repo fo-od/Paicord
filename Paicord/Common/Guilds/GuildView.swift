@@ -72,12 +72,12 @@ struct GuildView: View {
 		if banner.starts(with: "a_"), animated {
 			return URL(
 				string: CDNEndpoint.guildBanner(guildId: guild.guildId, banner: banner).url
-					+ ".\(animated ? "gif" : "png")?size=128&animated=true"
+					+ ".\(animated ? "gif" : "png")?size=600&animated=true"
 			)
 		} else {
 			return URL(
 				string: CDNEndpoint.guildBanner(guildId: guild.guildId, banner: banner).url
-					+ ".png?size=128&animated=false"
+					+ ".png?size=600&animated=false"
 			)
 		}
 	}
