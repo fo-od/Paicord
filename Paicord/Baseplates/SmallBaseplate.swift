@@ -24,36 +24,41 @@ struct SmallBaseplate: View {
 
 	var body: some View {
 		SlideoverDoubleView(swap: $appState.chatOpen) {
-			TabView(selection: $currentTab) {
-				HomeView(guild: currentGuildStore)
-					.frame(maxWidth: .infinity, maxHeight: .infinity)
-					.background(.appBackground)
-					.toolbarBackground(.tabBarBackground, for: .tabBar)
-					.toolbarBackground(.visible, for: .tabBar)
-					.tabItem { Label("Home", systemImage: "house") }
-					.tag(CurrentTab.home)
-				NotificationsView()
-					.frame(maxWidth: .infinity, maxHeight: .infinity)
-					.background(.appBackground)
-					.toolbarBackground(.tabBarBackground, for: .tabBar)
-					.toolbarBackground(.visible, for: .tabBar)
-					.tabItem { Label("Notifications", systemImage: "bell") }
-					.tag(CurrentTab.notifications)
-				ProfileView()
-					.frame(maxWidth: .infinity, maxHeight: .infinity)
-					.background(.appBackground)
-					.toolbarBackground(.tabBarBackground, for: .tabBar)
-					.toolbarBackground(.visible, for: .tabBar)
-					.tabItem { Label("Profile", systemImage: "person.circle") }
-					.tag(CurrentTab.profile)
+			NavigationStack {
+				TabView(selection: $currentTab) {
+					HomeView(guild: currentGuildStore)
+						.frame(maxWidth: .infinity, maxHeight: .infinity)
+						.background(.appBackground)
+						.toolbarBackground(.tabBarBackground, for: .tabBar)
+						.toolbarBackground(.visible, for: .tabBar)
+						.tabItem { Label("Home", systemImage: "house") }
+						.tag(CurrentTab.home)
+					NotificationsView()
+						.frame(maxWidth: .infinity, maxHeight: .infinity)
+						.background(.appBackground)
+						.toolbarBackground(.tabBarBackground, for: .tabBar)
+						.toolbarBackground(.visible, for: .tabBar)
+						.tabItem { Label("Notifications", systemImage: "bell") }
+						.tag(CurrentTab.notifications)
+					ProfileView()
+						.frame(maxWidth: .infinity, maxHeight: .infinity)
+						.background(.appBackground)
+						.toolbarBackground(.tabBarBackground, for: .tabBar)
+						.toolbarBackground(.visible, for: .tabBar)
+						.tabItem { Label("Profile", systemImage: "person.circle") }
+						.tag(CurrentTab.profile)
+				}
 			}
+
 		} secondary: {
-			if let currentChannelStore {
-				ChatView(vm: currentChannelStore)
-			} else {
-				Text(":3")
-					.font(.largeTitle)
-					.foregroundStyle(.secondary)
+			NavigationStack {
+				if let currentChannelStore {
+					ChatView(vm: currentChannelStore)
+				} else {
+					Text(":3")
+						.font(.largeTitle)
+						.foregroundStyle(.secondary)
+				}
 			}
 		}
 		.slideoverDisabled(disableSlideover)
@@ -65,7 +70,6 @@ struct SmallBaseplate: View {
 			}
 		}
 		.task(id: appState.selectedChannel) {
-			defer { print("selected channel \(String(describing: self.currentChannelStore))") }
 			if let selected = appState.selectedChannel {
 				// there is a likelihood that currentGuildStore is wrong when this runs
 				// but i dont think it will be a problem maybe.

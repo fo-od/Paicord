@@ -65,7 +65,6 @@ struct SlideoverDoubleView<Primary: View, Secondary: View>: View {
 					} else {
 						self.dragOffset = translation
 					}
-					print("dragOffset", dragOffset, swap)
 				}
 				.onEnded { drag in
 					guard !slideoverDisabled else {

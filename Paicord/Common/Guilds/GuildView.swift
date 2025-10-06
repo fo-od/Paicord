@@ -13,7 +13,7 @@ import SwiftUIX
 struct GuildView: View {
 	@Environment(PaicordAppState.self) var appState
 	var guild: GuildStore
-	
+
 	var body: some View {
 		ZStack(alignment: .top) {
 			ScrollView {
@@ -33,15 +33,20 @@ struct GuildView: View {
 					.hidden()
 				}
 
-				ForEach(guild.channels.map({$0.value})) { channel in
+				ForEach(guild.channels.map({ $0.value })) { channel in
 					Button {
 						appState.selectedChannel = channel.id
+						#if os(iOS)
+							withAnimation {
+								appState.chatOpen.toggle()
+							}
+						#endif
 					} label: {
 						Text(channel.name ?? "unknown-channel")
 					}
 				}
 			}
-			
+
 			// header text
 			HStack {
 				Text(guild.guild?.name ?? "Unknown Guild")
@@ -64,9 +69,16 @@ struct GuildView: View {
 
 	func bannerURL(animated: Bool) -> URL? {
 		guard let banner = guild.guild?.banner else { return nil }
-		return URL(
-			string: CDNEndpoint.guildBanner(guildId: guild.guildId, banner: banner).url
-				+ ".\(animated ? "gif" : "png")?size=600&animated=\(animated.description)"
-		)
+		if banner.starts(with: "a_"), animated {
+			return URL(
+				string: CDNEndpoint.guildBanner(guildId: guild.guildId, banner: banner).url
+					+ ".\(animated ? "gif" : "png")?size=128&animated=true"
+			)
+		} else {
+			return URL(
+				string: CDNEndpoint.guildBanner(guildId: guild.guildId, banner: banner).url
+					+ ".png?size=128&animated=false"
+			)
+		}
 	}
 }

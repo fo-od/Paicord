@@ -14,13 +14,8 @@ struct ProfileView: View {
 		VStack {
 			Text("Profile View")
 
-			AsyncButton("Log out") {
-				if let current = gs.accounts.currentAccount {
-					gs.accounts.removeAccount(current)
-					await gs.logOut()
-				}
-			} catch: {
-				print("failed to logout: \(String(describing: $0))")
+			NavigationLink("Settings") {
+				SettingsView()
 			}
 		}
 	}

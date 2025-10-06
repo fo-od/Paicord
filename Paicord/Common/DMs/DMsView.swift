@@ -25,11 +25,19 @@ struct DMsView: View {
 				.frame(maxWidth: .infinity, alignment: .leading)
 				.hidden()
 
-				ForEach(gw.currentUser.privateChannels.map({ $0.value}), id: \.id) { channel in
-					Button(channel.name ?? channel.recipients?.map({
+				ForEach(gw.currentUser.privateChannels.map({ $0.value }), id: \.id) {
+					channel in
+					Button(
+						channel.name ?? channel.recipients?.map({
 							$0.global_name ?? $0.username
-						}).joined(separator: ", ") ?? "Unknown Channel") {
+						}).joined(separator: ", ") ?? "Unknown Channel"
+					) {
 						appState.selectedChannel = channel.id
+						#if os(iOS)
+							withAnimation {
+								appState.chatOpen.toggle()
+							}
+						#endif
 					}
 				}
 			}

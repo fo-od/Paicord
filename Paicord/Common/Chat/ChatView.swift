@@ -20,6 +20,7 @@ struct ChatView: View {
 	@State private var showChannelInfo = false
 
 	@Environment(GatewayStore.self) var gw
+	@Environment(PaicordAppState.self) var appState
 
 	init(vm: ChannelStore) { self.vm = vm }
 
@@ -54,13 +55,18 @@ struct ChatView: View {
 				.listRowBackground(Color.clear)  // make background clear
 			}
 			.listStyle(.plain)
+			.environment(\.defaultMinListRowHeight, 10)
 			.defaultScrollAnchor(.bottom)
 			.onAppear {
-				proxy.scrollTo(vm.messages.values.last?.id, anchor: .bottom)
+				DispatchQueue.main.async {
+					proxy.scrollTo(vm.messages.values.last?.id, anchor: .bottom)
+				}
 			}
 			.onChange(of: vm.messages) {
 				if isNearBottom && !isScrolling {
-					proxy.scrollTo(vm.messages.values.last?.id, anchor: .bottom)
+					DispatchQueue.main.async {
+						proxy.scrollTo(vm.messages.values.last?.id, anchor: .bottom)
+					}
 				}
 			}
 			.background(.tableBackground)
@@ -88,6 +94,15 @@ struct ChatView: View {
 		}
 		.scrollContentBackground(.hidden)
 		.scrollDismissesKeyboard(.interactively)
+		.toolbar {
+			ToolbarItem(placement: .topBarLeading) {
+				Button {
+					appState.chatOpen.toggle()
+				} label: {
+					Image(systemName: "arrow.left")
+				}
+			}
+		}
 		.toolbar {
 			ToolbarItem(placement: .navigation) {
 				if let name = vm.channel?.name {
@@ -122,75 +137,83 @@ struct ChatView: View {
 			self.message = message
 			self.inline = inline
 		}
+		
+		let avatarSize: CGFloat = 45
 
 		var body: some View {
-			if inline {
-				HStack(alignment: .top) {
-					Button {
-					} label: {
-						Text("")
-							.frame(width: 35)
-					}
-					.buttonStyle(.borderless)
-					.height(1)
-					.disabled(true)  // btn used for spacing only
-
-					content
-				}
-			} else {
-				VStack {
-					if let ref = message.referenced_message {
-						HStack {
-							// line thing
-							//   ________  (pfp) <username> <content>
-							//  /
-							// |
-
-							ReplyLine()
-								.padding(.leading, 18)  // align with pfp
-
-							Text("\(ref.author?.username ?? "Unknown") • \(ref.content)")
-								.font(.caption)
-								.foregroundStyle(.secondary)
-								.lineLimit(1)
-								.frame(maxWidth: .infinity, alignment: .leading)
-						}
-					}
+			Group {
+				if inline {
 					HStack(alignment: .top) {
 						Button {
-							profileOpen = true
 						} label: {
-							AnimatedImage(
-								url: avatarURL(animated: avatarAnimated)
-							)
-							.resizable()
-							.scaledToFill()
-							.frame(width: 35, height: 35)
-							.clipShape(.circle)
+							Text("")
+								.frame(width: avatarSize)
 						}
 						.buttonStyle(.borderless)
-						.popover(isPresented: $profileOpen) {
-							Text("Profile for \(message.author?.username ?? "Unknown")")
-								.padding()
-						}
+						.height(1)
+						.disabled(true)  // btn used for spacing only
 
-						VStack {
+						content
+					}
+					.padding(.top, 5)
+				} else {
+					VStack {
+						if let ref = message.referenced_message {
 							HStack {
-								Text(message.author?.username ?? "Unknown")
-									.font(.headline)
-								Text(message.timestamp.date, style: .time)
+								// line thing
+								//   ________  (pfp) <username> <content>
+								//  /
+								// |
+
+								ReplyLine()
+									.padding(.leading, 22)  // align with pfp
+
+								Text("\(ref.author?.username ?? "Unknown") • \(ref.content)")
 									.font(.caption)
 									.foregroundStyle(.secondary)
+									.lineLimit(1)
+									.frame(maxWidth: .infinity, alignment: .leading)
 							}
-							.frame(maxWidth: .infinity, alignment: .leading)
+						}
+						HStack(alignment: .top) {
+							Button {
+								profileOpen = true
+							} label: {
+								AnimatedImage(
+									url: avatarURL(animated: avatarAnimated)
+								)
+								.resizable()
+								.scaledToFill()
+								.frame(width: avatarSize, height: avatarSize)
+								.clipShape(.circle)
+							}
+							.buttonStyle(.borderless)
+							.popover(isPresented: $profileOpen) {
+								Text("Profile for \(message.author?.username ?? "Unknown")")
+									.padding()
+							}
 
-							content
+							VStack {
+								HStack {
+									Text(message.author?.username ?? "Unknown")
+										.font(.headline)
+									Text(message.timestamp.date, style: .time)
+										.font(.caption)
+										.foregroundStyle(.secondary)
+								}
+								.frame(maxWidth: .infinity, alignment: .leading)
+
+								content
+							}
 						}
 					}
+					.padding(.top)
+					.onHover { self.avatarAnimated = $0 }
 				}
-				.onHover { self.avatarAnimated = $0 }
-				.padding(.top)
 			}
+			#if os(iOS)
+				.padding(.horizontal, 10) // ios needs horizontal padding
+			#endif
 		}
 
 		@ViewBuilder
@@ -258,6 +281,8 @@ struct ScrollStateDetector: ViewModifier {
 	@Binding var isNearBottom: Bool
 	@Binding var isScrolling: Bool
 	@State private var cancellables = Set<AnyCancellable>()
+	let threshold: CGFloat = 125
+
 	func body(content: Content) -> some View {
 		content
 			#if os(iOS)
@@ -273,8 +298,9 @@ struct ScrollStateDetector: ViewModifier {
 							let bottomEdge = offset.y + scrollView.frame.size.height
 							let distanceFromBottom =
 								scrollView.contentSize.height - bottomEdge
+							// also rember to change threshold based on safe area insets
 							DispatchQueue.main.async {
-								self.isNearBottom = distanceFromBottom < 100
+								self.isNearBottom = distanceFromBottom < (threshold - scrollView.safeAreaInsets.bottom)
 							}
 						}
 						.store(in: &cancellables)
@@ -321,8 +347,9 @@ struct ScrollStateDetector: ViewModifier {
 							let bottomEdge = scrollOffset + visibleHeight
 							let distanceFromBottom = contentHeight - bottomEdge
 
+							// also rember to change threshold based on safe area insets
 							DispatchQueue.main.async {
-								self.isNearBottom = distanceFromBottom < 100
+								self.isNearBottom = distanceFromBottom < (threshold - scrollView.safeAreaInsets.bottom)
 							}
 						}
 						.store(in: &cancellables)

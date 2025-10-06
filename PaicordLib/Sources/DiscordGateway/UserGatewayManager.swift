@@ -302,6 +302,8 @@ public actor UserGatewayManager: GatewayManager {
 			}
 		}
 	}
+	
+	// MARK: - Gateway actions
 
 	/// https://discord.com/developers/docs/topics/gateway-events#update-presence
 	public func updatePresence(payload: Gateway.Identify.Presence) {
@@ -368,6 +370,8 @@ public actor UserGatewayManager: GatewayManager {
 			)
 		)
 	}
+	
+	// MARK: End of Gateway actions -
 
 	/// Makes an stream of Gateway events.
 	@available(*, deprecated, renamed: "events")
