@@ -21,7 +21,7 @@ struct ChatView: View {
 	@State private var text = ""
 
 	@State private var showChannelInfo = false  // topic description popover
-	@State private var isNearBottom = true  // used to track if we are near the bottom, if so scroll.
+	@ViewStorage private var isNearBottom = true  // used to track if we are near the bottom, if so scroll.
 
 	init(vm: ChannelStore) { self.vm = vm }
 
@@ -51,7 +51,7 @@ struct ChatView: View {
 					}
 					.scrollTargetLayout()
 					#if os(macOS)
-						.padding(5)  // macos doesnt seem to have padding around chat
+						.padding(10)  // macos doesnt seem to have padding around chat
 					#elseif os(iOS)
 						.padding(.bottom, 10)  // add padding at the bottom for ios
 					#endif

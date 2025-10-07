@@ -61,8 +61,6 @@ class GuildStore: DiscordDataStore {
 				members[user.id] = member
 			}
 		}
-		
-		print(self.members)
 	}
 
 	// MARK: - Protocol Methods
