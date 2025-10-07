@@ -12,7 +12,7 @@ import PaicordLib
 @Observable
 class GuildStore: DiscordDataStore {
 	// MARK: - Protocol Properties
-	var gateway: UserGatewayManager?
+	var gateway: GatewayStore?
 	var eventTask: Task<Void, Never>?
 
 	// MARK: - Guild Properties
@@ -25,10 +25,6 @@ class GuildStore: DiscordDataStore {
 	var stickers: [StickerSnowflake: Sticker] = [:]
 	var presences: [UserSnowflake: Gateway.PresenceUpdate] = [:]
 	var voiceStates: [UserSnowflake: VoiceState] = [:]
-
-	// MARK: - State Properties
-	var isLoadingMembers = false
-	var hasAllMembers = false
 
 	init(id: GuildSnowflake, from guild: Guild?) {
 		self.guildId = id
@@ -58,10 +54,19 @@ class GuildStore: DiscordDataStore {
 		guild.stickers?.forEach { sticker in
 			stickers[sticker.id] = sticker
 		}
+		
+		// members (usually the connected user only)
+		guild.members?.forEach { member in
+			if let user = member.user {
+				members[user.id] = member
+			}
+		}
+		
+		print(self.members)
 	}
 
 	// MARK: - Protocol Methods
-	func setGateway(_ gateway: UserGatewayManager?) {
+	func setGateway(_ gateway: GatewayStore?) {
 		cancelEventHandling()
 		self.gateway = gateway
 		if gateway != nil {
@@ -70,7 +75,7 @@ class GuildStore: DiscordDataStore {
 	}
 
 	func setupEventHandling() {
-		guard let gateway = gateway else { return }
+		guard let gateway = gateway?.gateway else { return }
 
 		eventTask = Task { @MainActor in
 			for await event in await gateway.events {

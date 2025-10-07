@@ -13,8 +13,8 @@ struct SlideoverDoubleView<Primary: View, Secondary: View>: View {
 	var primary: Primary
 	var secondary: Secondary
 
-	@State private var dragOffset: CGFloat = 0
 	private let animationDuration: Double = 0.2
+	@State private var dragOffset: CGFloat = 0
 	@State var width: CGFloat = 0
 
 	@Environment(\.slideoverDisabled) var slideoverDisabled
@@ -33,18 +33,13 @@ struct SlideoverDoubleView<Primary: View, Secondary: View>: View {
 		ZStack {
 			primary
 				.id("primary")
-				.frame(maxWidth: .infinity, maxHeight: .infinity)
 			
 			// fixes some swift 6 warnings
 			let swap = swap
 			let dragOffset = dragOffset
 			secondary
-				.frame(maxWidth: .infinity, maxHeight: .infinity)
 				.background(.background)
 				.shadow(radius: 10)
-			// FIXME: the below causes the view to never update
-			// but this means changing the viewmodel won't update the view to use it.
-//				.equatable(by: true) // prevent unnecessary updates
 				.visualEffect { vs, proxy in
 					return vs
 						.offset(x: swap ? dragOffset : proxy.size.width + 10 + dragOffset)

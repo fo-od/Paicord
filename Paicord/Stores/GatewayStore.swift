@@ -93,17 +93,17 @@ final class GatewayStore {
 		}
 
 		// Set up stores with gateway
-		currentUser.setGateway(self.gateway)
-		settings.setGateway(self.gateway)
+		currentUser.setGateway(self)
+		settings.setGateway(self)
 
 		// Update existing channel stores
 		for channelStore in channels.values {
-			channelStore.setGateway(self.gateway)
+			channelStore.setGateway(self)
 		}
 
 		// Update existing guild stores
 		for guildStore in guilds.values {
-			guildStore.setGateway(self.gateway)
+			guildStore.setGateway(self)
 		}
 	}
 
@@ -127,7 +127,7 @@ final class GatewayStore {
 		} else {
 			let channel = guild?.channels[id] ?? currentUser.privateChannels[id]
 			let store = ChannelStore(id: id, from: channel)
-			store.setGateway(self.gateway)
+			store.setGateway(self)
 			channels[id] = store
 			return store
 		}
@@ -161,7 +161,7 @@ final class GatewayStore {
 		} else {
 			let guild = currentUser.guilds[id]
 			let store = GuildStore(id: id, from: guild)
-			store.setGateway(self.gateway)
+			store.setGateway(self)
 			guilds[id] = store
 			return store
 		}

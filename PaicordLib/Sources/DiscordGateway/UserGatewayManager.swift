@@ -371,6 +371,45 @@ public actor UserGatewayManager: GatewayManager {
 		)
 	}
 	
+//	/// https://docs.discord.food/topics/gateway-events#request-call-connect
+//	public func requestCallConnect(payload: Gateway.) {
+//		self.send(
+//			message: .init(
+//				payload: .init(
+//					opcode:
+//					data:
+//				),
+//				opcode: .text
+//			)
+//		)
+//	}
+	
+	//	/// https://docs.discord.food/topics/gateway-events#request-soundboard-sounds
+//	public func requestSoundboardSounds(payload: Gateway.) {
+//		self.send(
+//			message: .init(
+//				payload: .init(
+//					opcode:
+//					data:
+//				),
+//				opcode: .text
+//			)
+//		)
+//	}
+
+	/// https://docs.discord.food/topics/gateway-events#request-last-messages
+	public func requestLastMessages(payload: Gateway.RequestLastMessages) {
+		self.send(
+			message: .init(
+				payload: .init(
+					opcode: .requestLastMessages,
+					data: .requestLastMessages(payload)
+				),
+				opcode: .text
+			)
+		)
+	}
+
 	// MARK: End of Gateway actions -
 
 	/// Makes an stream of Gateway events.

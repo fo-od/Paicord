@@ -13,7 +13,7 @@ import PaicordLib
 @Observable
 class ChannelStore: DiscordDataStore {
 	// MARK: - Protocol Properties
-	var gateway: UserGatewayManager?
+	var gateway: GatewayStore?
 	var eventTask: Task<Void, Never>?
 
 	// MARK: - Channel Properties
@@ -34,7 +34,7 @@ class ChannelStore: DiscordDataStore {
 	}
 
 	// MARK: - Protocol Methods
-	func setGateway(_ gateway: UserGatewayManager?) {
+	func setGateway(_ gateway: GatewayStore?) {
 		cancelEventHandling()
 		self.gateway = gateway
 		if gateway != nil {
@@ -43,19 +43,35 @@ class ChannelStore: DiscordDataStore {
 	}
 
 	func setupEventHandling() {
-		guard let gateway = gateway else { return }
+		guard let gateway = gateway?.gateway else { return }
 		Task { @MainActor in
 			// ig also fetch latest messages too
-			
+			let res = try await gateway.client.listMessages(
+				channelId: channelId,
+				before: channel?.last_message_id
+			)
+			do {
+				// ensure request was successful
+				try res.guardSuccess()
+				let messages = try res.decode()
+				for message in messages.reversed() {
+					self.messages[message.id] = message
+				}
+				
+				// lastly request members if member data for any author is missing
+			} catch {
+				PaicordAppState.shared.error = res.asError()
+			}
 		}
 		eventTask = Task { @MainActor in
 			for await event in await gateway.events {
 				switch event.data {
+				case .resumed:
+					print("resumed")
 				case .channelUpdate(let updatedChannel):
 					if updatedChannel.id == channelId {
 						handleChannelUpdate(updatedChannel)
 					}
-
 				case .channelDelete(let deletedChannel):
 					if deletedChannel.id == channelId {
 						handleChannelDelete(deletedChannel)

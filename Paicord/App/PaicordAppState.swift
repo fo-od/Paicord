@@ -13,6 +13,8 @@ import PaicordLib
 
 @Observable
 final class PaicordAppState {
+	static let shared = PaicordAppState()
+	
 	private var _selectedGuild: GuildSnowflake? = nil
 	var selectedGuild: GuildSnowflake? {
 		get {

@@ -2,6 +2,14 @@
 //  DMsView.swift
 //  Paicord
 //
+//  Created by Lakhan Lothiyi on 06/10/2025.
+//  Copyright © 2025 Lakhan Lothiyi.
+//
+
+//
+//  DMsView.swift
+//  Paicord
+//
 //  Created by Lakhan Lothiyi on 22/09/2025.
 //  Copyright © 2025 Lakhan Lothiyi.
 //
@@ -25,20 +33,8 @@ struct DMsView: View {
 				.frame(maxWidth: .infinity, alignment: .leading)
 				.hidden()
 
-				ForEach(gw.currentUser.privateChannels.map({ $0.value }), id: \.id) {
-					channel in
-					Button(
-						channel.name ?? channel.recipients?.map({
-							$0.global_name ?? $0.username
-						}).joined(separator: ", ") ?? "Unknown Channel"
-					) {
-						appState.selectedChannel = channel.id
-						#if os(iOS)
-							withAnimation {
-								appState.chatOpen.toggle()
-							}
-						#endif
-					}
+				ForEach(Array(gw.currentUser.privateChannels.values)) { channel in
+					GuildView.ChannelButton(channels: [:], channel: channel)
 				}
 			}
 

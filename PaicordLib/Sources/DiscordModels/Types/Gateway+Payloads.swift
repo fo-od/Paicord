@@ -383,7 +383,7 @@ extension Gateway {
 		public var stickers: [Sticker]?
 		public var premium_progress_bar_enabled: Bool
 		public var `lazy`: Bool?
-		public var hub_type: String?
+//		public var hub_type: String?
 		public var nsfw: Bool
 		public var application_command_counts: [String: Int]?
 		public var embedded_activities: [Gateway.Activity]?
@@ -445,7 +445,7 @@ extension Gateway {
 			self.stickers = new.stickers
 			self.premium_progress_bar_enabled = new.premium_progress_bar_enabled
 			self.`lazy` = new.`lazy`
-			self.hub_type = new.hub_type
+//			self.hub_type = new.hub_type
 			self.nsfw = new.nsfw
 			self.application_command_counts = new.application_command_counts
 			self.embedded_activities = new.embedded_activities
@@ -939,6 +939,12 @@ extension Gateway {
 		public var message_id: MessageSnowflake
 		public var burst: Bool?
 		public var emoji: Emoji
+	}
+	
+	/// https://docs.discord.food/topics/gateway-events#request-last-messages-structure
+	public struct RequestLastMessages: Sendable, Codable {
+		public var guild_id: GuildSnowflake?
+		
 	}
 
 	/// https://discord.com/developers/docs/topics/gateway-events#client-status-object

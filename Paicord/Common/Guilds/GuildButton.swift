@@ -36,6 +36,7 @@ struct GuildButton: View {
 		if let folder, let guilds, folder.hasID {
 			// must be a folder
 			FolderButtons(id: folder.id.value, folder: folder, guilds: guilds)
+				.padding(-2)
 		} else {
 			// either a guild or DMs
 			guildButton(from: guild)
@@ -90,16 +91,43 @@ struct GuildButton: View {
 								Image(systemName: "folder.fill")
 									.font(.title2)
 									.foregroundStyle(.tertiaryButton)
-									.contentTransition(.symbolEffect(.replace))
 							}
+							.transition(.blurReplace)
 					} else {
-						// 2 x 2 grid of first 4 guilds. If less than 4, just show what we have with empty spaces
+						// 2 x 2 grid of first 4 guilds. If less than 4, just show what we have with empty spaces. no animated icons here.
 						Rectangle()
 							.fill(.primaryButtonBackground.opacity(0.5))
 							.aspectRatio(1, contentMode: .fit)
 							.overlay {
-								Text("GM")
+								VStack(spacing: 0) {
+									HStack(spacing: 0) {
+										if let guild = guilds[safe: 0] {
+											icon(for: guild)
+										} else {
+											Color.clear
+										}
+										if let guild = guilds[safe: 1] {
+											icon(for: guild)
+										} else {
+											Color.clear
+										}
+									}
+									HStack(spacing: 0) {
+										if let guild = guilds[safe: 2] {
+											icon(for: guild)
+										} else {
+											Color.clear
+										}
+										if let guild = guilds[safe: 3] {
+											icon(for: guild)
+										} else {
+											Color.clear
+										}
+									}
+								}
+								.padding(5)
 							}
+							.transition(.blurReplace)
 					}
 				}
 				.buttonStyle(.borderless)
@@ -108,12 +136,15 @@ struct GuildButton: View {
 				)
 
 				if isExpanded {
-					let guilds = folder.guildIds.compactMap { guildID in
+					let guilds: [Guild] = folder.guildIds.compactMap { guildID in
 						let guildID = GuildSnowflake(guildID.description)
 						return gw.currentUser.guilds[guildID]
 					}
 					ForEach(guilds) { guild in
 						GuildButton(guild: guild)  // imagine recursion lol (i joke)
+							.padding(.horizontal, 2)
+							.padding(.top, guild.id == (guilds.first?.id ?? (try! .makeFake())) ? 2 : 0)
+							.padding(.bottom, guild.id == (guilds.last?.id ?? (try! .makeFake())) ? 2 : 0)
 					}
 					.transition(.move(edge: .top).combined(with: .opacity))
 				}
@@ -123,13 +154,48 @@ struct GuildButton: View {
 					let color = DiscordColor(value: Int(folder.color.value))
 				{
 					Rectangle()
-						.fill(color.asColor().secondary)
+						.fill(color.asColor().secondary.opacity(0.35))
 				} else {
 					Rectangle()
 						.fill(.tableBackground.secondary)
 				}
 			}
 			.clipShape(.rect(cornerRadius: isExpanded ? 10 : 32, style: .continuous))
+		}
+		
+		@ViewBuilder
+		func icon(for guild: Guild) -> some View {
+			if let icon = guild.icon,
+				let url = iconURL(
+					id: guild.id,
+					icon: icon,
+					animated: false
+				)
+			{
+				WebImage(url: url)
+					.resizable()
+					.scaledToFill()
+					.clipShape(.circle)
+			} else {
+				Rectangle()
+					.fill(.primaryButtonBackground)
+					.aspectRatio(1, contentMode: .fit)
+					.clipShape(.rounded)
+			}
+		}
+		
+		func iconURL(id: GuildSnowflake, icon: String, animated: Bool) -> URL? {
+			if icon.starts(with: "a_") {
+				return URL(
+					string: CDNEndpoint.guildIcon(guildId: id, icon: icon).url
+					+ ".\(animated ? "gif" : "png")?size=128&animated=\(animated.description)"
+				)
+			} else {
+				return URL(
+					string: CDNEndpoint.guildIcon(guildId: id, icon: icon).url
+					+ ".png?size=128&animated=false"
+				)
+			}
 		}
 	}
 	
@@ -142,9 +208,7 @@ struct GuildButton: View {
 			Group {
 				if let id = guild?.id {
 					Group {
-						let shouldAnimate =
-							appState.selectedGuild == id
-							&& guild?.icon?.hasPrefix("a_") == true
+						let shouldAnimate = appState.selectedGuild == id
 						if let icon = guild?.icon,
 							let url = iconURL(id: id, icon: icon, animated: shouldAnimate)
 						{
@@ -191,10 +255,17 @@ struct GuildButton: View {
 	}
 
 	func iconURL(id: GuildSnowflake, icon: String, animated: Bool) -> URL? {
-		return URL(
-			string: CDNEndpoint.guildIcon(guildId: id, icon: icon).url
-				+ "?size=128&animated=\(animated.description)"
-		)
+		if icon.starts(with: "a_") {
+			return URL(
+				string: CDNEndpoint.guildIcon(guildId: id, icon: icon).url
+				+ ".\(animated ? "gif" : "png")?size=128&animated=\(animated.description)"
+			)
+		} else {
+			return URL(
+				string: CDNEndpoint.guildIcon(guildId: id, icon: icon).url
+				+ ".png?size=128&animated=false"
+			)
+		}
 	}
 }
 

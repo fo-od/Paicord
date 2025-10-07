@@ -6,23 +6,24 @@
 //  Copyright © 2025 Lakhan Lothiyi.
 //
 
+import Collections
 import Foundation
 import PaicordLib
 
 @Observable
 class CurrentUserStore: DiscordDataStore {
 	// MARK: - Protocol Properties
-	var gateway: UserGatewayManager?
+	var gateway: GatewayStore?
 	var eventTask: Task<Void, Never>?
 
 	// MARK: - State Properties
 	var currentUser: DiscordUser?
 	var guilds: [GuildSnowflake: Guild] = [:]
-	var privateChannels: [ChannelSnowflake: DiscordChannel] = [:]
+	var privateChannels: OrderedDictionary<ChannelSnowflake, DiscordChannel> = [:]
 	var relationships: [DiscordRelationship] = []
 
 	// MARK: - Protocol Methods
-	func setGateway(_ gateway: UserGatewayManager?) {
+	func setGateway(_ gateway: GatewayStore?) {
 		cancelEventHandling()
 		self.gateway = gateway
 		if gateway != nil {
@@ -31,7 +32,7 @@ class CurrentUserStore: DiscordDataStore {
 	}
 
 	func setupEventHandling() {
-		guard let gateway = gateway else { return }
+		guard let gateway = gateway?.gateway else { return }
 
 		eventTask = Task { @MainActor in
 			for await event in await gateway.events {
@@ -56,15 +57,17 @@ class CurrentUserStore: DiscordDataStore {
 
 				case .relationshipRemove(let partialRelationship):
 					handleRelationshipRemove(partialRelationship)
-
 				case .channelCreate(let channel):
 					if channel.type == .dm || channel.type == .groupDm {
 						handlePrivateChannelCreate(channel)
 					}
-
 				case .channelDelete(let channel):
 					if channel.type == .dm || channel.type == .groupDm {
 						handlePrivateChannelDelete(channel)
+					}
+				case .messageCreate(let message):
+					if privateChannels[message.channel_id] != nil {
+						handleMessageCreate(message)
 					}
 
 				default:
@@ -82,14 +85,16 @@ class CurrentUserStore: DiscordDataStore {
 	// MARK: - Event Handlers
 	private func handleReady(_ readyData: Gateway.Ready) {
 		currentUser = readyData.user
-		guilds = readyData.guilds.reduce(into: [:]) { dict, guild in
-			dict[guild.id] = guild
-		}
-		privateChannels = readyData.private_channels.reduce(into: [:]) {
-			dict,
-			channel in
-			dict[channel.id] = channel
-		}
+
+		guilds = readyData.guilds.reduce(into: [:]) { $0[$1.id] = $1 }
+
+		privateChannels = readyData.private_channels
+			.sorted(by: {
+				$0.last_message_id ?? (try! .makeFake(date: .discordPast)) > $1
+					.last_message_id ?? (try! .makeFake(date: .discordPast))
+			})
+			.reduce(into: [:]) { $0[$1.id] = $1 }
+
 		relationships = readyData.relationships
 	}
 
@@ -140,6 +145,12 @@ class CurrentUserStore: DiscordDataStore {
 
 	private func handlePrivateChannelDelete(_ channel: DiscordChannel) {
 		privateChannels.removeValue(forKey: channel.id)
+	}
+
+	private func handleMessageCreate(_ message: Gateway.MessageCreate) {
+		guard var channel = privateChannels[message.channel_id] else { return }
+		channel.last_message_id = message.id
+		privateChannels.updateValueAndMoveToFront(channel, forKey: channel.id)
 	}
 
 	//	/// Updates the current user's presence

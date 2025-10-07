@@ -52,7 +52,7 @@ extension Guild {
 		self.stickers = new.stickers
 		self.premium_progress_bar_enabled = new.premium_progress_bar_enabled
 		self.`lazy` = new.`lazy`
-		self.hub_type = new.hub_type
+//		self.hub_type = new.hub_type
 		self.nsfw = new.nsfw
 		self.application_command_counts = new.application_command_counts
 		self.embedded_activities = new.embedded_activities
@@ -107,7 +107,7 @@ extension Gateway.GuildCreate {
 			nsfw_level: nsfw_level,
 			stickers: stickers,
 			premium_progress_bar_enabled: premium_progress_bar_enabled,
-			hub_type: hub_type,
+//			hub_type: hub_type,
 			nsfw: nsfw,
 			application_command_counts: application_command_counts,
 			embedded_activities: embedded_activities,

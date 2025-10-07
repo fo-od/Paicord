@@ -17,9 +17,9 @@ import SwiftUIX
 #endif
 
 @main
-struct PaiCordApp: App {
+struct PaicordApp: App {
 	let gatewayStore = GatewayStore.shared
-	var appState = PaicordAppState()
+	var appState = PaicordAppState.shared
 	var challenges = Challenges()
 
 	@Environment(\.userInterfaceIdiom) var idiom

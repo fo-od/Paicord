@@ -6,6 +6,7 @@ import Foundation
 public struct DiscordChannel: Sendable, Codable, Equatable {
 
 	/// https://discord.com/developers/docs/resources/channel#channel-object-channel-types
+	/// https://docs.discord.food/resources/channel#channel-type
 	@UnstableEnum<Int>
 	public enum Kind: Sendable, Codable {
 		case guildText  // 0
@@ -14,12 +15,14 @@ public struct DiscordChannel: Sendable, Codable, Equatable {
 		case groupDm  // 3
 		case guildCategory  // 4
 		case guildAnnouncement  // 5
+		case guildStore  // 6
 		case announcementThread  // 10
 		case publicThread  // 11
 		case privateThread  // 12
 		case guildStageVoice  // 13
 		case guildDirectory  // 14
 		case guildForum  // 15
+		case guildMedia  // 16
 		case __undocumented(Int)
 	}
 
@@ -58,10 +61,24 @@ public struct DiscordChannel: Sendable, Codable, Equatable {
 	}
 
 	/// https://discord.com/developers/docs/resources/channel#channel-object-channel-flags
+	/// https://docs.discord.food/resources/channel#channel-flags
 	@UnstableEnum<UInt>
 	public enum Flag: Sendable {
+		case guildFeedRemoved  // 0
 		case pinned  // 1
+		case activeChannelsRemoved  // 2
 		case requireTag  // 4
+		case spam  // 5
+		case isGuildResourceChannel  // 7
+		case clydeAI // 8
+		case scheduledForDeletion  // 9
+		case summariesDisabled  // 11
+		case isRoleSubscriptionTemplatePreviewChannel  // 13
+		case isBroadcasting  // 14
+		case hideMediaDownloadOptions  // 15
+		case isJoinRequestInterviewChannel // 16
+		case obfuscated // 17
+		case isModeratorReportChannel // 19
 		case __undocumented(UInt)
 	}
 
@@ -221,7 +238,7 @@ extension DiscordChannel {
 			self.message_reference = message_reference
 			self.flags = flags
 			self.referenced_message = referenced_message
-//			self.interaction_metadata = interaction_metadata
+			//			self.interaction_metadata = interaction_metadata
 			self.interaction = interaction
 			self.thread = thread
 			self.components = components
@@ -454,18 +471,18 @@ extension DiscordChannel {
 		}
 
 		/// https://discord.com/developers/docs/resources/channel#message-interaction-metadata-object-message-interaction-metadata-structure
-//		@_spi(UserInstallableApps)
-//		public struct InteractionMetadata: Sendable, Codable {
-//			public var id: InteractionSnowflake
-//			public var type: Interaction.Kind
-//			public var user: DiscordUser
-//			public var authorizing_integration_owners:
-//				[DiscordApplication.IntegrationKind: AnySnowflake]
-//			public var original_response_message_id: MessageSnowflake?
-//			public var interacted_message_id: MessageSnowflake?
-//			public var triggering_interaction_metadata:
-//				DereferenceBox<InteractionMetadata>?
-//		}
+		//		@_spi(UserInstallableApps)
+		//		public struct InteractionMetadata: Sendable, Codable {
+		//			public var id: InteractionSnowflake
+		//			public var type: Interaction.Kind
+		//			public var user: DiscordUser
+		//			public var authorizing_integration_owners:
+		//				[DiscordApplication.IntegrationKind: AnySnowflake]
+		//			public var original_response_message_id: MessageSnowflake?
+		//			public var interacted_message_id: MessageSnowflake?
+		//			public var triggering_interaction_metadata:
+		//				DereferenceBox<InteractionMetadata>?
+		//		}
 
 		public struct Call: Sendable, Codable, Equatable {
 			public var participants: [UserSnowflake]
@@ -496,8 +513,8 @@ extension DiscordChannel {
 		public var message_reference: MessageReference?
 		public var flags: IntBitField<Flag>?
 		public var referenced_message: DereferenceBox<Message>?
-//		@_spi(UserInstallableApps) @DecodeOrNil
-//		public var interaction_metadata: InteractionMetadata?
+		//		@_spi(UserInstallableApps) @DecodeOrNil
+		//		public var interaction_metadata: InteractionMetadata?
 		public var interaction: MessageInteraction?
 		public var thread: DiscordChannel?
 		public var components: [Interaction.ActionRow]?
@@ -541,8 +558,8 @@ extension DiscordChannel {
 		public var message_reference: DiscordChannel.Message.MessageReference?
 		public var flags: IntBitField<DiscordChannel.Message.Flag>?
 		public var referenced_message: DereferenceBox<PartialMessage>?
-//		@_spi(UserInstallableApps) @DecodeOrNil
-//		public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?
+		//		@_spi(UserInstallableApps) @DecodeOrNil
+		//		public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?
 		public var interaction: MessageInteraction?
 		public var thread: DiscordChannel?
 		public var components: [Interaction.ActionRow]?
@@ -650,7 +667,9 @@ public struct Embed: Sendable, Codable, Equatable, ValidatablePayload {
 		case __undocumented(String)
 	}
 
-	public enum DynamicURL: Sendable, Codable, ExpressibleByStringLiteral, Equatable {
+	public enum DynamicURL: Sendable, Codable, ExpressibleByStringLiteral,
+		Equatable
+	{
 		public typealias StringLiteralType = String
 
 		case exact(String)

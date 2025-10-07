@@ -183,7 +183,7 @@ public struct Gateway: Sendable, Codable {
 			case guildMembersChunk(GuildMembersChunk)
 			case requestGuildMembers(RequestGuildMembers)
 				
-				case updateGuildSubscriptions(UpdateGuildSubscriptions)
+			case updateGuildSubscriptions(UpdateGuildSubscriptions)
 
 			//			case guildPowerupEntitlementsCreate // TODO
 			//			case guildPowerupEntitlementsDelete // TODO
@@ -242,6 +242,8 @@ public struct Gateway: Sendable, Codable {
 			case messageReactionRemove(MessageReactionRemove)
 			case messageReactionRemoveAll(MessageReactionRemoveAll)
 			case messageReactionRemoveEmoji(MessageReactionRemoveEmoji)
+				
+			case requestLastMessages(RequestLastMessages)
 
 			case recentMentionDelete(RecentMentionDelete)
 			case lastMessages(LastMessages)

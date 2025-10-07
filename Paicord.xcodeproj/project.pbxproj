@@ -47,8 +47,8 @@
 		AA10971B2E64C181005BC3D2 /* PaicordApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1097122E64C181005BC3D2 /* PaicordApp.swift */; };
 		AA10971D2E64C18C005BC3D2 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10971C2E64C189005BC3D2 /* ChatView.swift */; };
 		AA1878F32E81A30C009C7E40 /* GuildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1878F22E81A305009C7E40 /* GuildView.swift */; };
-		AA1878F62E81A362009C7E40 /* DMsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1878F52E81A35F009C7E40 /* DMsView.swift */; };
-		AA1878F92E81FC1A009C7E40 /* FLEX in Frameworks */ = {isa = PBXBuildFile; platformFilters = (ios, xros, ); productRef = AA1878F82E81FC1A009C7E40 /* FLEX */; };
+		AA1878F92E81FC1A009C7E40 /* FLEX in Frameworks */ = {isa = PBXBuildFile; platformFilter = ios; productRef = AA1878F82E81FC1A009C7E40 /* FLEX */; };
+		AA5DC55A2E9482ED00D81EB5 /* MessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5DC5592E9482ED00D81EB5 /* MessageCell.swift */; };
 		AA9C81832E6660BE0086B1DA /* GuildButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9C81822E6660BE0086B1DA /* GuildButton.swift */; };
 		AA9C81862E66670E0086B1DA /* CornerRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9C81852E66670E0086B1DA /* CornerRadius.swift */; };
 		AA9C818C2E6702930086B1DA /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = AA9C818B2E6702930086B1DA /* SwiftUIIntrospect */; };
@@ -63,6 +63,7 @@
 		AABED5A42E7F4DAE005BDD63 /* GuildStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABED5A32E7F4DAE005BDD63 /* GuildStore.swift */; };
 		AABED5A62E7F514B005BDD63 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABED5A52E7F5148005BDD63 /* SettingsStore.swift */; };
 		AABED5A92E7FF982005BDD63 /* Merging.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABED5A82E7FF979005BDD63 /* Merging.swift */; };
+		AAD73EB62E93E29E00470158 /* DMsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD73EB52E93E29E00470158 /* DMsView.swift */; };
 		AADD58652E82A95B00CBC8B6 /* GuildScrollBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AADD58642E82A95100CBC8B6 /* GuildScrollBar.swift */; };
 		AAEEC71F2E65120000EB5FC9 /* TokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEEC71E2E6511F800EB5FC9 /* TokenStore.swift */; };
 		AAEEC7222E6515C400EB5FC9 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = AAEEC7212E6515C400EB5FC9 /* KeychainAccess */; };
@@ -104,7 +105,7 @@
 		AA1097122E64C181005BC3D2 /* PaicordApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaicordApp.swift; sourceTree = "<group>"; };
 		AA10971C2E64C189005BC3D2 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		AA1878F22E81A305009C7E40 /* GuildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildView.swift; sourceTree = "<group>"; };
-		AA1878F52E81A35F009C7E40 /* DMsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMsView.swift; sourceTree = "<group>"; };
+		AA5DC5592E9482ED00D81EB5 /* MessageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCell.swift; sourceTree = "<group>"; };
 		AA9C81822E6660BE0086B1DA /* GuildButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildButton.swift; sourceTree = "<group>"; };
 		AA9C81852E66670E0086B1DA /* CornerRadius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerRadius.swift; sourceTree = "<group>"; };
 		AAB9052F2E82FD8E00EA171B /* Conformances.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Conformances.swift; sourceTree = "<group>"; };
@@ -118,6 +119,7 @@
 		AABED5A32E7F4DAE005BDD63 /* GuildStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildStore.swift; sourceTree = "<group>"; };
 		AABED5A52E7F5148005BDD63 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
 		AABED5A82E7FF979005BDD63 /* Merging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Merging.swift; sourceTree = "<group>"; };
+		AAD73EB52E93E29E00470158 /* DMsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMsView.swift; sourceTree = "<group>"; };
 		AADD58642E82A95100CBC8B6 /* GuildScrollBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildScrollBar.swift; sourceTree = "<group>"; };
 		AAEEC71E2E6511F800EB5FC9 /* TokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenStore.swift; sourceTree = "<group>"; };
 		AAFD41372E92FA42002BC9BE /* Array+safe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+safe.swift"; sourceTree = "<group>"; };
@@ -205,6 +207,7 @@
 		57A55C552E7560BB005C8226 /* Guilds */ = {
 			isa = PBXGroup;
 			children = (
+				AAD73EB52E93E29E00470158 /* DMsView.swift */,
 				AAB905372E845A7000EA171B /* ChannelButton.swift */,
 				AADD58642E82A95100CBC8B6 /* GuildScrollBar.swift */,
 				AA1878F22E81A305009C7E40 /* GuildView.swift */,
@@ -337,12 +340,12 @@
 			path = Paicord;
 			sourceTree = "<group>";
 		};
-		AA1878F42E81A356009C7E40 /* DMs */ = {
+		AA5DC5582E9482E800D81EB5 /* Messages */ = {
 			isa = PBXGroup;
 			children = (
-				AA1878F52E81A35F009C7E40 /* DMsView.swift */,
+				AA5DC5592E9482ED00D81EB5 /* MessageCell.swift */,
 			);
-			path = DMs;
+			path = Messages;
 			sourceTree = "<group>";
 		};
 		AA9C817E2E665E010086B1DA /* iOS */ = {
@@ -356,7 +359,7 @@
 		AA9C81802E665E190086B1DA /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				AA1878F42E81A356009C7E40 /* DMs */,
+				AA5DC5582E9482E800D81EB5 /* Messages */,
 				57DA042D2E79DC4400DB4C7C /* Settings */,
 				57A4E7092E6B315700470131 /* Login */,
 				AA9C81842E6667050086B1DA /* Utilities */,
@@ -530,7 +533,6 @@
 				57F5AF4D2E7CB14A00AD5674 /* PaicordSheetsAlerts.swift in Sources */,
 				57E05C5D2E6CBCDC00B81AA7 /* GatewayStore.swift in Sources */,
 				57F5AF552E7CBDF400AD5674 /* MFAView.swift in Sources */,
-				AA1878F62E81A362009C7E40 /* DMsView.swift in Sources */,
 				5783AA942E6B8FD100F73F6D /* MeshGradient.swift in Sources */,
 				57A55C622E7563D6005C8226 /* Test.swift in Sources */,
 				57DA042A2E79894500DB4C7C /* ConnectionStateView.swift in Sources */,
@@ -545,7 +547,9 @@
 				AAFD41382E92FA43002BC9BE /* Array+safe.swift in Sources */,
 				57F5AF4F2E7CB14F00AD5674 /* RootView.swift in Sources */,
 				57A4E70B2E6B315F00470131 /* LoginView.swift in Sources */,
+				AAD73EB62E93E29E00470158 /* DMsView.swift in Sources */,
 				AABED59E2E7F463A005BDD63 /* ChannelStore.swift in Sources */,
+				AA5DC55A2E9482ED00D81EB5 /* MessageCell.swift in Sources */,
 				57F5AF532E7CBDD000AD5674 /* AccountPicker.swift in Sources */,
 				AAB905342E8334AC00EA171B /* SlideoverDoubleView.swift in Sources */,
 				57F5AF4B2E7CB13F00AD5674 /* AccountCommands.swift in Sources */,
