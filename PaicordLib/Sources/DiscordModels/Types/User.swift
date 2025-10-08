@@ -1,6 +1,44 @@
 /// https://discord.com/developers/docs/resources/user#user-object-user-structure
 public struct DiscordUser: Sendable, Codable, Equatable {
 
+	public init(
+		id: UserSnowflake,
+		username: String,
+		discriminator: String,
+		global_name: String? = nil,
+		avatar: String? = nil,
+		bot: Bool? = nil,
+		system: Bool? = nil,
+		mfa_enabled: Bool? = nil,
+		banner: String? = nil,
+		accent_color: DiscordColor? = nil,
+		locale: DiscordLocale? = nil,
+		verified: Bool? = nil,
+		email: String? = nil,
+		flags: IntBitField<Flag>? = nil,
+		premium_type: PremiumKind? = nil,
+		public_flags: IntBitField<Flag>? = nil,
+		avatar_decoration_data: AvatarDecoration? = nil
+	) {
+		self.id = id
+		self.username = username
+		self.discriminator = discriminator
+		self.global_name = global_name
+		self.avatar = avatar
+		self.bot = bot
+		self.system = system
+		self.mfa_enabled = mfa_enabled
+		self.banner = banner
+		self.accent_color = accent_color
+		self.locale = locale
+		self.verified = verified
+		self.email = email
+		self.flags = flags
+		self.premium_type = premium_type
+		self.public_flags = public_flags
+		self.avatar_decoration_data = avatar_decoration_data
+	}
+
 	/// https://discord.com/developers/docs/resources/user#user-object-premium-types
 	@UnstableEnum<Int>
 	public enum PremiumKind: Sendable, Codable {

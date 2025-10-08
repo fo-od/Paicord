@@ -54,6 +54,8 @@ struct SmallBaseplate: View {
 			NavigationStack {
 				if let currentChannelStore {
 					ChatView(vm: currentChannelStore)
+						.environment(currentGuildStore)
+						.environment(currentChannelStore)
 				} else {
 					Text(":3")
 						.font(.largeTitle)

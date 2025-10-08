@@ -6,7 +6,6 @@
 // Copyright © 2025 Lakhan Lothiyi.
 //
 
-import Combine
 import PaicordLib
 import SDWebImageSwiftUI
 @_spi(Advanced) import SwiftUIIntrospect
@@ -39,6 +38,7 @@ struct ChatView: View {
 								) < 300 && msg.referenced_message == nil
 
 							MessageCell(for: msg, inline: isInline)
+								.padding(.top, isInline ? 0 : 5)
 								.onAppear {
 									guard msg == vm.messages.values.last else { return }
 									self.isNearBottom = true
@@ -50,11 +50,6 @@ struct ChatView: View {
 						}
 					}
 					.scrollTargetLayout()
-					#if os(macOS)
-						.padding(10)  // macos doesnt seem to have padding around chat
-					#elseif os(iOS)
-						.padding(.bottom, 10)  // add padding at the bottom for ios
-					#endif
 				}
 				.defaultScrollAnchor(.bottom)
 				.scrollDismissesKeyboard(.interactively)
@@ -76,25 +71,36 @@ struct ChatView: View {
 					}
 				}
 			}
-
-			Divider()
-
+		}
+		.safeAreaInset(edge: .bottom) {
 			HStack {
 				TextField("Message", text: $text)
 					.textFieldStyle(.roundedBorder)
-				#if os(iOS)
-					.disabled(appState.chatOpen == false)
-				#endif
+					#if os(iOS)
+						.disabled(appState.chatOpen == false)
+					#endif
 					.onSubmit(sendMessage)
 				#if os(iOS)
-					Button("Send", action: sendMessage)
-						.buttonStyle(.borderedProminent)
+					if text.isEmpty == false {
+						Button(action: sendMessage) {
+							Image(systemName: "paperplane.fill")
+								.imageScale(.large)
+								.padding(5)
+								.foregroundStyle(.white)
+								.background(.primaryButton)
+								.clipShape(.circle)
+						}
+						.buttonStyle(.borderless)
+						.foregroundStyle(.primaryButton)
+						.transition(.move(edge: .trailing).combined(with: .opacity))
+					}
 				#endif
 			}
 			.padding(5)
 			.background(.regularMaterial)
 		}
 		.background(.tableBackground)
+		.animation(.default.speed(2), value: text.isEmpty)
 		#if os(iOS)
 			.toolbar {
 				ToolbarItem(placement: .topBarLeading) {
@@ -107,6 +113,7 @@ struct ChatView: View {
 			}
 		#endif
 		.toolbar {
+			#warning("make channel headers nicer")
 			ToolbarItem(placement: .navigation) {
 				if let name = vm.channel?.name {
 					Text(name)

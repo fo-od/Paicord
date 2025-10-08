@@ -46,10 +46,7 @@ class ChannelStore: DiscordDataStore {
 		guard let gateway = gateway?.gateway else { return }
 		Task { @MainActor in
 			// ig also fetch latest messages too
-			let res = try await gateway.client.listMessages(
-				channelId: channelId,
-				before: channel?.last_message_id
-			)
+			let res = try await gateway.client.listMessages(channelId: channelId)
 			do {
 				// ensure request was successful
 				try res.guardSuccess()
@@ -57,7 +54,7 @@ class ChannelStore: DiscordDataStore {
 				for message in messages.reversed() {
 					self.messages[message.id] = message
 				}
-				
+
 				// lastly request members if member data for any author is missing
 			} catch {
 				PaicordAppState.shared.error = res.asError()
@@ -66,8 +63,7 @@ class ChannelStore: DiscordDataStore {
 		eventTask = Task { @MainActor in
 			for await event in await gateway.events {
 				switch event.data {
-				case .resumed:
-					print("resumed")
+				// Channel updates
 				case .channelUpdate(let updatedChannel):
 					if updatedChannel.id == channelId {
 						handleChannelUpdate(updatedChannel)
@@ -76,51 +72,44 @@ class ChannelStore: DiscordDataStore {
 					if deletedChannel.id == channelId {
 						handleChannelDelete(deletedChannel)
 					}
-
+				// messages
 				case .messageCreate(let messageData):
 					if messageData.channel_id == channelId {
 						handleMessageCreate(messageData)
 					}
-
 				case .messageUpdate(let partialMessage):
 					if partialMessage.channel_id == channelId {
 						handleMessageUpdate(partialMessage)
 					}
-
 				case .messageDelete(let messageDelete):
 					if messageDelete.channel_id == channelId {
 						handleMessageDelete(messageDelete)
 					}
-
 				case .messageDeleteBulk(let bulkDelete):
 					if bulkDelete.channel_id == channelId {
 						handleMessageDeleteBulk(bulkDelete)
+					}
+				case .channelPinsUpdate(let pinsUpdate):
+					if pinsUpdate.channel_id == channelId {
+						handleChannelPinsUpdate(pinsUpdate)
 					}
 				//				case .messageReactionAdd(let reactionAdd):
 				//					if reactionAdd.channel_id == channelId {
 				//						handleMessageReactionAdd(reactionAdd)
 				//					}
-				//
 				//				case .messageReactionRemove(let reactionRemove):
 				//					if reactionRemove.channel_id == channelId {
 				//						handleMessageReactionRemove(reactionRemove)
 				//					}
-				//
 				//				case .messageReactionRemoveAll(let removeAll):
 				//					if removeAll.channel_id == channelId {
 				//						handleMessageReactionRemoveAll(removeAll)
 				//					}
-				//
+				// typing
 				case .typingStart(let typing):
 					if typing.channel_id == channelId {
 						handleTypingStart(typing)
 					}
-
-				case .channelPinsUpdate(let pinsUpdate):
-					if pinsUpdate.channel_id == channelId {
-						handleChannelPinsUpdate(pinsUpdate)
-					}
-
 				default:
 					break
 				}
@@ -158,6 +147,11 @@ class ChannelStore: DiscordDataStore {
 		if let userId = message.author?.id {
 			typingUsers.removeValue(forKey: userId)
 		}
+
+		// Update channel's last message id if we have the channel
+		guard var currentChannel = channel else { return }
+		currentChannel.last_message_id = message.id
+		channel = currentChannel
 	}
 
 	private func handleMessageUpdate(

@@ -128,7 +128,7 @@ public struct Gateway: Sendable, Codable {
 
 			case channelRecipientAdd(ChannelRecipientAdd)
 			case channelRecipientRemove(ChannelRecipientRemove)
-				
+
 			case channelUnreadUpdate(ChannelUnreadUpdate)
 
 			case consoleCommandUpdate(ConsoleCommandUpdate)  // TODO
@@ -157,7 +157,9 @@ public struct Gateway: Sendable, Codable {
 			case guildUpdate(Guild)
 			case guildDelete(UnavailableGuild)
 
-			case guildApplicationCommandIndexUpdate(GuildApplicationCommandIndexUpdate)
+			case guildApplicationCommandIndexUpdate(
+				GuildApplicationCommandIndexUpdate
+			)
 			case guildAppliedBoostsUpdate(Guild.PremiumGuildSubscription)
 			case guildAuditLogEntryCreate(AuditLog.Entry)
 
@@ -182,7 +184,7 @@ public struct Gateway: Sendable, Codable {
 
 			case guildMembersChunk(GuildMembersChunk)
 			case requestGuildMembers(RequestGuildMembers)
-				
+
 			case updateGuildSubscriptions(UpdateGuildSubscriptions)
 
 			//			case guildPowerupEntitlementsCreate // TODO
@@ -198,7 +200,9 @@ public struct Gateway: Sendable, Codable {
 			case guildScheduledEventExceptionCreate(GuildScheduledEventException)
 			case guildScheduledEventExceptionUpdate(GuildScheduledEventException)
 			case guildScheduledEventExceptionDelete(GuildScheduledEventException)
-			case guildScheduledEventExceptionsDelete(GuildScheduledEventExceptionsDelete)
+			case guildScheduledEventExceptionsDelete(
+				GuildScheduledEventExceptionsDelete
+			)
 
 			case guildScheduledEventUserAdd(GuildScheduledEventUser)
 			case guildScheduledEventUserRemove(GuildScheduledEventUser)
@@ -221,7 +225,8 @@ public struct Gateway: Sendable, Codable {
 			case interactionSuccess(InteractionSuccess)
 
 			case applicationCommandAutocompleteResponse(
-				ApplicationCommandAutocomplete)
+				ApplicationCommandAutocomplete
+			)
 
 			case interactionModalCreate(InteractionModalCreate)
 			case interactionIFrameModalCreate(InteractionIFrameModalCreate)
@@ -242,11 +247,11 @@ public struct Gateway: Sendable, Codable {
 			case messageReactionRemove(MessageReactionRemove)
 			case messageReactionRemoveAll(MessageReactionRemoveAll)
 			case messageReactionRemoveEmoji(MessageReactionRemoveEmoji)
-				
+
 			case requestLastMessages(RequestLastMessages)
+			case lastMessages(LastMessages)
 
 			case recentMentionDelete(RecentMentionDelete)
-			case lastMessages(LastMessages)
 
 			case notificationSettingsUpdate(NotificationSettings)
 
@@ -277,7 +282,8 @@ public struct Gateway: Sendable, Codable {
 
 			case autoModerationActionExecution(AutoModerationActionExecution)
 			case autoModerationMentionRaidDetection(
-				AutoModerationMentionRaidDetection)
+				AutoModerationMentionRaidDetection
+			)
 
 			case stageInstanceCreate(StageInstance)
 			case stageInstanceDelete(StageInstance)

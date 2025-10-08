@@ -63,6 +63,10 @@ final class GatewayStore {
 	/// Login with a specific token
 	func logIn(as account: TokenStore.AccountData) async {
 		await disconnectIfNeeded()
+		guard !ProcessInfo.isRunningInXcodePreviews else {
+			// don't connect from previews
+			return
+		}
 		gateway = await UserGatewayManager(
 			token: account.token,
 			captchaCallback: captchaCallback,
@@ -86,7 +90,7 @@ final class GatewayStore {
 			guard let gateway else { return }
 			for await event in await gateway.events {
 				switch event.data {
-				
+
 				default: break
 				}
 			}
@@ -121,7 +125,9 @@ final class GatewayStore {
 	var settings = SettingsStore()
 
 	private var channels: [ChannelSnowflake: ChannelStore] = [:]
-	func getChannelStore(for id: ChannelSnowflake, from guild: GuildStore? = nil) -> ChannelStore {
+	func getChannelStore(for id: ChannelSnowflake, from guild: GuildStore? = nil)
+		-> ChannelStore
+	{
 		if let store = channels[id] {
 			return store
 		} else {
@@ -142,15 +148,15 @@ final class GatewayStore {
 				Task {
 					await gateway?.updateGuildSubscriptions(
 						payload:
-								.init(subscriptions: [
-									id: .init(
-										typing: true,
-										activities: false,
-										threads: false,
-										channels: [:],
-										thread_member_lists: nil
-									)
-								])
+							.init(subscriptions: [
+								id: .init(
+									typing: true,
+									activities: false,
+									threads: false,
+									channels: [:],
+									thread_member_lists: nil
+								)
+							])
 					)
 					print("Subscribed to guild \(id)")
 				}

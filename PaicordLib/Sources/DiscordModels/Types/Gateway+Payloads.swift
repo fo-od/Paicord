@@ -943,8 +943,8 @@ extension Gateway {
 	
 	/// https://docs.discord.food/topics/gateway-events#request-last-messages-structure
 	public struct RequestLastMessages: Sendable, Codable {
-		public var guild_id: GuildSnowflake?
-		
+		public var guild_id: GuildSnowflake
+		public var channel_ids: [ChannelSnowflake]
 	}
 
 	/// https://discord.com/developers/docs/topics/gateway-events#client-status-object

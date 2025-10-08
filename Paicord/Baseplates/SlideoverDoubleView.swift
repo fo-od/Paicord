@@ -4,7 +4,7 @@
 //
 //  Created by Lakhan Lothiyi on 23/09/2025.
 //  Copyright © 2025 Lakhan Lothiyi.
-//  
+//
 
 import SwiftUIX
 
@@ -13,9 +13,10 @@ struct SlideoverDoubleView<Primary: View, Secondary: View>: View {
 	var primary: Primary
 	var secondary: Secondary
 
-	private let animationDuration: Double = 0.2
+	private let animation: Animation = .easeOut(duration: 0.2)
 	@State private var dragOffset: CGFloat = 0
-	@State var width: CGFloat = 0
+	@ViewStorage var width: CGFloat = 0
+	@ViewStorage private var gestureDirectionLocked: Bool? = nil
 
 	@Environment(\.slideoverDisabled) var slideoverDisabled
 
@@ -33,7 +34,7 @@ struct SlideoverDoubleView<Primary: View, Secondary: View>: View {
 		ZStack {
 			primary
 				.id("primary")
-			
+
 			// fixes some swift 6 warnings
 			let swap = swap
 			let dragOffset = dragOffset
@@ -41,7 +42,8 @@ struct SlideoverDoubleView<Primary: View, Secondary: View>: View {
 				.background(.background)
 				.shadow(radius: 10)
 				.visualEffect { vs, proxy in
-					return vs
+					return
+						vs
 						.offset(x: swap ? dragOffset : proxy.size.width + 10 + dragOffset)
 				}
 				.id("secondary")
@@ -49,51 +51,71 @@ struct SlideoverDoubleView<Primary: View, Secondary: View>: View {
 		.onGeometryChange(for: CGFloat.self, of: { $0.size.width }) {
 			self.width = $0
 		}
-		.gesture(
-			DragGesture()
-				.onChanged { drag in
-					guard !slideoverDisabled else { return }
-					let translation = drag.translation.width
-
-					if swap {
-						self.dragOffset = translation < 0 ? 0 : translation
-					} else {
-						self.dragOffset = translation
-					}
-				}
-				.onEnded { drag in
-					guard !slideoverDisabled else {
-						swap = false
-						return
-					}
-					let translation = drag.translation.width
-					let velocity = drag.velocity.width
-
-					let shouldSwap: Bool = {
-						if abs(velocity) > 600 { return velocity < 0 }
-						if abs(translation) > self.width / 2 { return translation < 0 }
-						return swap
-					}()
-
-					withAnimation(.easeOut(duration: animationDuration)) {
-						swap = shouldSwap
-						dragOffset = 0
-					}
-				}
-		)
+		.simultaneousGesture(gesture)  // allow dragging over child views like buttons etc
 		.onChange(of: swap) {
-			withAnimation(.easeOut(duration: animationDuration)) {
+			withAnimation(animation) {
 				dragOffset = 0
 			}
 		}
 		.onChange(of: slideoverDisabled) {
 			if slideoverDisabled {
-				withAnimation(.easeOut(duration: animationDuration)) {
+				withAnimation(animation) {
 					swap = false
 					dragOffset = 0
 				}
 			}
 		}
+	}
+
+	var gesture: some Gesture {
+		DragGesture()
+			.onChanged { drag in
+				guard !slideoverDisabled else { return }
+
+				let translation = drag.translation
+				let horizontal = translation.width
+				let vertical = translation.height
+
+				// decide drag direction
+				if gestureDirectionLocked == nil {
+					if abs(horizontal) > 10 || abs(vertical) > 10 {
+						gestureDirectionLocked = abs(horizontal) > abs(vertical)
+					} else {
+						return  // too small to decide yet
+					}
+				}
+
+				guard gestureDirectionLocked == true else { return }
+
+				if swap {
+					dragOffset = horizontal < 0 ? 0 : horizontal
+				} else {
+					dragOffset = horizontal
+				}
+			}
+			.onEnded { drag in
+				defer { gestureDirectionLocked = nil }  // reset lock
+				guard !slideoverDisabled else {
+					swap = false
+					return
+				}
+
+				guard gestureDirectionLocked == true else { return }
+
+				let translation = drag.translation.width
+				let velocity = drag.velocity.width
+
+				let shouldSwap: Bool = {
+					if abs(velocity) > 600 { return velocity < 0 }
+					if abs(translation) > width / 2 { return translation < 0 }
+					return swap
+				}()
+
+				withAnimation(animation) {
+					swap = shouldSwap
+					dragOffset = 0
+				}
+			}
 	}
 }
 
