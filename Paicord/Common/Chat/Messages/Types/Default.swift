@@ -66,7 +66,7 @@ extension MessageCell {
     @ViewBuilder
     var userAndMessage: some View {
       VStack(spacing: 2) {
-        HStack(alignment: .bottom) {
+        HStack(alignment: .center) {
           MessageAuthor.Username(  // username line
             message: message,
             guildStore: guildStore,

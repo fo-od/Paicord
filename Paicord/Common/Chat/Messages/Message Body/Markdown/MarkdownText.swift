@@ -828,7 +828,7 @@ extension Text {
   @Previewable @State var profileOpen: Bool = false
   @Previewable @State var avatarAnimated: Bool = false
   
-  var message: DiscordChannel.Message = .init(
+  let message: DiscordChannel.Message = .init(
     id: try! .makeFake(),
     channel_id: try! .makeFake(),
     author: DiscordUser(

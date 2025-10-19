@@ -12,18 +12,17 @@ import SwiftUI
 // Markdown VM Helper
 
 extension MarkdownRendererVM {
-  private static let _emojiProviderRegistered: Void = {
-    NSTextAttachment.registerViewProviderClass(
-      EmojiAttachmentViewProvider.self,
-      forFileType: "public.url"
-    )
-  }()
+  #if os(iOS)
+    private static let _emojiProviderRegistered: Void = {
+      NSTextAttachment.registerViewProviderClass(
+        EmojiAttachmentViewProvider.self,
+        forFileType: "public.url"
+      )
+    }()
+  #endif
 
   // TODO: replace with emoji type
   func makeEmojiAttachment(url: URL, copyText: String) -> NSAttributedString {
-    // ensure registration
-    _ = Self._emojiProviderRegistered
-
     #if os(macOS)
       let attachment = NSTextAttachment()
       attachment.attachmentCell = EmojiAttachmentCell(
@@ -31,7 +30,9 @@ extension MarkdownRendererVM {
         copyText: copyText
       )  // textkit1
     #elseif os(iOS)
-      // textkit2
+      // textkit2? but somehow the view is made to use textkit1 compatibility mode?
+      // ensure registration
+      _ = Self._emojiProviderRegistered
       let urlData = try? NSKeyedArchiver.archivedData(
         withRootObject: url,
         requiringSecureCoding: false

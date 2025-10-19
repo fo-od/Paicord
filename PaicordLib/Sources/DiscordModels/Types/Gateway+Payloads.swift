@@ -1644,7 +1644,7 @@ extension Gateway {
 		public var type: DiscordRelationship.Kind
 		public var nickname: String?
 		public var stranger_request: Bool?
-		public var user_ignored: Bool
+		public var user_ignored: Bool?
 		public var since: DiscordTimestamp?
 	}
 
