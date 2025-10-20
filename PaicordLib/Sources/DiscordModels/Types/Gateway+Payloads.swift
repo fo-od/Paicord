@@ -1105,12 +1105,14 @@ extension Gateway {
       guild_id: GuildSnowflake? = nil,
       status: Status,
       activities: [Activity],
+      hidden_activities: [Activity] = [],
       client_status: ClientStatus
     ) {
       self.user = user
       self.guild_id = guild_id
       self.status = status
       self.activities = activities
+      self.hidden_activities = hidden_activities
       self.client_status = client_status
     }
 
@@ -1118,6 +1120,7 @@ extension Gateway {
     public var guild_id: GuildSnowflake?
     public var status: Status
     public var activities: [Activity]
+    public var hidden_activities: [Activity]
     public var client_status: ClientStatus
   }
 
@@ -1691,7 +1694,7 @@ extension Gateway {
   public struct Session: Sendable, Codable {
     public var session_id: String
     public var client_info: ClientInfo
-    public var status: String
+    public var status: Status
     public var activities: [Activity]
     public var hidden_activities: [Activity]
     public var active: Bool?

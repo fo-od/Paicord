@@ -23,9 +23,11 @@ extension Snowflake: @retroactive Identifiable {
 
 extension DiscordChannel.Message: @retroactive Identifiable {}
 
-// sadly i need to add this conformance to the declaration itself. im not writing this manually.
-//extension DiscordChannel.Message: @retroactive Equatable {
-//	public static func == (lhs: DiscordModels.DiscordChannel.Message, rhs: DiscordModels.DiscordChannel.Message) -> Bool {
-//		return lhs.id == rhs.id && lhs.content == rhs.content
-//	}
-//}
+protocol ActivityData {
+  var status: Gateway.Status { get }
+  var activities: [Gateway.Activity] { get }
+  var hidden_activities: [Gateway.Activity] { get }
+}
+
+extension Gateway.PresenceUpdate: ActivityData {}
+extension Gateway.Session: ActivityData {}

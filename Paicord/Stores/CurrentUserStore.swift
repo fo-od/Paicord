@@ -23,6 +23,7 @@ class CurrentUserStore: DiscordDataStore {
   var relationships: [UserSnowflake: DiscordRelationship] = [:]
   var presences: [UserSnowflake: Gateway.PresenceUpdate] = [:]
   var users: [UserSnowflake: PartialUser] = [:]
+  var sessions: [Gateway.Session] = []
 
   // MARK: - Protocol Methods
   func setGateway(_ gateway: GatewayStore?) {
@@ -67,6 +68,8 @@ class CurrentUserStore: DiscordDataStore {
           }
         case .presenceUpdate(let presence):
           handlePresenceUpdate(presence)
+        case .sessionReplace(let sessionReplace):
+          self.sessions = sessionReplace
         default:
           break
         }
@@ -81,6 +84,7 @@ class CurrentUserStore: DiscordDataStore {
 
   // MARK: - Event Handlers
   private func handleReady(_ readyData: Gateway.Ready) {
+    sessions = readyData.sessions
     currentUser = readyData.user
 
     guilds = readyData.guilds.reduce(into: [:]) { $0[$1.id] = $1 }
@@ -154,7 +158,7 @@ class CurrentUserStore: DiscordDataStore {
     channel.last_message_id = message.id
     privateChannels.updateValueAndMoveToFront(channel, forKey: channel.id)
   }
-  
+
   private func handlePresenceUpdate(_ presence: Gateway.PresenceUpdate) {
     presences[presence.user.id] = presence
     users[presence.user.id] = presence.user

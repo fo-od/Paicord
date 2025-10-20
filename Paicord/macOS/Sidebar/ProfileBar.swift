@@ -20,12 +20,14 @@ struct ProfileBar: View {
 
   var body: some View {
     HStack {
-      #warning("replace with avatar presence view of some sort")
-      AnimatedImage(url: profileURL(animated: true))
-        .resizable()
-        .scaledToFit()
+      if let user = gw.user.currentUser {
+        Profile.AvatarWithPresence(
+          member: nil,
+          user: user,
+          hideOffline: false
+        )
         .maxHeight(40)
-        .clipShape(.circle)
+      }
 
       VStack(alignment: .leading) {
         Text(
@@ -89,4 +91,3 @@ struct ProfileBar: View {
     }
   }
 }
-

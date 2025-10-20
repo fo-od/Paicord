@@ -59,29 +59,36 @@ enum Profile {
     @Environment(GatewayStore.self) var gw
     let member: Guild.PartialMember?
     let user: DiscordUser
-    let testingPresence: Gateway.PresenceUpdate?
+    var hideOffline: Bool
 
     var body: some View {
       GeometryReader { geo in
         let size = min(geo.size.width, geo.size.height)
-        let dotSize = size * 0.28
+        let dotSize = size * 0.25
+        let inset = dotSize * 0.55
+
         ZStack(alignment: .bottomTrailing) {
           Avatar(member: member, user: user)
-            .clipShape(
+            .reverseMask(alignment: .bottomTrailing) {
               Circle()
-                .path(in: CGRect(origin: .zero, size: geo.size))
-                .subtracting(
-                  Circle()
-                    .path(in: CGRect(
-                      x: geo.size.width - dotSize * 1.1,
-                      y: geo.size.height - dotSize * 1.1,
-                      width: dotSize,
-                      height: dotSize
-                    ))
+                .frame(width: dotSize * 1.5, height: dotSize * 1.5)
+                .position(
+                  x: geo.size.width - inset,
+                  y: geo.size.height - inset
                 )
-            )
-
-          if let presence = testingPresence ?? gw.user.presences[user.id] {
+            }
+          let presence: ActivityData? = {
+            if user.id == gw.user.currentUser?.id,
+              let session = gw.user.sessions.first(where: {
+                $0.session_id == "all"
+              }) ?? gw.user.sessions.first
+            {
+              return session
+            } else {
+              return gw.user.presences[user.id]
+            }
+          }()
+          if let presence {
             let color: Color = {
               switch presence.status {
               case .online: return .init(hexadecimal6: 0x42a25a)
@@ -91,11 +98,25 @@ enum Profile {
               }
             }()
 
-            Circle()
-              .fill(color)
-              .frame(width: dotSize, height: dotSize)
-              .offset(x: -dotSize * 0.15, y: -dotSize * 0.15)
-              .shadow(radius: dotSize * 0.1)
+            Group {
+              switch presence.status {
+              case .online:
+                StatusIndicatorShapes.OnlineShape()
+              case .afk:
+                StatusIndicatorShapes.IdleShape()
+              case .doNotDisturb:
+                StatusIndicatorShapes.DNDShape()
+              default:
+                StatusIndicatorShapes.InvisibleShape()
+                  .hidden(hideOffline)
+              }
+            }
+            .foregroundStyle(color)
+            .frame(width: dotSize, height: dotSize)
+            .position(
+              x: geo.size.width - inset,
+              y: geo.size.height - inset
+            )
           }
         }
         .frame(width: geo.size.width, height: geo.size.height)
@@ -151,61 +172,75 @@ enum Profile {
   }
 }
 
-#Preview {
-  @Previewable @State var width: CGFloat = 100
-  @Previewable @State var height: CGFloat = 100
-  
-  VStack {
-    Profile.AvatarWithPresence(
-      member: nil,
-      user: DiscordUser(
-        id: UserSnowflake("381538809180848128"),
-        username: "llsc12",
-        discriminator: "0",
-        global_name: nil,
-        avatar: "df71b3f223666fd8331c9940c6f7cbd9",
-        bot: false,
-        system: false,
-        mfa_enabled: true,
-        banner: nil,
-        accent_color: nil,
-        locale: nil,
-        verified: true,
-        email: nil,
-        flags: .init(rawValue: 4_194_352),
-        premium_type: DiscordUser.PremiumKind.none,
-        public_flags: .init(rawValue: 4_194_304),
-        collectibles: .init(
-          nameplate: .init(
-            asset: "nameplates/nameplates_v3/bonsai/",
-            sku_id: .init("1382845914225442886"),
-            label: "COLLECTIBLES_NAMEPLATES_VOL_3_BONSAI_A11Y",
-            palette: .bubble_gum,
-            expires_at: nil
-          ),
-        ),
-        avatar_decoration_data: nil
-      ),
-      testingPresence: Gateway.PresenceUpdate(
-        user: PartialUser(id: UserSnowflake("381538809180848128")),
-        status: .online,
-        activities: [],
-        client_status: Gateway.ClientStatus(
-          desktop: nil,
-          mobile: nil,
-          web: nil,
-          embedded: nil
-        )
-      )
-    )
-    .frame(width: width, height: height)
-    .environment(GatewayStore())
-    
-    Slider(value: $width, in: 50...300) {
-      Text("Width")
+enum StatusIndicatorShapes {
+  struct OnlineShape: View {
+    var body: some View {
+      Circle()
     }
-    Slider(value: $height, in: 50...300) {
-      Text("Height")
+  }
+  struct IdleShape: View {
+    var body: some View {
+      GeometryReader { geo in
+        let size = min(geo.size.width, geo.size.height)
+        let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
+        let radius = size / 2
+
+        let cutoutRadius = radius * 0.65
+        let cutoutCenter = CGPoint(
+          x: geo.size.width - radius * 1.5,
+          y: geo.size.height - radius * 1.4
+        )
+
+        Circle()
+          .frame(width: radius * 2, height: radius * 2)
+          .position(center)
+          .reverseMask {
+            Circle()
+              .frame(width: cutoutRadius * 2, height: cutoutRadius * 2)
+              .position(cutoutCenter)
+          }
+      }
+      .aspectRatio(1, contentMode: .fit)
+    }
+  }
+  struct DNDShape: View {
+    var body: some View {
+      GeometryReader { geo in
+        let size = min(geo.size.width, geo.size.height)
+        let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
+        let radius = size / 2
+
+        let capsuleWidth = size * 0.6
+        let capsuleHeight = size * 0.18
+        let capsuleCenter = center
+
+        Circle()
+          .frame(width: radius * 2, height: radius * 2)
+          .position(center)
+          .reverseMask {
+            RoundedRectangle(cornerRadius: capsuleHeight / 2)
+              .frame(width: capsuleWidth, height: capsuleHeight)
+              .position(x: capsuleCenter.x, y: capsuleCenter.y)
+          }
+      }
+      .aspectRatio(1, contentMode: .fit)
+    }
+  }
+  struct InvisibleShape: View {
+    var body: some View {
+      GeometryReader { geo in
+        let size = min(geo.size.width, geo.size.height)
+        let radius = size / 2
+        let cutoutRadius = radius * 0.5
+
+        Circle()
+          .frame(width: radius * 2, height: radius * 2)
+          .reverseMask {
+            Circle()
+              .frame(width: cutoutRadius * 2, height: cutoutRadius * 2)
+          }
+      }
+      .aspectRatio(1, contentMode: .fit)
     }
   }
 }

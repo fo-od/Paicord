@@ -25,8 +25,12 @@ struct ChannelButton: View {
       textChannelButton { hovered in
         HStack {
           if let user = channel.recipients?.first {
-            Profile.Avatar(member: nil, user: user)
-              .padding(2)
+            Profile.AvatarWithPresence(
+              member: nil,
+              user: user,
+              hideOffline: false
+            )
+            .padding(2)
           }
           Text(
             channel.name ?? channel.recipients?.map({
