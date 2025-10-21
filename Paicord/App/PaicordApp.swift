@@ -57,6 +57,7 @@ struct PaicordApp: App {
       Settings {
         SettingsView()
           .environment(gatewayStore)
+          .environment(appState)
       }
     #endif
   }

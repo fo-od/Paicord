@@ -73,21 +73,4 @@ struct ProfileBar: View {
     }
     .clipped()
   }
-
-  func profileURL(animated: Bool) -> URL? {
-    if let id = gw.user.currentUser?.id,
-      let avatar = gw.user.currentUser?.avatar
-    {
-      return URL(
-        string: CDNEndpoint.userAvatar(userId: id, avatar: avatar).url
-          + "?size=128&animated=\(animated.description)"
-      )
-    } else {
-      let discrim = gw.user.currentUser?.discriminator ?? "0"
-      return URL(
-        string: CDNEndpoint.defaultUserAvatar(discriminator: discrim).url
-          + "?size=128"
-      )
-    }
-  }
 }

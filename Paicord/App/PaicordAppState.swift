@@ -68,6 +68,13 @@ final class PaicordAppState {
       self.selectedChannel = nil
     }
   }
+  
+  func resetStore() {
+    selectedGuild = nil
+    selectedChannel = nil
+    rawPrevSelectedChannels = [:]
+    savePrevSelectedChannels()
+  }
 
   // MARK: - Persistence Helpers
 

@@ -47,6 +47,7 @@ final class GatewayStore {
     guard !([.stopped, .noConnection].contains(state)) else { return }
     await gateway?.disconnect()
     eventTask?.cancel()
+    eventTask = nil
   }
 
   /// Connects to the gateway if it is not already connected
@@ -120,6 +121,7 @@ final class GatewayStore {
     channels = [:]
     guilds = [:]
     subscribedGuilds = []
+    PaicordAppState.shared.resetStore()
   }
 
   // MARK: - Data Stores

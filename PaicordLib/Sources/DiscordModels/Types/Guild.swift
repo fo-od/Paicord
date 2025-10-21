@@ -68,7 +68,8 @@ public struct Guild: Sendable, Codable {
 
 		public var user: DiscordUser?
 		public var nick: String?
-		public var avatar: String?
+    public var avatar: String?
+		public var banner: String?
 		public var roles: [RoleSnowflake]
 		public var joined_at: DiscordTimestamp
 		public var premium_since: DiscordTimestamp?
@@ -420,7 +421,8 @@ extension Guild {
 		
 		public var user: DiscordUser?
 		public var nick: String?
-		public var avatar: String?
+    public var avatar: String?
+		public var banner: String?
 		public var roles: [RoleSnowflake]?
 		public var joined_at: DiscordTimestamp?
 		public var premium_since: DiscordTimestamp?

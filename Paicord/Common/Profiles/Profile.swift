@@ -67,27 +67,31 @@ enum Profile {
         let dotSize = size * 0.25
         let inset = dotSize * 0.55
 
+        let presence: ActivityData? = {
+          if user.id == gw.user.currentUser?.id,
+            let session = gw.user.sessions.last
+          {
+            return session
+          } else {
+            return gw.user.presences[user.id]
+          }
+        }()
+
         ZStack(alignment: .bottomTrailing) {
           Avatar(member: member, user: user)
             .reverseMask(alignment: .bottomTrailing) {
-              Circle()
-                .frame(width: dotSize * 1.5, height: dotSize * 1.5)
-                .position(
-                  x: geo.size.width - inset,
-                  y: geo.size.height - inset
-                )
+              if ([Gateway.Status.offline, .invisible].contains(
+                presence?.status ?? .offline
+              ) && hideOffline) == false {
+                Circle()
+                  .frame(width: dotSize * 1.5, height: dotSize * 1.5)
+                  .position(
+                    x: geo.size.width - inset,
+                    y: geo.size.height - inset
+                  )
+              }
             }
-          let presence: ActivityData? = {
-            if user.id == gw.user.currentUser?.id,
-              let session = gw.user.sessions.first(where: {
-                $0.session_id == "all"
-              }) ?? gw.user.sessions.first
-            {
-              return session
-            } else {
-              return gw.user.presences[user.id]
-            }
-          }()
+
           if let presence {
             let color: Color = {
               switch presence.status {
@@ -117,6 +121,15 @@ enum Profile {
               x: geo.size.width - inset,
               y: geo.size.height - inset
             )
+          } else {
+            StatusIndicatorShapes.InvisibleShape()
+              .foregroundStyle(Color.init(hexadecimal6: 0x82838b))
+              .frame(width: dotSize, height: dotSize)
+              .position(
+                x: geo.size.width - inset,
+                y: geo.size.height - inset
+              )
+              .hidden(hideOffline)
           }
         }
         .frame(width: geo.size.width, height: geo.size.height)

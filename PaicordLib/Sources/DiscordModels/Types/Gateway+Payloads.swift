@@ -348,7 +348,7 @@ extension Gateway {
 
   /// https://discord.com/developers/docs/topics/gateway-events#update-presence-status-types
   @UnstableEnum<String>
-  public enum Status: Sendable, Codable {
+  public enum Status: Sendable, Codable, Equatable {
     case online  // "online"
     case doNotDisturb  // "dnd"
     case afk  // "idle"

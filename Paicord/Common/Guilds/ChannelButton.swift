@@ -42,7 +42,7 @@ struct ChannelButton: View {
         .frame(height: 38)
         .padding(4)
         .background {
-          if hovered,
+          if hovered || appState.selectedChannel == channel.id,
             let nameplate = channel.recipients?.first?.collectibles?.nameplate
           {
             Profile.NameplateView(nameplate: nameplate)
@@ -142,6 +142,16 @@ struct ChannelButton: View {
           Group {
             if hovered {
               Color.gray.opacity(0.2)
+            } else {
+              Color.clear
+            }
+          }
+          .clipShape(.rounded)
+        )
+        .background(
+          Group {
+            if appState.selectedChannel == channel.id {
+              Color.gray.opacity(0.08)
             } else {
               Color.clear
             }

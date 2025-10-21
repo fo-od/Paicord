@@ -27,7 +27,9 @@ extension MessageCell {
         }
 
         // Embeds
-        // TODO: Embeds
+        if !message.embeds.isEmpty {
+          EmbedsView(message: message, embeds: message.embeds)
+        }
 
         // Stickers
         if let stickers = message.sticker_items, !stickers.isEmpty {
