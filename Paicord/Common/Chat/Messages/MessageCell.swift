@@ -20,17 +20,17 @@ struct MessageCell: View {
 
   var message: DiscordChannel.Message
   var priorMessage: DiscordChannel.Message?
-  let guild: GuildStore?
+  var channelStore: ChannelStore
   @State var cellHighlighted = false
 
   init(
     for message: DiscordChannel.Message,
     prior: DiscordChannel.Message? = nil,
-    guild: GuildStore? = nil
+    channel: ChannelStore
   ) {
     self.message = message
     self.priorMessage = prior
-    self.guild = guild
+    self.channelStore = channel
   }
 
   var body: some View {
@@ -57,11 +57,11 @@ struct MessageCell: View {
         DefaultMessage(
           message: message,
           priorMessage: priorMessage,
-          guildStore: guild,
+          channelStore: channelStore,
           inline: inline,
         )
       case .chatInputCommand:
-        ChatInputCommandMessage(message: message, guildStore: guild)
+        ChatInputCommandMessage(message: message, channelStore: channelStore)
       default:
         HStack {
           AvatarBalancing()
@@ -148,6 +148,7 @@ struct MessageCell: View {
       guild_id: nil,
       member: nil
     ),
-    prior: nil
+    prior: nil,
+    channel: .init(id: try! .makeFake())
   )
 }

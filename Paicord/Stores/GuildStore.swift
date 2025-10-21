@@ -21,8 +21,6 @@ class GuildStore: DiscordDataStore {
   var channels: [ChannelSnowflake: DiscordChannel] = [:]
   var members: [UserSnowflake: Guild.PartialMember] = [:]
   var roles: [RoleSnowflake: Role] = [:]
-  var emojis: [EmojiSnowflake: Emoji] = [:]
-  var stickers: [StickerSnowflake: Sticker] = [:]
   var presences: [UserSnowflake: Gateway.PresenceUpdate] = [:]
   var voiceStates: [UserSnowflake: VoiceState] = [:]
 
@@ -41,18 +39,6 @@ class GuildStore: DiscordDataStore {
     // roles
     guild.roles.forEach { role in
       roles[role.id] = role
-    }
-
-    // emojis
-    guild.emojis.forEach { emoji in
-      if let id = emoji.id {
-        emojis[id] = emoji
-      }
-    }
-
-    // stickers
-    guild.stickers?.forEach { sticker in
-      stickers[sticker.id] = sticker
     }
 
     // members (usually the connected user only)
@@ -138,16 +124,6 @@ class GuildStore: DiscordDataStore {
             handleGuildRoleDelete(roleDelete)
           }
 
-        case .guildEmojisUpdate(let emojisUpdate):
-          if emojisUpdate.guild_id == guildId {
-            handleGuildEmojisUpdate(emojisUpdate)
-          }
-
-        case .guildStickersUpdate(let stickersUpdate):
-          if stickersUpdate.guild_id == guildId {
-            handleGuildStickersUpdate(stickersUpdate)
-          }
-
         case .presenceUpdate(let presence):
           if presence.guild_id == guildId {
             handlePresenceUpdate(presence)
@@ -180,15 +156,6 @@ class GuildStore: DiscordDataStore {
     for role in guildRoles {
       roles[role.id] = role
     }
-
-    // Update cached emojis
-    let guildEmojis = updatedGuild.emojis
-    emojis.removeAll()
-    for emoji in guildEmojis {
-      if let id = emoji.id {
-        emojis[id] = emoji
-      }
-    }
   }
 
   private func handleGuildDelete(_ unavailableGuild: UnavailableGuild) {
@@ -197,8 +164,6 @@ class GuildStore: DiscordDataStore {
     channels.removeAll()
     members.removeAll()
     roles.removeAll()
-    emojis.removeAll()
-    stickers.removeAll()
     presences.removeAll()
     voiceStates.removeAll()
   }
@@ -253,25 +218,6 @@ class GuildStore: DiscordDataStore {
 
   private func handleGuildRoleDelete(_ roleDelete: Gateway.GuildRoleDelete) {
     roles.removeValue(forKey: roleDelete.role_id)
-  }
-
-  private func handleGuildEmojisUpdate(
-    _ emojisUpdate: Gateway.GuildEmojisUpdate
-  ) {
-    emojis.removeAll()
-    for emoji in emojisUpdate.emojis {
-      guard let id = emoji.id else { continue }
-      emojis[id] = emoji
-    }
-  }
-
-  private func handleGuildStickersUpdate(
-    _ stickersUpdate: Gateway.GuildStickersUpdate
-  ) {
-    stickers.removeAll()
-    for sticker in stickersUpdate.stickers {
-      stickers[sticker.id] = sticker
-    }
   }
 
   private func handlePresenceUpdate(_ presence: Gateway.PresenceUpdate) {

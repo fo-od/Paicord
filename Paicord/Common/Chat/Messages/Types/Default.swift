@@ -13,7 +13,7 @@ extension MessageCell {
   struct DefaultMessage: View {
     let message: DiscordChannel.Message
     let priorMessage: DiscordChannel.Message?
-    let guildStore: GuildStore?
+    let channelStore: ChannelStore
     let inline: Bool
 
     @State var editedPopover = false
@@ -25,7 +25,13 @@ extension MessageCell {
         HStack(alignment: .top) {
           AvatarBalancing()
 
-          MessageBody(message: message)
+          MessageBody(
+            message: message,
+            reactions: channelStore.reactions[message.id, default: [:]],
+            burstReactions: channelStore.burstReactions[message.id,default: [:]],
+            buffReactions: channelStore.buffReactions[message.id, default: [:]],
+            buffBurstReactions: channelStore.buffBurstReactions[message.id, default: [:]]
+          )
         }
       } else {
         VStack {
@@ -69,7 +75,7 @@ extension MessageCell {
         HStack(alignment: .center) {
           MessageAuthor.Username(  // username line
             message: message,
-            guildStore: guildStore,
+            guildStore: channelStore.guildStore,
             profileOpen: $profileOpen
           )
           Date(for: message.timestamp.date)  // message date
@@ -77,10 +83,20 @@ extension MessageCell {
             EditStamp(edited: edit)
           }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+        .frame(
+          maxWidth: .infinity,
+          maxHeight: .infinity,
+          alignment: .bottomLeading
+        )
         .fixedSize(horizontal: false, vertical: true)
 
-        MessageBody(message: message)  // content
+        MessageBody(
+          message: message,
+          reactions: channelStore.reactions[message.id, default: [:]],
+          burstReactions: channelStore.burstReactions[message.id, default: [:]],
+          buffReactions: channelStore.buffReactions[message.id, default: [:]],
+          buffBurstReactions: channelStore.buffBurstReactions[message.id, default: [:]]
+        )  // content
       }
       .frame(maxHeight: .infinity, alignment: .bottom)  // align text to bottom of cell
     }

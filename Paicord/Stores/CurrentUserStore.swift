@@ -24,6 +24,8 @@ class CurrentUserStore: DiscordDataStore {
   var presences: [UserSnowflake: Gateway.PresenceUpdate] = [:]
   var users: [UserSnowflake: PartialUser] = [:]
   var sessions: [Gateway.Session] = []
+  var emojis: [GuildSnowflake: [EmojiSnowflake: Emoji]] = [:]
+  var stickers: [GuildSnowflake: [StickerSnowflake: Sticker]] = [:]
 
   // MARK: - Protocol Methods
   func setGateway(_ gateway: GatewayStore?) {
@@ -42,34 +44,52 @@ class CurrentUserStore: DiscordDataStore {
         switch event.data {
         case .ready(let readyData):
           handleReady(readyData)
+
         case .userUpdate(let user):
           handleUserUpdate(user)
+
         case .guildCreate(let guildData):
           handleGuildCreate(guildData)
+
         case .guildDelete(let unavailableGuild):
           handleGuildDelete(unavailableGuild)
+
         case .relationshipAdd(let relationship):
           handleRelationshipAdd(relationship)
+
         case .relationshipUpdate(let partialRelationship):
           handleRelationshipUpdate(partialRelationship)
+
         case .relationshipRemove(let partialRelationship):
           handleRelationshipRemove(partialRelationship)
+
         case .channelCreate(let channel):
           if channel.type == .dm || channel.type == .groupDm {
             handlePrivateChannelCreate(channel)
           }
+
         case .channelDelete(let channel):
           if channel.type == .dm || channel.type == .groupDm {
             handlePrivateChannelDelete(channel)
           }
+
         case .messageCreate(let message):
           if privateChannels[message.channel_id] != nil {
             handleMessageCreate(message)
           }
+
         case .presenceUpdate(let presence):
           handlePresenceUpdate(presence)
+
         case .sessionReplace(let sessionReplace):
           self.sessions = sessionReplace
+
+        case .guildEmojisUpdate(let emojisUpdate):
+          handleGuildEmojisUpdate(emojisUpdate)
+
+        case .guildStickersUpdate(let stickersUpdate):
+          handleGuildStickersUpdate(stickersUpdate)
+
         default:
           break
         }
@@ -103,6 +123,20 @@ class CurrentUserStore: DiscordDataStore {
 
     users[readyData.user.id] = readyData.user.toPartialUser()
     users = readyData.presences.reduce(into: users) { $0[$1.user.id] = $1.user }
+
+    var emojis = [GuildSnowflake: [EmojiSnowflake: Emoji]]()
+    var stickers = [GuildSnowflake: [StickerSnowflake: Sticker]]()
+    for guild in readyData.guilds {
+      emojis = guild.emojis
+        .compactMap { $0.id != nil ? $0 : nil }
+        .reduce(into: emojis) { $0[guild.id, default: [:]][$1.id!] = $1 }
+
+      // stickers
+      stickers =
+        guild.stickers?
+        .reduce(into: stickers) { $0[guild.id, default: [:]][$1.id] = $1 }
+        ?? stickers
+    }
   }
 
   private func handleUserUpdate(_ user: DiscordUser) {
@@ -125,14 +159,6 @@ class CurrentUserStore: DiscordDataStore {
   private func handleRelationshipUpdate(
     _ partialRelationship: Gateway.PartialRelationship
   ) {
-    //		if let index = relationships.firstIndex(where: {
-    //			$0.id == partialRelationship.id
-    //		}) {
-    //			// Update the existing relationship with new data
-    //			var updatedRelationship = relationships[index]
-    //			updatedRelationship.type = partialRelationship.type
-    //			relationships[index] = updatedRelationship
-    //		}
     if var existingRelationship = relationships[partialRelationship.id] {
       existingRelationship.update(with: partialRelationship)
       relationships[existingRelationship.id] = existingRelationship
@@ -160,8 +186,34 @@ class CurrentUserStore: DiscordDataStore {
   }
 
   private func handlePresenceUpdate(_ presence: Gateway.PresenceUpdate) {
+    guard presence.guild_id == nil else { return }
     presences[presence.user.id] = presence
     users[presence.user.id] = presence.user
+  }
+
+  private func handleGuildEmojisUpdate(
+    _ emojisUpdate: Gateway.GuildEmojisUpdate
+  ) {
+    let guildId = emojisUpdate.guild_id
+    let emojis = emojisUpdate.emojis
+    var emojisDict = [EmojiSnowflake: Emoji]()
+    for emoji in emojis {
+      if emoji.id == nil { continue }
+      emojisDict[emoji.id!] = emoji
+    }
+    self.emojis[guildId] = emojisDict
+  }
+
+  private func handleGuildStickersUpdate(
+    _ stickersUpdate: Gateway.GuildStickersUpdate
+  ) {
+    let guildId = stickersUpdate.guild_id
+    let stickers = stickersUpdate.stickers
+    var stickersDict = [StickerSnowflake: Sticker]()
+    for sticker in stickers {
+      stickersDict[sticker.id] = sticker
+    }
+    self.stickers[guildId] = stickersDict
   }
 
   //	/// Updates the current user's presence

@@ -13,7 +13,7 @@ import SwiftUIX
 extension MessageCell {
   struct ChatInputCommandMessage: View {
     let message: DiscordChannel.Message
-    let guildStore: GuildStore?
+    let channelStore: ChannelStore
 
     @State var profileOpen = false
     @State var editedPopover = false
@@ -79,7 +79,9 @@ extension MessageCell {
           Button {
             profileOpen = true
           } label: {
-            if let guildStore, let userID = message.author?.id {
+            if let guildStore = channelStore.guildStore,
+              let userID = message.author?.id
+            {
               let member = guildStore.members[userID] ?? message.member
               let color = member?.roles?.compactMap { guildStore.roles[$0] }
                 .sorted(by: { $0.position > $1.position })
@@ -119,7 +121,13 @@ extension MessageCell {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
 
-        MessageBody(message: message)
+        MessageBody(
+          message: message,
+          reactions: channelStore.reactions[message.id, default: [:]],
+          burstReactions: channelStore.burstReactions[message.id,default: [:]],
+          buffReactions: channelStore.buffReactions[message.id, default: [:]],
+          buffBurstReactions: channelStore.buffBurstReactions[message.id, default: [:]]
+        )
       }
       .frame(maxHeight: .infinity, alignment: .bottom)  // align text to bottom of cell
     }

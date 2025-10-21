@@ -16,8 +16,6 @@ struct ChatView: View {
   @Environment(PaicordAppState.self) var appState
   @Environment(\.accessibilityReduceMotion) var accessibilityReduceMotion
 
-  @State private var text = ""
-
   @ViewStorage private var isNearBottom = true  // used to track if we are near the bottom, if so scroll.
   @ViewStorage private var pendingScrollWorkItem: DispatchWorkItem?
 
@@ -32,7 +30,8 @@ struct ChatView: View {
             ForEach(orderedMessages) { msg in
               let prior = vm.getMessage(before: msg)
               if messageAllowed(msg) {
-                MessageCell(for: msg, prior: prior, guild: vm.guildStore)
+                MessageCell(for: msg, prior: prior, channel: vm)
+                  .padding(.bottom, msg == vm.messages.values.last ? 18 : 0)
                   .onAppear {
                     guard msg == vm.messages.values.last else { return }
                     self.isNearBottom = true
@@ -70,35 +69,13 @@ struct ChatView: View {
         }
       }
     }
-    .safeAreaInset(edge: .bottom) {
-      HStack {
-        TextField("Message", text: $text)
-          .textFieldStyle(.roundedBorder)
-          #if os(iOS)
-            .disabled(appState.chatOpen == false)
-          #endif
-          .onSubmit(sendMessage)
-        #if os(iOS)
-          if text.isEmpty == false {
-            Button(action: sendMessage) {
-              Image(systemName: "paperplane.fill")
-                .imageScale(.large)
-                .padding(5)
-                .foregroundStyle(.white)
-                .background(.primaryButton)
-                .clipShape(.circle)
-            }
-            .buttonStyle(.borderless)
-            .foregroundStyle(.primaryButton)
-            .transition(.move(edge: .trailing).combined(with: .opacity))
-          }
-        #endif
-      }
-      .padding(5)
-      .background(.regularMaterial)
+    .overlay(alignment: .bottom) {
+      TypingIndicatorBar(vm: vm)
+    }
+    .safeAreaInset(edge: .bottom, spacing: 0) {
+      InputBar(vm: vm)
     }
     .background(.tableBackground)
-    .animation(.default.speed(2), value: text.isEmpty)
     #if os(iOS)
       .toolbar {
         ToolbarItem(placement: .topBarLeading) {
@@ -157,7 +134,7 @@ struct ChatView: View {
     pendingScrollWorkItem = workItem
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.06, execute: workItem)
   }
-  
+
   @State var ackTask: Task<Void, Error>? = nil
   private func acknowledge() {
     ackTask?.cancel()
@@ -166,22 +143,6 @@ struct ChatView: View {
       Task.detached {
         try await gw.client.triggerTypingIndicator(channelId: .makeFake())
       }
-    }
-  }
-
-  private func sendMessage() {
-    let msg = text.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !msg.isEmpty else { return }
-    text = ""  // clear input field
-    Task.detached {
-      let nonce: MessageSnowflake? = try? .makeFake(date: .now)
-      return try await gw.client.createMessage(
-        channelId: vm.channelId,
-        payload: .init(
-          content: msg,
-          nonce: nonce != nil ? .string(nonce!.rawValue) : nil
-        )
-      )
     }
   }
 }

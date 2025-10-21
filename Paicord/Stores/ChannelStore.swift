@@ -25,10 +25,20 @@ class ChannelStore: DiscordDataStore {
   var channel: DiscordChannel?
   var messages: OrderedDictionary<MessageSnowflake, DiscordChannel.Message> =
     [:]
-  var typingUsers: [UserSnowflake: Date] = [:]
+  var reactions: [MessageSnowflake: Reactions] = [:]
+  var burstReactions: [MessageSnowflake: Reactions] = [:]
+  // number of reactions per emoji per message, since message fetch wont return users
+  // as there could be thousands.
+  var buffReactions: [MessageSnowflake: BuffReactions] = [:]
+  var buffBurstReactions: [MessageSnowflake: BuffReactions] = [:]
+
+  typealias Reactions = OrderedDictionary<Emoji, Set<UserSnowflake>>
+  typealias BuffReactions = OrderedDictionary<Emoji, Int>
+  
+  var typingTimeoutTokens: [UserSnowflake: UUID] = [:]
 
   // MARK: - State Properties
-  var isLoadingHistory = false
+  var isLoadingMessages = false
   var hasMoreHistory = true
   var lastReadMessageId: MessageSnowflake?
 
@@ -94,18 +104,29 @@ class ChannelStore: DiscordDataStore {
           if pinsUpdate.channel_id == channelId {
             handleChannelPinsUpdate(pinsUpdate)
           }
-        //				case .messageReactionAdd(let reactionAdd):
-        //					if reactionAdd.channel_id == channelId {
-        //						handleMessageReactionAdd(reactionAdd)
-        //					}
-        //				case .messageReactionRemove(let reactionRemove):
-        //					if reactionRemove.channel_id == channelId {
-        //						handleMessageReactionRemove(reactionRemove)
-        //					}
-        //				case .messageReactionRemoveAll(let removeAll):
-        //					if removeAll.channel_id == channelId {
-        //						handleMessageReactionRemoveAll(removeAll)
-        //					}
+        // reactions
+        case .messageReactionAdd(let reactionAdd):
+          guard guildStore?.guildId == reactionAdd.guild_id else { continue }
+          if reactionAdd.channel_id == channelId {
+            handleMessageReactionAdd(reactionAdd)
+          }
+        case .messageReactionAddMany(let reactionAddMany):
+          guard guildStore?.guildId == reactionAddMany.guild_id else {
+            continue
+          }
+          if reactionAddMany.channel_id == channelId {
+            handleMessageReactionAddMany(reactionAddMany)
+          }
+        case .messageReactionRemove(let reactionRemove):
+          guard guildStore?.guildId == reactionRemove.guild_id else { continue }
+          if reactionRemove.channel_id == channelId {
+            handleMessageReactionRemove(reactionRemove)
+          }
+        case .messageReactionRemoveAll(let removeAll):
+          guard guildStore?.guildId == removeAll.guild_id else { continue }
+          if removeAll.channel_id == channelId {
+            handleMessageReactionRemoveAll(removeAll)
+          }
         // typing
         case .typingStart(let typing):
           if typing.channel_id == channelId {
@@ -131,7 +152,7 @@ class ChannelStore: DiscordDataStore {
   private func handleChannelDelete(_ deletedChannel: DiscordChannel) {
     // Channel was deleted, clear all data
     messages.removeAll()
-    typingUsers.removeAll()
+    typingTimeoutTokens.removeAll()
     channel = nil
   }
 
@@ -146,7 +167,7 @@ class ChannelStore: DiscordDataStore {
 
     // Remove typing indicator for this user
     if let userId = message.author?.id {
-      typingUsers.removeValue(forKey: userId)
+      typingTimeoutTokens.removeValue(forKey: userId)
     }
 
     // Update channel's last message id if we have the channel
@@ -186,17 +207,84 @@ class ChannelStore: DiscordDataStore {
     }
   }
 
-  //	private func handleMessageReactionAdd(_ reactionAdd: Gateway.MessageReactionAdd) {
-  //	}
-
-  //	private func handleMessageReactionRemove(_ reactionRemove: Gateway.MessageReactionRemove) {
-  //	}
-
-  //	private func handleMessageReactionRemoveAll(_ removeAll: Gateway.MessageReactionRemoveAll) {
-  //	}
+  private func handleMessageReactionAdd(
+    _ reactionAdd: Gateway.MessageReactionAdd
+  ) {
+    if let member = reactionAdd.member?.toPartialMember(), let guildStore,
+      let userId = member.user?.id
+    {
+      // Update guild member info
+      if var existingMember = guildStore.members[userId] {
+        existingMember.update(with: member)
+        guildStore.members[userId] = existingMember
+      } else {
+        guildStore.members[userId] = member
+      }
+    }
+    func addToReactionsList(
+      reactions: inout [MessageSnowflake: Reactions]
+    ) {
+      // reactions for message id, creating dict if needed, then set of users for emoji, creating set if needed, inserting user id.
+      reactions[reactionAdd.message_id, default: [:]][
+        reactionAdd.emoji,
+        default: []
+      ].insert(reactionAdd.user_id)
+    }
+    if reactionAdd.burst == true {
+      addToReactionsList(reactions: &burstReactions)
+    } else {
+      addToReactionsList(reactions: &reactions)
+    }
+  }
+  private func handleMessageReactionAddMany(
+    _ reactionAddMany: Gateway.MessageReactionAddMany
+  ) {
+    // reactions for message id, creating dict if needed, then set of users for emoji, creating set if needed, inserting user ids.
+    for reaction in reactionAddMany.reactions {
+      for user in reaction.users {
+        reactions[reactionAddMany.message_id, default: [:]][
+          reaction.emoji,
+          default: []
+        ].insert(user)
+      }
+    }
+  }
+  private func handleMessageReactionRemove(
+    _ reactionRemove: Gateway.MessageReactionRemove
+  ) {
+    reactions[reactionRemove.message_id]?[reactionRemove.emoji]?.remove(
+      reactionRemove.user_id
+    )
+    pruneReactions()
+  }
+  private func handleMessageReactionRemoveEmoji(
+    _ reactionRemoveEmoji: Gateway.MessageReactionRemoveEmoji
+  ) {
+    reactions[reactionRemoveEmoji.message_id]?.removeValue(
+      forKey: reactionRemoveEmoji.emoji
+    )
+    pruneReactions()
+  }
+  private func handleMessageReactionRemoveAll(
+    _ removeAll: Gateway.MessageReactionRemoveAll
+  ) {
+    reactions.removeValue(forKey: removeAll.message_id)
+    pruneReactions()
+  }
 
   private func handleTypingStart(_ typing: Gateway.TypingStart) {
-    typingUsers[typing.user_id] = Date.now
+    let userId = typing.user_id
+
+    let token = UUID()
+    typingTimeoutTokens[userId] = token
+
+    Task { [weak self] in
+      try? await Task.sleep(nanoseconds: 10_000_000_000)
+
+      if self?.typingTimeoutTokens[userId] == token {
+        self?.typingTimeoutTokens.removeValue(forKey: userId)
+      }
+    }
   }
 
   private func handleChannelPinsUpdate(_ pinsUpdate: Gateway.ChannelPinsUpdate)
@@ -208,8 +296,31 @@ class ChannelStore: DiscordDataStore {
   }
 
   // MARK: - Helpers
+  
+  /// Look at reactions and remove any with zero users.
+  func pruneReactions() {
+    func prune(reactions: inout [MessageSnowflake: Reactions]) {
+      for (messageId, emojiDict) in reactions {
+        var prunedEmojiDict = emojiDict
+        for (emoji, userSet) in emojiDict {
+          if userSet.isEmpty {
+            prunedEmojiDict.removeValue(forKey: emoji)
+          }
+        }
+        if prunedEmojiDict.isEmpty {
+          reactions.removeValue(forKey: messageId)
+        } else {
+          reactions[messageId] = prunedEmojiDict
+        }
+      }
+    }
+    
+    prune(reactions: &reactions)
+    prune(reactions: &burstReactions)
+  }
 
-  // NOTE: `around`, `before` and `after` are mutually exclusive.
+  /// Fetches messages.
+  /// NOTE: `around`, `before` and `after` are mutually exclusive.
   func fetchMessages(
     around: MessageSnowflake? = nil,
     before: MessageSnowflake? = nil,
@@ -218,6 +329,8 @@ class ChannelStore: DiscordDataStore {
   ) async throws {
     #warning("make this handle pagination etc maybe?")
     guard let gateway = gateway?.gateway else { return }
+    self.isLoadingMessages = true
+    defer { self.isLoadingMessages = false }
     let res = try await gateway.client.listMessages(channelId: channelId)
     do {
       // ensure request was successful
@@ -226,6 +339,19 @@ class ChannelStore: DiscordDataStore {
       for message in messages.reversed() {
         self.messages[message.id] = message
       }
+      
+      // populate buffreactions etc
+//      for message in messages {
+//        if let reactionList = message.reactions {
+//          for reaction in reactionList {
+//            if reaction
+//            self.buffReactions[message.id, default: [:]][
+//              reaction.emoji
+//            ] = reaction.count
+//          }
+//        }
+//      }
+      
       // lastly request members if member data for any author is missing
       if let guildStore {
         let unknownMembers = Array(
@@ -249,6 +375,7 @@ class ChannelStore: DiscordDataStore {
     }
   }
 
+  /// Checks message storage for a message before the provided message.
   func getMessage(
     before message: DiscordChannel.Message
   ) -> DiscordChannel.Message? {
