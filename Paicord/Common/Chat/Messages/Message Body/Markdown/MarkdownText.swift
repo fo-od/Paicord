@@ -865,7 +865,7 @@ extension Text {
           label: "COLLECTIBLES_NAMEPLATES_VOL_3_BONSAI_A11Y",
           palette: .bubble_gum,
           expires_at: nil
-        ),
+        )
       ),
       avatar_decoration_data: nil
     ),

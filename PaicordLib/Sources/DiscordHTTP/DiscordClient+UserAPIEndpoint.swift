@@ -126,7 +126,7 @@ extension DiscordClient {
 	/// https://docs.discord.food/authentication#verify-mfa
 	@inlinable
 	public func verifyMFA(
-    payload: Payloads.MFASubmitData,
+    payload: Payloads.MFASubmitData
   ) async throws -> DiscordClientResponse<MFAResponse> {
 		let endpoint = UserAPIEndpoint.verifyMFA
 		return try await self.send(

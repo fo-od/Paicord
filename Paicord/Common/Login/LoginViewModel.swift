@@ -85,7 +85,7 @@ final class LoginViewModel {
       let request = try await loginClient.userLogin(
         payload: .init(
           login: login,
-          password: .init(password),
+          password: .init(password)
         ),
         fingerprint: fingerprint
       )

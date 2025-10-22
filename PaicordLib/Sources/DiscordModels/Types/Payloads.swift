@@ -1775,7 +1775,7 @@ public enum Payloads {
       validateElementCountDoesNotExceed(
         allow_list,
         max: 1000,
-        name: "allow_list",
+        name: "allow_list"
       )
       validateHasPrecondition(
         condition: mention_total_limit <= 50,
