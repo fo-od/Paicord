@@ -78,6 +78,11 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
   public struct AvatarDecoration: Sendable, Codable, Equatable, Hashable {
     public var asset: String
     public var sku_id: SKUSnowflake
+    
+    public init(asset: String, sku_id: SKUSnowflake) {
+      self.asset = asset
+      self.sku_id = sku_id
+    }
   }
 
   public var id: UserSnowflake

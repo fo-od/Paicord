@@ -20,14 +20,18 @@ import SwiftUIX
 struct DMsView: View {
   @Environment(GatewayStore.self) var gw
   @Environment(PaicordAppState.self) var appState
+  @Environment(\.userInterfaceIdiom) var idiom
   var body: some View {
     ScrollView {
-      #if os(iOS)
-      HStack {
-        Text("Direct Messages")
-          .font(.title2)
+      if idiom == .phone {
+        VStack {
+          Text("Direct Messages")
+            .font(.title2)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 5)
+          Divider()
+        }
       }
-      #endif
       let channels = Array(gw.user.privateChannels.values)
       LazyVStack {
         ForEach(channels) { channel in

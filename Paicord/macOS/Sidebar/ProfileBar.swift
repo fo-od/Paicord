@@ -23,8 +23,7 @@ struct ProfileBar: View {
       if let user = gw.user.currentUser {
         Profile.AvatarWithPresence(
           member: nil,
-          user: user,
-          hideOffline: false
+          user: user
         )
         .maxHeight(40)
       }

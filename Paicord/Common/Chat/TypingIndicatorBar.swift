@@ -50,9 +50,7 @@ extension ChatView {
             Spacer()
           }
           .font(.subheadline)
-          #if os(macOS)
           .padding(.horizontal, 6)
-          #endif
           .padding(.vertical, 2)
           .background(.regularMaterial)
           .background(.black.opacity(0.5))

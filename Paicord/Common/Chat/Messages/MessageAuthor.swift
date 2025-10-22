@@ -22,13 +22,16 @@ extension MessageCell {
           guard message.author != nil else { return }
           profileOpen = true
         } label: {
-          AnimatedImage(
-            url: avatarURL(animated: animated)
+          let guildstoremember =
+            message.author != nil
+            ? guildStore?.members[message.author!.id] : nil
+          Profile.Avatar(
+            member: guildstoremember ?? message.member,
+            user: message.author
           )
-          .resizable()
-          .scaledToFill()
+          .animated(animated)
+          .showsAvatarDecoration()
           .frame(width: avatarSize, height: avatarSize)
-          .clipShape(.circle)
         }
         .buttonStyle(.borderless)
         .popover(isPresented: $profileOpen) {
@@ -40,30 +43,6 @@ extension MessageCell {
           }
         }
         .frame(maxHeight: .infinity, alignment: .top)  // align pfp to top of cell
-      }
-
-      func avatarURL(animated: Bool) -> URL? {
-        if let id = message.author?.id,
-          let avatar = message.author?.avatar
-        {
-          if avatar.starts(with: "a_"), animated {
-            return URL(
-              string: CDNEndpoint.userAvatar(userId: id, avatar: avatar).url
-                + ".gif?size=128&animated=true"
-            )
-          } else {
-            return URL(
-              string: CDNEndpoint.userAvatar(userId: id, avatar: avatar).url
-                + ".png?size=128&animated=false"
-            )
-          }
-        } else {
-          let discrim = message.author?.discriminator ?? "0"
-          return URL(
-            string: CDNEndpoint.defaultUserAvatar(discriminator: discrim).url
-              + "?size=128"
-          )
-        }
       }
     }
 

@@ -7,8 +7,10 @@
 //
 
 import PaicordLib
+import SDWebImageSwiftUI
 import SwiftUIX
 
+/// Sheet on iOS, else its the popover on macOS/ipadOS.
 struct ProfilePopoutView: View {
   @Environment(\.userInterfaceIdiom) var idiom
   var guild: GuildStore?
@@ -17,18 +19,20 @@ struct ProfilePopoutView: View {
 
   var body: some View {
     ScrollView {
-
+      WebImage(
+        url: bannerURL(animated: true),
+        options: []
+      )
       VStack {
         Profile.AvatarWithPresence(
           member: member,
-          user: user,
-          hideOffline: false
+          user: user
         )
         .frame(maxWidth: 80, maxHeight: 80)
       }
-      .minWidth(idiom == .phone ? nil : 300)
-      .maxWidth(idiom == .phone ? nil : 300)
-      .minHeight(idiom == .phone ? nil : 400)
+      .minWidth(idiom == .phone ? nil : 300)  // popover limits on larger devices
+      .maxWidth(idiom == .phone ? nil : 300)  // popover limits on larger devices
+      .minHeight(idiom == .phone ? nil : 400)  // popover limits on larger devices
     }
     .presentationDetents([.medium, .large])
   }

@@ -23,13 +23,15 @@ struct ChannelButton: View {
       }
     case .dm:
       textChannelButton { hovered in
+        let selected = appState.selectedChannel == channel.id
         HStack {
           if let user = channel.recipients?.first {
             Profile.AvatarWithPresence(
               member: nil,
-              user: user,
-              hideOffline: false
+              user: user
             )
+            .animated(hovered)
+            .showsAvatarDecoration()
             .padding(2)
           }
           Text(
@@ -42,7 +44,7 @@ struct ChannelButton: View {
         .frame(height: 38)
         .padding(4)
         .background {
-          if hovered || appState.selectedChannel == channel.id,
+          if hovered || selected,
             let nameplate = channel.recipients?.first?.collectibles?.nameplate
           {
             Profile.NameplateView(nameplate: nameplate)

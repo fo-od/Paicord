@@ -74,8 +74,8 @@ extension MessageCell {
 
     @ViewBuilder
     var userAndMessage: some View {
-      VStack {
-        HStack(alignment: .bottom) {
+      VStack(spacing: 2) {
+        HStack(alignment: .center) {
           Button {
             profileOpen = true
           } label: {
