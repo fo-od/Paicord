@@ -477,7 +477,7 @@ struct AvatarDecorationView: View {
     flags: .init(rawValue: 4_194_352),
     premium_type: nil,
     public_flags: .init(rawValue: 4_194_304),
-    avatar_decoration_data: decoration,
+    avatar_decoration_data: decoration
   )
   Group {
     Profile.AvatarWithPresence(

@@ -132,7 +132,7 @@ extension DiscordClient {
   /// https://docs.discord.food/authentication#verify-mfa
   @inlinable
   public func verifyMFA(
-    payload: Payloads.MFASubmitData,
+    payload: Payloads.MFASubmitData
   ) async throws -> DiscordClientResponse<MFAResponse> {
     let endpoint = UserAPIEndpoint.verifyMFA
     return try await self.send(
@@ -582,7 +582,7 @@ extension DiscordClient {
     withMutualFriends: Bool,
     withMutualFriendsCount: Bool,
     guildID: GuildSnowflake? = nil
-//    , joinRequestID: AnySnowflake? = nil
+      //    , joinRequestID: AnySnowflake? = nil
   ) async throws -> DiscordClientResponse<DiscordUser.Profile> {
     let endpoint = UserAPIEndpoint.getUserProfile(
       userId: userID,

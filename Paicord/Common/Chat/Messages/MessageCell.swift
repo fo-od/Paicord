@@ -58,7 +58,7 @@ struct MessageCell: View {
           message: message,
           priorMessage: priorMessage,
           channelStore: channelStore,
-          inline: inline,
+          inline: inline
         )
       case .chatInputCommand:
         ChatInputCommandMessage(message: message, channelStore: channelStore)
@@ -107,7 +107,7 @@ struct MessageCell: View {
     flags: .init(rawValue: 4_194_352),
     premium_type: nil,
     public_flags: .init(rawValue: 4_194_304),
-    avatar_decoration_data: nil,
+    avatar_decoration_data: nil
   )
   MessageCell(
     for: .init(
