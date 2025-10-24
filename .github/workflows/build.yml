@@ -39,8 +39,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            build-mac
-            build-ios
+            build
           key: deriveddata-${{ hashFiles('.github/workflows/build.yml') }}
           restore-keys: |
             deriveddata
@@ -51,16 +50,16 @@ jobs:
             -scheme "Paicord Release" \
             -configuration Release \
             -destination "platform=macOS" \
-            -derivedDataPath build-mac \
+            -derivedDataPath build \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
       - name: Archive macOS .app
         run: |
           mkdir -p output
-          cp -R build-mac/Build/Products/Release/Paicord.app output/Paicord-macOS.app
+          cp -R build/Build/Products/Release/Paicord.app output/Paicord.app
           cd output
-          zip -r Paicord-macOS.zip Paicord-macOS.app
-          rm -rf Paicord-macOS.app
+          zip -r Paicord-macOS.zip Paicord.app
+          rm -rf Paicord.app
           cd ..
 
       # iOS build (.ipa)
@@ -71,7 +70,7 @@ jobs:
             -configuration Release \
             -arch arm64 \
             -sdk iphoneos \
-            -derivedDataPath build-ios \
+            -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY=""
@@ -79,7 +78,7 @@ jobs:
       - name: Archive .ipa
         run: |
           set -e
-          APP_PATH="build-ios/Build/Products/Release-iphoneos/Paicord.app"
+          APP_PATH="build/Build/Products/Release-iphoneos/Paicord.app"
           STAGE_DIR="stage-ios"
           rm -rf Payload "$STAGE_DIR"
           mkdir -p "$STAGE_DIR/Payload"
