@@ -3,7 +3,6 @@ name: Build
 on:
   push:
     branches: [main]
-  pull_request:
   workflow_dispatch:
 
 concurrency:
@@ -12,7 +11,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
@@ -24,17 +23,8 @@ jobs:
 
       - name: Install ldid
         run: |
-          # Only install ldid if it's not already available
-          if command -v ldid >/dev/null 2>&1; then
-            echo "ldid already installed at: $(command -v ldid)"
-            ldid --version || true
-          else
-            echo "ldid not found — downloading and installing"
-            curl -LO https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_x86_64
-            sudo install -m755 ldid_macosx_x86_64 /usr/local/bin/ldid
-            rm -f ldid_macosx_x86_64
-            echo "ldid installed at: $(command -v ldid)"
-          fi
+          curl -LO https://github.com/ProcursusTeam/ldid/releases/latest/download/ldid_macosx_x86_64
+          sudo install -m755 ldid_macosx_x86_64 /usr/local/bin/ldid
 
       - name: Cache Xcode DerivedData
         uses: actions/cache@v4
