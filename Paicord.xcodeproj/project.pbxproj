@@ -66,6 +66,7 @@
 		AA9C81832E6660BE0086B1DA /* GuildButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9C81822E6660BE0086B1DA /* GuildButton.swift */; };
 		AA9C81862E66670E0086B1DA /* CornerRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9C81852E66670E0086B1DA /* CornerRadius.swift */; };
 		AA9C818C2E6702930086B1DA /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = AA9C818B2E6702930086B1DA /* SwiftUIIntrospect */; };
+		AAB22FD82EAD0A2400413310 /* SwiftPrettyPrint in Frameworks */ = {isa = PBXBuildFile; productRef = AAB22FD72EAD0A2400413310 /* SwiftPrettyPrint */; };
 		AAB50A502E9AA6800048E8B0 /* ChatInputCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAB50A4F2E9AA67C0048E8B0 /* ChatInputCommand.swift */; };
 		AAB50A522E9AC9CB0048E8B0 /* ChannelHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAB50A512E9AC9CB0048E8B0 /* ChannelHeader.swift */; };
 		AAB50A542E9AD4470048E8B0 /* MessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAB50A532E9AD4470048E8B0 /* MessageBody.swift */; };
@@ -185,6 +186,7 @@
 				AA9C818C2E6702930086B1DA /* SwiftUIIntrospect in Frameworks */,
 				57CDD87F2E71CB6000022203 /* HCaptcha in Frameworks */,
 				AA13780B2E969D6100100969 /* DiscordMarkdownParser in Frameworks */,
+				AAB22FD82EAD0A2400413310 /* SwiftPrettyPrint in Frameworks */,
 				AAEEC7222E6515C400EB5FC9 /* KeychainAccess in Frameworks */,
 				5783AA922E6B8F6500F73F6D /* MeshGradientCHeaders in Frameworks */,
 				AA1378092E969A9000100969 /* Lottie in Frameworks */,
@@ -568,6 +570,7 @@
 				AA5CA6572E9D2CBA00C7C82A /* HighlightSwift */,
 				AA5CA65F2E9D435800C7C82A /* SDWebImageSwiftUI */,
 				AA21D2822EAA557C00C75093 /* Sparkle */,
+				AAB22FD72EAD0A2400413310 /* SwiftPrettyPrint */,
 			);
 			productName = PaiCord;
 			productReference = AA1096DB2E63BE84005BC3D2 /* Paicord.app */;
@@ -609,6 +612,7 @@
 				AA5CA6562E9D2CBA00C7C82A /* XCRemoteSwiftPackageReference "HighlightSwift" */,
 				AA5CA65E2E9D435800C7C82A /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 				AA21D2812EAA557C00C75093 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				AAB22FD62EAD0A2300413310 /* XCRemoteSwiftPackageReference "SwiftPrettyPrint" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AA1096DC2E63BE84005BC3D2 /* Products */;
@@ -1015,6 +1019,14 @@
 				minimumVersion = 1.3.0;
 			};
 		};
+		AAB22FD62EAD0A2300413310 /* XCRemoteSwiftPackageReference "SwiftPrettyPrint" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/YusukeHosonuma/SwiftPrettyPrint";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.4.0;
+			};
+		};
 		AAEEC7202E6515C400EB5FC9 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
@@ -1083,6 +1095,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AA9C818A2E6702930086B1DA /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
 			productName = SwiftUIIntrospect;
+		};
+		AAB22FD72EAD0A2400413310 /* SwiftPrettyPrint */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAB22FD62EAD0A2300413310 /* XCRemoteSwiftPackageReference "SwiftPrettyPrint" */;
+			productName = SwiftPrettyPrint;
 		};
 		AAEEC7212E6515C400EB5FC9 /* KeychainAccess */ = {
 			isa = XCSwiftPackageProductDependency;

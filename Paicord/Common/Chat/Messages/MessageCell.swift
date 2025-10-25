@@ -21,6 +21,7 @@ struct MessageCell: View {
   var message: DiscordChannel.Message
   var priorMessage: DiscordChannel.Message?
   var channelStore: ChannelStore
+  @Environment(GatewayStore.self) var gw
   @State var cellHighlighted = false
 
   init(
@@ -31,6 +32,13 @@ struct MessageCell: View {
     self.message = message
     self.priorMessage = prior
     self.channelStore = channel
+  }
+
+  var userMentioned: Bool {
+    guard let currentUserID = gw.user.currentUser?.id else {
+      return false
+    }
+    return message.mentions.contains(where: { $0.id == currentUserID })
   }
 
   var body: some View {
@@ -85,7 +93,13 @@ struct MessageCell: View {
           ? Color(NSColor.secondaryLabelColor).opacity(0.1) : .clear
       )
     #endif
+    .background(Color(hexadecimal6: 0xcc8735).opacity(userMentioned ? 0.05 : 0))
+    .background(alignment: .leading) {
+      Color(hexadecimal6: 0xce9c5c).opacity(userMentioned ? 1 : 0)
+        .maxWidth(2)
+    }
     .padding(.top, inline ? 0 : 10)  // adds space between message groups
+
   }
 }
 

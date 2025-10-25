@@ -174,6 +174,25 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
     public var premium_type: PremiumKind?
     public var premium_since: DiscordTimestamp?
     public var premium_guild_since: DiscordTimestamp?
+    
+    public init(application: ProfileApplication? = nil, user: PartialUser, user_profile: Metadata? = nil, badges: [Badge]? = nil, guild_member: Guild.Member? = nil, guild_member_profile: Metadata? = nil, guild_badges: [Badge]? = nil, legacy_username: String? = nil, mutual_guilds: [MutualGuild]? = nil, mutual_friends: [PartialUser]? = nil, mutual_friends_count: Int? = nil, connected_accounts: [PartialConnection]? = nil, application_role_connections: [ApplicationRoleConnection]? = nil, premium_type: PremiumKind? = nil, premium_since: DiscordTimestamp? = nil, premium_guild_since: DiscordTimestamp? = nil) {
+      self.application = application
+      self.user = user
+      self.user_profile = user_profile
+      self.badges = badges
+      self.guild_member = guild_member
+      self.guild_member_profile = guild_member_profile
+      self.guild_badges = guild_badges
+      self.legacy_username = legacy_username
+      self.mutual_guilds = mutual_guilds
+      self.mutual_friends = mutual_friends
+      self.mutual_friends_count = mutual_friends_count
+      self.connected_accounts = connected_accounts
+      self.application_role_connections = application_role_connections
+      self.premium_type = premium_type
+      self.premium_since = premium_since
+      self.premium_guild_since = premium_guild_since
+    }
 
     /// https://docs.discord.food/resources/user#profile-application-structure
     public struct ProfileApplication: Sendable, Codable, Equatable, Hashable {
@@ -190,12 +209,29 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
       public var popout_animation_particle_type: AnySnowflake?
       public var emoji: Emoji?
       public var profile_effect: Effect?
+      
+      public init(guild_id: GuildSnowflake? = nil, pronouns: String? = nil, bio: String? = nil, banner: String? = nil, accent_color: DiscordColor? = nil, theme_colors: [DiscordColor]? = nil, popout_animation_particle_type: AnySnowflake? = nil, emoji: Emoji? = nil, profile_effect: Effect? = nil) {
+        self.guild_id = guild_id
+        self.pronouns = pronouns
+        self.bio = bio
+        self.banner = banner
+        self.accent_color = accent_color
+        self.theme_colors = theme_colors
+        self.popout_animation_particle_type = popout_animation_particle_type
+        self.emoji = emoji
+        self.profile_effect = profile_effect
+      }
     }
 
     /// https://docs.discord.food/resources/user#profile-effect-structure
     public struct Effect: Sendable, Codable, Equatable, Hashable {
       public var id: AnySnowflake
       public var expires_at: DiscordTimestamp?
+      
+      public init(id: AnySnowflake, expires_at: DiscordTimestamp? = nil) {
+        self.id = id
+        self.expires_at = expires_at
+      }
     }
 
     /// https://docs.discord.food/resources/user#profile-badge-structure
@@ -204,12 +240,24 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
       public var description: String
       public var icon: String
       public var link: String?
+      
+      public init(id: AnySnowflake, description: String, icon: String, link: String? = nil) {
+        self.id = id
+        self.description = description
+        self.icon = icon
+        self.link = link
+      }
     }
 
     /// https://docs.discord.food/resources/user#mutual-guild-structure
     public struct MutualGuild: Sendable, Codable, Equatable, Hashable {
       public var id: GuildSnowflake
       public var nick: String?
+      
+      public init(id: GuildSnowflake, nick: String? = nil) {
+        self.id = id
+        self.nick = nick
+      }
     }
   }
 }
@@ -409,5 +457,17 @@ extension DiscordUser {
     public var identity_guild_id: GuildSnowflake?
     public var tag: String?
     public var badge: String?
+    
+    public init(
+      identity_enabled: Bool? = nil,
+      identity_guild_id: GuildSnowflake? = nil,
+      tag: String? = nil,
+      badge: String? = nil
+    ) {
+      self.identity_enabled = identity_enabled
+      self.identity_guild_id = identity_guild_id
+      self.tag = tag
+      self.badge = badge
+    }
   }
 }

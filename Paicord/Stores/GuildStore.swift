@@ -268,13 +268,22 @@ class GuildStore: DiscordDataStore {
   //	}
 
   // MARK: - Helpers
-
-  func requestMembers(for ids: [UserSnowflake]) async {
+  
+  // Track requested member IDs to avoid duplicate requests
+  var requestedMemberIds: Set<UserSnowflake> = []
+  
+  func requestMembers(for ids: Set<UserSnowflake>) async {
+    // Check IDs to request, excluding prior requested ppl
+    let idsToRequest = ids.subtracting(requestedMemberIds)
+    guard !idsToRequest.isEmpty else { return }
+    
+    // Add to requested IDs and send gateway request
+    requestedMemberIds.formUnion(idsToRequest)
     await gateway?.gateway?.requestGuildMembersChunk(
       payload: .init(
         guild_id: guildId,
         presences: false,
-        user_ids: ids
+        user_ids: Array(ids)
       )
     )
   }

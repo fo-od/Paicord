@@ -31,3 +31,6 @@ protocol ActivityData {
 
 extension Gateway.PresenceUpdate: ActivityData {}
 extension Gateway.Session: ActivityData {}
+
+extension DiscordUser: @retroactive Identifiable {}
+extension PartialUser: @retroactive Identifiable {}

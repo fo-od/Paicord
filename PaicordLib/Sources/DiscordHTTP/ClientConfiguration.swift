@@ -48,6 +48,10 @@ public struct ClientConfiguration: Sendable {
 			self.apiEndpointsStorage.updateValue(.seconds(120), forKey: .getGateway)
 			self.apiEndpointsStorage.updateValue(
 				.seconds(120), forKey: .getBotGateway)
+      
+      // Client can make a lot of getUserProfile calls, so caching it for a minute is beneficial.
+      // Add any other common user API endpoints here if needed.
+      self.userApiEndpointsStorage.updateValue(.seconds(60), forKey: .getUserProfile)
 		}
 
 		/// Uses the TTL in the 'endpoints'. If not available, falls back to the 'defaultTTL'.

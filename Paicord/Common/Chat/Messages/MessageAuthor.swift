@@ -27,7 +27,7 @@ extension MessageCell {
             ? guildStore?.members[message.author!.id] : nil
           Profile.Avatar(
             member: guildstoremember ?? message.member,
-            user: message.author
+            user: message.author?.toPartialUser()
           )
           .animated(animated)
           .showsAvatarDecoration()
@@ -38,7 +38,7 @@ extension MessageCell {
           if let userId = message.author?.id, let user = message.author {
             ProfilePopoutView(
               member: guildStore?.members[userId] ?? message.member,
-              user: user
+              user: user.toPartialUser()
             )
           }
         }

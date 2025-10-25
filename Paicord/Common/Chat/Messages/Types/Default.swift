@@ -27,10 +27,7 @@ extension MessageCell {
 
           MessageBody(
             message: message,
-            reactions: channelStore.reactions[message.id, default: [:]],
-            burstReactions: channelStore.burstReactions[message.id,default: [:]],
-            buffReactions: channelStore.buffReactions[message.id, default: [:]],
-            buffBurstReactions: channelStore.buffBurstReactions[message.id, default: [:]]
+            channelStore: channelStore
           )
         }
       } else {
@@ -92,10 +89,7 @@ extension MessageCell {
 
         MessageBody(
           message: message,
-          reactions: channelStore.reactions[message.id, default: [:]],
-          burstReactions: channelStore.burstReactions[message.id, default: [:]],
-          buffReactions: channelStore.buffReactions[message.id, default: [:]],
-          buffBurstReactions: channelStore.buffBurstReactions[message.id, default: [:]]
+          channelStore: channelStore
         )  // content
       }
       .frame(maxHeight: .infinity, alignment: .bottom)  // align text to bottom of cell

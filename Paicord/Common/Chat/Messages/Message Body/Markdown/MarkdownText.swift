@@ -9,11 +9,17 @@ import DiscordMarkdownParser
 import Foundation
 import HighlightSwift
 import PaicordLib
+import Playgrounds
 import SwiftUIX
 
 struct MarkdownText: View {
   var content: String
+  @Environment(GatewayStore.self) var gw
+  var channelStore: ChannelStore?
+
   var renderer: MarkdownRendererVM = .init()
+
+  @State var userPopover: PartialUser?
 
   var body: some View {
     VStack(alignment: .leading, spacing: 4) {
@@ -29,8 +35,43 @@ struct MarkdownText: View {
     }
     .task(id: content) {
       guard content != renderer.rawContent else { return }  // skip reparsing of same content.
+      renderer.passRefs(
+        gw: gw,
+        channelStore: channelStore
+      )  // it isnt expensive to call this, its just refs.
       await renderer.update(content)
     }
+    .environment(
+      \.openURL,
+      OpenURLAction { url in
+        return handleURL(url)
+      }
+    )
+    .popover(item: $userPopover) {
+      user in
+      ProfilePopoutView(
+        guild: channelStore?.guildStore,
+        member: channelStore?.guildStore?.members[user.id],
+        user: user
+      )
+    }
+  }
+
+  func handleURL(_ url: URL) -> OpenURLAction.Result {
+    // Handle paicord mention links
+    guard let cmd = PaicordChatLink(url: url) else {
+      return .systemAction
+    }
+
+    switch cmd {
+    case .userMention(let userID):
+      if let user = gw.user.users[userID] {
+        userPopover = user
+      }
+    default: return .discarded // other paicord links not handled yet, todo.
+    }
+
+    return .handled
   }
 
   struct BlockView: View {
@@ -168,10 +209,11 @@ struct BlockElement: Identifiable {
 @Observable
 class MarkdownRendererVM {
   static var parser: DiscordMarkdownParser = {
-    .init() 
+    .init()
   }()
-  static let cache: NSCache<NSString, CachedDocument> =  .init()
-  
+
+  static let cache: NSCache<NSString, CachedDocument> = .init()
+
   class CachedDocument: NSObject {
     let document: AST.DocumentNode
     init(document: AST.DocumentNode) {
@@ -182,6 +224,19 @@ class MarkdownRendererVM {
   var blocks: [BlockElement] = []
 
   init() {}
+
+  var gw: GatewayStore!
+  var guildStore: GuildStore?
+  var channelStore: ChannelStore?
+
+  func passRefs(
+    gw: GatewayStore,
+    channelStore: ChannelStore?
+  ) {
+    self.gw = gw
+    self.guildStore = channelStore?.guildStore
+    self.channelStore = channelStore
+  }
 
   func update(_ rawContent: String) async {
     self.rawContent = rawContent
@@ -196,10 +251,10 @@ class MarkdownRendererVM {
         return ast
       }.value
       let blocks = await Task.detached {
-//        let emojisOnly = ast.isEmojisOnly()
-//        await MainActor.run {
-//          self.isEmojisOnly = emojisOnly
-//        }
+        //        let emojisOnly = ast.isEmojisOnly()
+        //        await MainActor.run {
+        //          self.isEmojisOnly = emojisOnly
+        //        }
         let blocks = self.buildBlocks(from: ast)
         return blocks
       }.value
@@ -543,12 +598,7 @@ class MarkdownRendererVM {
 
     case .autolink:
       if let a = node as? AST.AutolinkNode {
-        let attrs: [NSAttributedString.Key: Any] = [
-          .font: FontHelpers.preferredBodyFont(),
-          .foregroundColor: AppKitOrUIKitColor.systemBlue,
-          .link: URL(string: a.url) as Any,
-        ]
-        let s = NSAttributedString(string: a.text, attributes: attrs)
+        let s = NSAttributedString(string: a.text, attributes: baseAttributes)
         container.append(s)
       }
 
@@ -596,39 +646,126 @@ class MarkdownRendererVM {
 
     case .userMention:
       if let m = node as? AST.UserMentionNode {
-        let s = NSAttributedString(
-          string: "<@\(m.id)>",
-          attributes: baseAttributes
+        let name: String
+        if let user = gw.user.users[m.id] {
+          if let member = guildStore?.members[m.id] {
+            name =
+              member.nick ?? user.global_name ?? user.username ?? m.id.rawValue
+          } else {
+            name = user.global_name ?? user.username ?? m.id.rawValue
+          }
+        } else {
+          name = m.id.rawValue
+        }
+
+        var attrs = baseAttributes
+        attrs[.backgroundColor] = AppKitOrUIKitColor(
+          Color(hexadecimal6: 0x292c52)
         )
+        attrs[.foregroundColor] = AppKitOrUIKitColor.secondaryLabelCompatible
+        // add clickable paicord link for user mention (use rawValue!)
+        if let url = URL(string: "paicord://mention/user/\(m.id.rawValue)") {
+          attrs[.link] = url
+        }
+
+        let s = NSAttributedString(string: "@\(name)", attributes: attrs)
         container.append(s)
       }
 
     case .roleMention:
       if let r = node as? AST.RoleMentionNode {
-        let s = NSAttributedString(
-          string: "<@&\(r.id)>",
-          attributes: baseAttributes
-        )
-        container.append(s)
+        // construct paicord link so text view can intercept clicks
+        if let role = guildStore?.roles[r.id] {
+          let color: AppKitOrUIKitColor = AppKitOrUIKitColor(
+            role.color.asColor()
+          )
+          var attrs = baseAttributes
+          // base role background is tertiary (as requested)
+          attrs[.backgroundColor] =
+            AppKitOrUIKitColor.tertiarySystemBackgroundCompatible
+          // base role foreground use secondary label
+          attrs[.foregroundColor] = AppKitOrUIKitColor.secondaryLabelCompatible
+
+          if let url = URL(string: "paicord://mention/role/\(r.id.rawValue)") {
+            attrs[.link] = url
+          }
+
+          let s = NSAttributedString(
+            string: "@\(role.name)",
+            attributes: attrs
+          )
+          container.append(s)
+        } else {
+          var attrs = baseAttributes
+          if let url = URL(string: "paicord://mention/role/\(r.id.rawValue)") {
+            attrs[.link] = url
+          }
+          let s = NSAttributedString(
+            string: "<@&\(r.id.rawValue)>",
+            attributes: attrs
+          )
+          container.append(s)
+        }
       }
 
     case .channelMention:
       if let c = node as? AST.ChannelMentionNode {
-        let s = NSAttributedString(
-          string: "<#\(c.id)>",
-          attributes: baseAttributes
-        )
-        container.append(s)
+        if let channel = guildStore?.channels[c.id] {
+          var attrs = baseAttributes
+          // base mention background and text per spec:
+          attrs[.backgroundColor] = AppKitOrUIKitColor(
+            Color(hexadecimal6: 0x292c52)
+          )
+          attrs[.foregroundColor] = AppKitOrUIKitColor.secondaryLabelCompatible
+          if let url = URL(string: "paicord://mention/channel/\(c.id.rawValue)")
+          {
+            attrs[.link] = url
+          }
+          let name = channel.name ?? c.id.rawValue
+          let s = NSAttributedString(
+            string: "#\(name)",
+            attributes: attrs
+          )
+          container.append(s)
+        } else {
+          var attrs = baseAttributes
+          if let url = URL(string: "paicord://mention/channel/\(c.id.rawValue)")
+          {
+            attrs[.link] = url
+          }
+          let s = NSAttributedString(
+            string: "<#\(c.id.rawValue)>",
+            attributes: attrs
+          )
+          container.append(s)
+        }
       }
 
     case .everyoneMention:
+      // everyone/here should be clickable and follow the same visual style
+      var attrs = baseAttributes
+      attrs[.backgroundColor] = AppKitOrUIKitColor(
+        Color(hexadecimal6: 0x292c52)
+      )
+      attrs[.foregroundColor] = AppKitOrUIKitColor.secondaryLabelCompatible
+      if let url = URL(string: "paicord://mention/everyone") {
+        attrs[.link] = url
+      }
       container.append(
-        NSAttributedString(string: "@everyone", attributes: baseAttributes)
+        NSAttributedString(string: "@everyone", attributes: attrs)
       )
 
     case .hereMention:
+      var attrs = baseAttributes
+      attrs[.backgroundColor] = AppKitOrUIKitColor(
+        Color(hexadecimal6: 0x292c52)
+      )
+      attrs[.foregroundColor] = AppKitOrUIKitColor.secondaryLabelCompatible
+      if let url = URL(string: "paicord://mention/here") {
+        attrs[.link] = url
+      }
       container.append(
-        NSAttributedString(string: "@here", attributes: baseAttributes)
+        NSAttributedString(string: "@here", attributes: attrs)
       )
 
     case .timestamp:
@@ -851,7 +988,7 @@ extension Text {
 #Preview {
   @Previewable @State var profileOpen: Bool = false
   @Previewable @State var avatarAnimated: Bool = false
-  
+
   let message: DiscordChannel.Message = .init(
     id: try! .makeFake(),
     channel_id: try! .makeFake(),
@@ -986,4 +1123,50 @@ extension Text {
     //    .onHover { avatarAnimated = $0 }
   }
   //}
+}
+
+enum PaicordChatLink {
+  case userMention(UserSnowflake)
+  case roleMention(RoleSnowflake)
+  case channelMention(ChannelSnowflake)
+
+  case discordMessageLink(UserSnowflake)
+
+  init?(url: URL) {
+    guard
+      url.scheme == "paicord"
+        || (url.host() == "discord.com" && url.scheme == "https")
+    else { return nil }
+    switch url.host() {
+    case "discord.com":
+      return nil
+      #warning("impl discord.com links")
+
+    case "mention":
+      let pathComponents = url.pathComponents.filter { $0 != "/" }
+      guard let first = pathComponents.first else { return nil }
+      switch first {
+      case "user":
+        guard pathComponents.count >= 2,
+          let userId = pathComponents[safe: 1]
+        else { return nil }
+        self = .userMention(.init(userId))
+      case "role":
+        guard pathComponents.count >= 2,
+          let roleId = pathComponents[safe: 1]
+        else { return nil }
+        self = .roleMention(.init(roleId))
+      case "channel":
+        guard pathComponents.count >= 2,
+          let channelId = pathComponents[safe: 1]
+        else { return nil }
+        self = .channelMention(.init(channelId))
+      default:
+        return nil
+      }
+
+    default:
+      return nil
+    }
+  }
 }

@@ -186,6 +186,23 @@ class ChannelStore: DiscordDataStore {
         guildStore.members[authorId] = msgMember
       }
     }
+    
+    if let guildStore {
+      var unknownMemberIds: Set<UserSnowflake> = []
+      for mention in messageData.mentions {
+        if guildStore.members[mention.id] == nil {
+          unknownMemberIds.insert(mention.id)
+        }
+      }
+      if !unknownMemberIds.isEmpty {
+        print(
+          "[ChannelStore] Requesting \(unknownMemberIds.count) unknown members in guild \(guildStore.guildId.rawValue)"
+        )
+        Task { @MainActor in
+          await guildStore.requestMembers(for: unknownMemberIds)
+        }
+      }
+    }
   }
 
   private func handleMessageUpdate(
@@ -194,6 +211,24 @@ class ChannelStore: DiscordDataStore {
     guard var msg = messages[partialMessage.id] else { return }
     msg.update(with: partialMessage)
     messages.updateValue(msg, forKey: msg.id)
+    
+    // check for unknown member data from mentions if we have a guild store
+    if let guildStore {
+      var unknownMemberIds: Set<UserSnowflake> = []
+      for mention in partialMessage.mentions ?? [] {
+        if guildStore.members[mention.id] == nil {
+          unknownMemberIds.insert(mention.id)
+        }
+      }
+      if !unknownMemberIds.isEmpty {
+        print(
+          "[ChannelStore] Requesting \(unknownMemberIds.count) unknown members in guild \(guildStore.guildId.rawValue)"
+        )
+        Task { @MainActor in
+          await guildStore.requestMembers(for: unknownMemberIds)
+        }
+      }
+    }
   }
 
   private func handleMessageDelete(_ messageDelete: Gateway.MessageDelete) {
@@ -354,11 +389,11 @@ class ChannelStore: DiscordDataStore {
       
       // lastly request members if member data for any author is missing
       if let guildStore {
-        let unknownMembers = Array(
-          messages.compactMap(\.author?.id).filter({
-            guildStore.members[$0] == nil
-          }).uniqued()
-        )
+        let unknownMembers = Set(messages.map { message in
+          ([message.author?.id] + message.mentions.map(\.id)).compactMap({ $0 })
+        }.flatMap({ $0 }).filter({
+          guildStore.members[$0] == nil
+        }))
         if !unknownMembers.isEmpty {
           print(
             "[ChannelStore] Requesting \(unknownMembers.count) unknown members in guild \(guildStore.guildId.rawValue)"

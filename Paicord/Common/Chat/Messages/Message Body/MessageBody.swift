@@ -12,10 +12,8 @@ import SwiftUIX
 extension MessageCell {
   struct MessageBody: View {
     let message: DiscordChannel.Message
-    let reactions: ChannelStore.Reactions
-    let burstReactions: ChannelStore.Reactions
-    let buffReactions: ChannelStore.BuffReactions
-    let buffBurstReactions: ChannelStore.BuffReactions
+    let channelStore: ChannelStore
+    
     var body: some View {
       VStack(alignment: .leading, spacing: 4) {
         // Content
@@ -23,7 +21,7 @@ extension MessageCell {
           ComponentsV2View( /*components: message.components*/)
             .equatable(by: message.components)
         } else if !message.content.isEmpty {
-          MarkdownText(content: message.content)
+          MarkdownText(content: message.content, channelStore: channelStore)
             .equatable(by: message.content)
         }
 
@@ -43,6 +41,11 @@ extension MessageCell {
         }
 
         // Reactions
+        let reactions = channelStore.reactions[message.id, default: [:]]
+        let burstReactions = channelStore.burstReactions[message.id, default: [:]]
+        let buffReactions = channelStore.buffReactions[message.id, default: [:]]
+        let buffBurstReactions = channelStore.buffBurstReactions[message.id, default: [:]]
+        
         if !reactions.isEmpty || !burstReactions.isEmpty || !buffReactions.isEmpty || !buffBurstReactions.isEmpty {
           ReactionsView(
             message: message,

@@ -14,7 +14,7 @@ import SwiftUIX
 enum Profile {
   struct Avatar: View {
     let member: Guild.PartialMember?
-    let user: DiscordUser?
+    let user: PartialUser?
     var animated: Bool = false
     var showDecoration: Bool = false
 
@@ -43,7 +43,7 @@ enum Profile {
     }
 
     struct UserAvatar: View {
-      var user: DiscordUser?
+      var user: PartialUser?
       var animated: Bool = false
       
       var body: some View {
@@ -90,7 +90,7 @@ enum Profile {
       // use env for guildstore only if we have a member,
       // then we can be sure guildstore is available
       @Environment(GuildStore.self) var guildStore
-      var user: DiscordUser?
+      var user: PartialUser?
       var member: Guild.PartialMember?
       var animated: Bool = false
       
@@ -193,10 +193,19 @@ enum Profile {
   struct AvatarWithPresence: View {
     @Environment(GatewayStore.self) var gw
     let member: Guild.PartialMember?
-    let user: DiscordUser
+    let user: PartialUser
     var hideOffline: Bool = false
     var animated: Bool = false
     var showDecoration: Bool = false
+    
+    init(member: Guild.PartialMember?, user: DiscordUser) {
+      self.member = member
+      self.user = user.toPartialUser()
+    }
+    init(member: Guild.PartialMember?, user: PartialUser) {
+      self.member = member
+      self.user = user
+    }
 
     var body: some View {
       GeometryReader { geo in
