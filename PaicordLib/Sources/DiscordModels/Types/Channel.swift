@@ -800,6 +800,8 @@ public struct Embed: Sendable, Codable, Equatable, Hashable, ValidatablePayload
 		public var proxy_url: String?
 		public var height: Int?
 		public var width: Int?
+    public var placeholder: String?
+    public var content_type: String?
 
 		public init(
 			url: DynamicURL,
@@ -846,7 +848,9 @@ public struct Embed: Sendable, Codable, Equatable, Hashable, ValidatablePayload
 	}
 
 	/// https://discord.com/developers/docs/resources/channel#embed-object-embed-field-structure
-	public struct Field: Sendable, Codable, Equatable, Hashable {
+  public struct Field: Sendable, Codable, Equatable, Hashable, Identifiable {
+    public let id: UUID = UUID()
+    
 		public var name: String
 		public var value: String
 		public var inline: Bool?

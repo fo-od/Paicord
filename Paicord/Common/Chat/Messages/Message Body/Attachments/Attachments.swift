@@ -6,6 +6,7 @@
 //  Copyright © 2025 Lakhan Lothiyi.
 //
 
+import AVKit
 import PaicordLib
 import SDWebImageSwiftUI
 import SwiftUIX
@@ -45,16 +46,23 @@ extension MessageCell {
         switch previewableAttachments.count {
         case 1:
           let attachment = previewableAttachments[0]
+          let aspectRatio: CGFloat? = {
+            if let width = attachment.width, let height = attachment.height {
+              return width.toCGFloat / height.toCGFloat
+            } else {
+              return nil
+            }
+          }()
           AttachmentGridItemPreview(
             attachment: attachment
           )
-          .scaledToFit()
           .clipShape(.rounded)
+          .aspectRatio(aspectRatio, contentMode: .fit)
           .frame(
             minWidth: 1,
-            maxWidth: min(attachment.width?.toCGFloat, 350),
+            maxWidth: min(attachment.width?.toCGFloat, 400),
             minHeight: 1,
-            maxHeight: min(attachment.height?.toCGFloat, 400),
+            maxHeight: min(attachment.height?.toCGFloat, 300),
             alignment: .leading
           )
         //					case
@@ -90,7 +98,7 @@ extension MessageCell {
         "video/quicktime",
       ]
 
-      var attachment: DiscordChannel.Message.Attachment
+      var attachment: DiscordMedia
 
       var body: some View {
         switch attachment.content_type {
@@ -106,9 +114,9 @@ extension MessageCell {
 
       // preview for image
       struct ImageView: View {
-        var attachment: DiscordChannel.Message.Attachment
+        var attachment: DiscordMedia
         var body: some View {
-          WebImage(url: URL(string: attachment.proxy_url)) {
+          WebImage(url: URL(string: attachment.proxyurl)) {
             phase in
             switch phase {
             case .success(let image):
@@ -133,15 +141,73 @@ extension MessageCell {
               }
             }
           }
+          .scaledToFit()
         }
       }
 
       struct VideoView: View {
-        var attachment: DiscordChannel.Message.Attachment
-        var body: some View {
-          Text("Video preview not implemented yet.")
-            .foregroundStyle(.red)
+        var attachment: DiscordMedia
+        @State var wantsPlayback: Bool = false
+
+        var poster: URL {
+          let url = URL(string: attachment.proxyurl)!
+          var urlcomponents = URLComponents(
+            url: url,
+            resolvingAgainstBaseURL: false
+          )!
+          // replace host with media.discordapp.net
+          urlcomponents.host = "media.discordapp.net"
+          // add query parameter "format=png" to get poster image
+          urlcomponents.queryItems =
+            (urlcomponents.queryItems ?? []) + [
+              URLQueryItem(name: "format", value: "png")
+            ]
+          return urlcomponents.url!
         }
+        var body: some View {
+          if !wantsPlayback {
+            WebImage(url: poster)
+              .resizable()
+              .scaledToFit()
+              .overlay(
+                Button {
+                  wantsPlayback = true
+                } label: {
+                  Image(systemName: "play.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(.white)
+                    .padding()
+                    .background(.ultraThinMaterial)
+                    .clipShape(.circle)
+                    .frame(width: 64, height: 64)
+                }
+                .buttonStyle(.borderless)
+              )
+          } else {
+            VideoPlayerView(attachment: attachment)
+          }
+        }
+        
+        struct VideoPlayerView: View {
+          var attachment: DiscordMedia
+          var player: AVPlayer
+          
+          init(attachment: DiscordMedia) {
+            self.attachment = attachment
+            self.player = AVPlayer(
+              url: URL(string: attachment.proxyurl)!
+            )
+            
+            // Auto-play
+            self.player.play()
+          }
+          
+          var body: some View {
+            VideoPlayer(player: player)
+          }
+        }
+        
       }
     }
 

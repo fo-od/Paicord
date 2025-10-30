@@ -34,3 +34,28 @@ extension Gateway.Session: ActivityData {}
 
 extension DiscordUser: @retroactive Identifiable {}
 extension PartialUser: @retroactive Identifiable {}
+
+extension Embed: @retroactive Identifiable {
+  public var id: Int {
+    self.hashValue
+  }
+}
+
+protocol DiscordMedia {
+  var proxyurl: String { get }
+  var height: Int? { get }
+  var width: Int? { get }
+  var placeholder: String? { get }
+  var content_type: String? { get }
+}
+
+extension Embed.Media: DiscordMedia {
+  var proxyurl: String {
+    self.proxy_url ?? self.url.asString
+  }
+}
+extension DiscordChannel.Message.Attachment: DiscordMedia {
+  var proxyurl: String {
+    self.proxy_url
+  }
+}

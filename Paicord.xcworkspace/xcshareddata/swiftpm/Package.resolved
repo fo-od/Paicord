@@ -1,5 +1,5 @@
 {
-  "originHash" : "7a6580397f7f8bd804abef4efb89eacb66c8d26ae4fd1ff7bf54e9834c5e1a6c",
+  "originHash" : "d9e6101f659a2be0544ce8319c6724b1b5aafdb18dea9f47610c86079bbfb6c3",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -89,6 +89,15 @@
       "state" : {
         "branch" : "master",
         "revision" : "e0c7eebc5a4465a3c4680764f26b7a61f567cdaf"
+      }
+    },
+    {
+      "identity" : "localconsole",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/circularsprojects/LocalConsole",
+      "state" : {
+        "branch" : "main",
+        "revision" : "f7b08c9784bc04483fda9ddc71971ec9e918c049"
       }
     },
     {

@@ -35,6 +35,7 @@
 		57F5AF532E7CBDD000AD5674 /* AccountPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F5AF522E7CBDD000AD5674 /* AccountPicker.swift */; };
 		57F5AF552E7CBDF400AD5674 /* MFAView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F5AF542E7CBDF400AD5674 /* MFAView.swift */; };
 		8702A5382EAA6753008DD55A /* MemberRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8702A5372EAA6751008DD55A /* MemberRowView.swift */; };
+		AA0718942EB237F100D41529 /* LocalConsole in Frameworks */ = {isa = PBXBuildFile; platformFilters = (ios, xros, ); productRef = AA0718932EB237F100D41529 /* LocalConsole */; };
 		AA0C43D72E9F190B000FA834 /* AttributedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0C43D62E9F18AD000FA834 /* AttributedText.swift */; };
 		AA0C43D92E9F1D41000FA834 /* EmojiAttachmentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0C43D82E9F1D41000FA834 /* EmojiAttachmentCell.swift */; };
 		AA1097142E64C181005BC3D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA1097102E64C181005BC3D2 /* Assets.xcassets */; };
@@ -191,6 +192,7 @@
 				AA9C818C2E6702930086B1DA /* SwiftUIIntrospect in Frameworks */,
 				57CDD87F2E71CB6000022203 /* HCaptcha in Frameworks */,
 				AA13780B2E969D6100100969 /* DiscordMarkdownParser in Frameworks */,
+				AA0718942EB237F100D41529 /* LocalConsole in Frameworks */,
 				AAB22FDB2EAD86B700413310 /* ColorCube in Frameworks */,
 				AAB22FD82EAD0A2400413310 /* SwiftPrettyPrint in Frameworks */,
 				AAEEC7222E6515C400EB5FC9 /* KeychainAccess in Frameworks */,
@@ -604,6 +606,7 @@
 				AA21D2822EAA557C00C75093 /* Sparkle */,
 				AAB22FD72EAD0A2400413310 /* SwiftPrettyPrint */,
 				AAB22FDA2EAD86B700413310 /* ColorCube */,
+				AA0718932EB237F100D41529 /* LocalConsole */,
 			);
 			productName = PaiCord;
 			productReference = AA1096DB2E63BE84005BC3D2 /* Paicord.app */;
@@ -647,6 +650,7 @@
 				AA21D2812EAA557C00C75093 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				AAB22FD62EAD0A2300413310 /* XCRemoteSwiftPackageReference "SwiftPrettyPrint" */,
 				AAB22FD92EAD86B600413310 /* XCRemoteSwiftPackageReference "ColorCube" */,
+				AA0718922EB237F100D41529 /* XCRemoteSwiftPackageReference "LocalConsole" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AA1096DC2E63BE84005BC3D2 /* Products */;
@@ -1007,6 +1011,14 @@
 				kind = branch;
 			};
 		};
+		AA0718922EB237F100D41529 /* XCRemoteSwiftPackageReference "LocalConsole" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/circularsprojects/LocalConsole";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		AA1378072E969A9000100969 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/airbnb/lottie-spm";
@@ -1105,6 +1117,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 57CDD87D2E71CB6000022203 /* XCRemoteSwiftPackageReference "hcaptcha" */;
 			productName = HCaptcha;
+		};
+		AA0718932EB237F100D41529 /* LocalConsole */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0718922EB237F100D41529 /* XCRemoteSwiftPackageReference "LocalConsole" */;
+			productName = LocalConsole;
 		};
 		AA1378082E969A9000100969 /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;
