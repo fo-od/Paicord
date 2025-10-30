@@ -91,10 +91,7 @@ final class GatewayStore {
       for await event in await gateway.events {
         switch event.data {
         case .ready(let readyData):
-          if let token = readyData.auth_token, var acc = accounts.currentAccount {
-            acc.token = token
-            accounts.currentAccount = acc
-          }
+          handleReady(readyData)
         default: break
         }
       }
@@ -180,4 +177,34 @@ final class GatewayStore {
   }
   private var subscribedGuilds: Set<GuildSnowflake> = []
 
+  
+  // MARK: - Handlers
+  
+  private func handleReady(_ data: Gateway.Ready) {
+    guard self.subscribedGuilds.isEmpty == false else { return }
+    print("[GatewayStore] Reconnected, removing ChannelStore instances excluding focused channel.")
+    if let channelId = PaicordAppState.shared.selectedChannel {
+      channels = channels.filter { $0.key == channelId }
+    } else {
+      channels = [:]
+    }
+    if let channel = channels.values.first {
+      print("[GatewayStore] Refetching messages on behalf of focused channel \(channel.channelId.rawValue).")
+      channel.messages.removeAll()
+      Task { @MainActor in
+        do {
+          try await channel.fetchMessages()
+        } catch {
+          PaicordAppState.shared.error = error
+        }
+      }
+    }
+    print("[GatewayStore] Reconnected, guild subscriptions invalidated.")
+    self.subscribedGuilds = []
+    if let guildId = PaicordAppState.shared.selectedGuild {
+      print("[GatewayStore] Resubscribing to focused guild.")
+      _ = getGuildStore(for: guildId)
+    }
+  }
+    
 }
