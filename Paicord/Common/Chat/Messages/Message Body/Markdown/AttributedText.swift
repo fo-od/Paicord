@@ -46,6 +46,7 @@ struct AttributedText: View {
       textView.textContainer?.maximumNumberOfLines = lineLimit ?? 0
       textView.textStorage?.setAttributedString(attributedString)
       textView.isAutomaticLinkDetectionEnabled = true
+      textView.linkTextAttributes = [:]  // use original attributes
       return textView
     }
 
@@ -78,7 +79,6 @@ struct AttributedText: View {
       return CGSize(width: targetWidth, height: usedRect.height)
     }
 
-    // Coordinator holds the SwiftUI OpenURLAction so native clicks can trigger it.
     final class Coordinator: NSObject {
       let openURL: OpenURLAction
       init(openURL: OpenURLAction) {
@@ -87,67 +87,53 @@ struct AttributedText: View {
     }
   }
 
-  // NSTextView subclass that preserves copy-behaviour and forwards clicks to coordinator.
-  class ModifiedCopyingTextView: NSTextView {
-    weak fileprivate var customCoordinator: _AttributedTextView.Coordinator?
-
-    override func clicked(onLink link: Any, at charIndex: Int) {
-      if let url = link as? URL {
-        customCoordinator?.openURL(url)
-      } else {
-        super.clicked(onLink: link, at: charIndex)
-      }
-    }
-
-    override func writeSelection(
-      to pboard: NSPasteboard,
-      type: NSPasteboard.PasteboardType
-    ) -> Bool {
-      let selectedAttributedString = attributedString().attributedSubstring(
-        from: selectedRange()
-      )
-      let selectedAttributedStringCopy = NSMutableAttributedString(
-        attributedString: selectedAttributedString
-      )
-
-      selectedAttributedStringCopy.enumerateAttribute(
-        NSAttributedString.Key.attachment,
-        in: NSMakeRange(0, (selectedAttributedString.string.count)),
-        options: .reverse,
-        using: {
-          (
-            _ value: Any?,
-            _ range: NSRange,
-            _ stop: UnsafeMutablePointer<ObjCBool>
-          ) -> Void in
-
-          if let textAttachment = value as? NSTextAttachment,
-            let textAttachmentCell = textAttachment.attachmentCell
-              as? MarkdownRendererVM.EmojiAttachmentCell
-          {
-            var range2: NSRange = NSRange(location: 0, length: 0)
-            let attributes = selectedAttributedStringCopy.attributes(
-              at: range.location,
-              effectiveRange: &range2
-            )
-
-            selectedAttributedStringCopy.replaceCharacters(
-              in: range,
-              with: NSMutableAttributedString(
-                string: textAttachmentCell.copyText
-              )
-            )
-            selectedAttributedStringCopy.addAttributes(attributes, range: range)
-          }
-        }
-      )
-
-      pboard.clearContents()
-      pboard.writeObjects([selectedAttributedStringCopy])
-
-      return true
+class ModifiedCopyingTextView: NSTextView {
+  weak fileprivate var customCoordinator: _AttributedTextView.Coordinator?
+  
+  override func clicked(onLink link: Any, at charIndex: Int) {
+    if let url = link as? URL {
+      customCoordinator?.openURL(url)
+    } else {
+      super.clicked(onLink: link, at: charIndex)
     }
   }
+  
+  override func writeSelection(
+    to pboard: NSPasteboard,
+    type: NSPasteboard.PasteboardType
+  ) -> Bool {
+    let selectedAttributedString = attributedString().attributedSubstring(
+      from: selectedRange()
+    )
+    let selectedAttributedStringCopy = NSMutableAttributedString(
+      attributedString: selectedAttributedString
+    )
+    
+    selectedAttributedStringCopy.enumerateAttribute(
+      NSAttributedString.Key.accessibilityCustomText,
+      in: NSMakeRange(0, selectedAttributedString.string.count),
+      options: .reverse
+    ) { value, range, _ in
+      if let customText = value as? String {
+        // Preserve existing attributes
+        var range2 = NSRange(location: 0, length: 0)
+        let attributes = selectedAttributedStringCopy.attributes(
+          at: range.location,
+          effectiveRange: &range2
+        )
+        
+        selectedAttributedStringCopy.replaceCharacters(
+          in: range,
+          with: NSAttributedString(string: customText, attributes: attributes)
+        )
+      }
+    }
+    
+    pboard.clearContents()
+    pboard.writeObjects([selectedAttributedStringCopy.string as NSString])
+    return true
+  }
+}
 #elseif os(iOS)
   import UIKit
 
@@ -175,6 +161,7 @@ struct AttributedText: View {
       textView.layoutManager.ensureLayout(for: textView.textContainer)
       textView.dataDetectorTypes = [.link]
       textView.isUserInteractionEnabled = true
+      textView.linkTextAttributes = [:]
       textView.isScrollEnabled = false
       // allow links, but we'll intercept via delegate
       textView.isEditable = false
@@ -209,7 +196,6 @@ struct AttributedText: View {
         self.openURL = openURL
       }
 
-      // Intercept link taps. If it's a paicord:// link, forward to SwiftUI's openURL and return false
       func textView(
         _ textView: UITextView,
         shouldInteractWith URL: URL,

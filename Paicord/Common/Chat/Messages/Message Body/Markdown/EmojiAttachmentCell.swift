@@ -27,8 +27,7 @@ extension MarkdownRendererVM {
       let attachment = NSTextAttachment()
       DispatchQueue.main.sync {
         attachment.attachmentCell = EmojiAttachmentCell(
-          url: url,
-          copyText: copyText
+          url: url
         )
       }  // textkit1
     #elseif os(iOS)
@@ -45,18 +44,23 @@ extension MarkdownRendererVM {
       )
       attachment.bounds = CGRect(x: 0, y: 0, width: 15, height: 15)
     #endif
-    return NSAttributedString(attachment: attachment)
+    // set accessibilityCustomText attribute for copy text
+    let mutable = NSMutableAttributedString(attributedString: .init(attachment: attachment))
+    mutable.addAttribute(
+      .accessibilityCustomText,
+      value: copyText,
+      range: NSRange(location: 0, length: mutable.length)
+    )
+    return mutable
   }
 
   #if os(macOS)
     final class EmojiAttachmentCell: NSTextAttachmentCell {
       private let url: URL
       private var hostingView: NSHostingView<AnyView>?
-      let copyText: String
 
-      init(url: URL, copyText: String = "") {
+      init(url: URL) {
         self.url = url
-        self.copyText = copyText
         super.init(imageCell: nil)
       }
 

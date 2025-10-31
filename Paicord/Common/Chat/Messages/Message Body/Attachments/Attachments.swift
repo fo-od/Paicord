@@ -177,7 +177,7 @@ extension MessageCell {
                     .resizable()
                     .scaledToFit()
                     .foregroundStyle(.white)
-                    .padding()
+                    .padding(20)
                     .background(.ultraThinMaterial)
                     .clipShape(.circle)
                     .frame(width: 64, height: 64)

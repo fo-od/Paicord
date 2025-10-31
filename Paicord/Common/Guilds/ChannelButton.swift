@@ -21,6 +21,7 @@ struct ChannelButton: View {
       textChannelButton { _ in
         Text("# \(channel.name ?? "unknown")")
       }
+      .tint(.primary)
     case .dm:
       textChannelButton { hovered in
         let selected = appState.selectedChannel == channel.id
@@ -55,6 +56,7 @@ struct ChannelButton: View {
         .clipShape(.rounded)
       }
       .buttonStyle(.borderless)
+      .tint(.primary)
     case .groupDm:
       textChannelButton { _ in
         HStack {
@@ -80,6 +82,7 @@ struct ChannelButton: View {
         .padding(4)
       }
       .buttonStyle(.borderless)
+      .tint(.primary)
     case .guildCategory:
       let expectedParentID = channel.id
       let childChannels = channels.values
@@ -88,11 +91,13 @@ struct ChannelButton: View {
         .map { $0.id }
 
       category(channelIDs: childChannels)
+        .tint(.primary)
     case .guildVoice:
       textChannelButton { _ in
         Text(Image(systemName: "speaker.wave.2.fill"))
           + Text(" \(channel.name ?? "unknown")")
       }
+      .tint(.primary)
       .disabled(true)
     default:
       textChannelButton { _ in
@@ -101,6 +106,7 @@ struct ChannelButton: View {
           Text(String(describing: channel.type))
         }
       }
+      .tint(.primary)
       .disabled(true)
     }
   }

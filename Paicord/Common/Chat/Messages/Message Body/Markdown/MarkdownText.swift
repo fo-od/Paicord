@@ -68,7 +68,7 @@ struct MarkdownText: View {
       if let user = gw.user.users[userID] {
         userPopover = user
       }
-    default: return .discarded // other paicord links not handled yet, todo.
+    default: return .discarded  // other paicord links not handled yet, todo.
     }
 
     return .handled
@@ -156,9 +156,9 @@ struct MarkdownText: View {
             .highlightMode(.languageAlias(language))
         } else {
           Text(code)  // no highlighting
-            .fontDesign(.monospaced)
         }
       }
+      .fontDesign(.monospaced)
       .containerRelativeFrame(.horizontal, alignment: .leading) { length, _ in
         max(length * 0.8, 250)
       }
@@ -659,14 +659,20 @@ class MarkdownRendererVM {
         }
 
         var attrs = baseAttributes
-        attrs[.backgroundColor] = AppKitOrUIKitColor(
-          Color(hexadecimal6: 0x292c52)
-        )
-        attrs[.foregroundColor] = AppKitOrUIKitColor.secondaryLabelCompatible
         // add clickable paicord link for user mention (use rawValue!)
         if let url = URL(string: "paicord://mention/user/\(m.id.rawValue)") {
           attrs[.link] = url
         }
+        
+        attrs[.accessibilityCustomText] = "<@\(m.id.rawValue)>"
+        
+        attrs[.backgroundColor] = AppKitOrUIKitColor(
+          Color(hexadecimal6: 0x292c52).opacity(0.5)
+        )
+        attrs[.foregroundColor] = AppKitOrUIKitColor(
+          Color(hexadecimal6: 0xaabbff)
+        )
+        attrs[.underlineStyle] = .none
 
         let s = NSAttributedString(string: "@\(name)", attributes: attrs)
         container.append(s)
@@ -679,21 +685,24 @@ class MarkdownRendererVM {
           let color: AppKitOrUIKitColor = {
             let discordColor = role.color
             if let color = discordColor.asColor() {
-              return AppKitOrUIKitColor(color)
+              return AppKitOrUIKitColor(color.opacity(0.5))
             } else {
-              return AppKitOrUIKitColor.labelCompatible
+              return AppKitOrUIKitColor(Color(hexadecimal6: 0x292c52).opacity(0.5))
             }
           }()
           var attrs = baseAttributes
-          // base role background is tertiary (as requested)
-          attrs[.backgroundColor] =
-            AppKitOrUIKitColor.tertiarySystemBackgroundCompatible
-          // base role foreground use secondary label
-          attrs[.foregroundColor] = AppKitOrUIKitColor.secondaryLabelCompatible
-
+          attrs[.accessibilityCustomText] = "<@&\(r.id.rawValue)>"
+          
           if let url = URL(string: "paicord://mention/role/\(r.id.rawValue)") {
             attrs[.link] = url
           }
+          
+          // base role background is tertiary (as requested)
+          attrs[.backgroundColor] = color
+          // base role foreground use secondary label
+          attrs[.foregroundColor] = AppKitOrUIKitColor.secondaryLabelCompatible
+          attrs[.underlineStyle] = .none
+
 
           let s = NSAttributedString(
             string: "@\(role.name)",
@@ -717,15 +726,16 @@ class MarkdownRendererVM {
       if let c = node as? AST.ChannelMentionNode {
         if let channel = guildStore?.channels[c.id] {
           var attrs = baseAttributes
+          attrs[.accessibilityCustomText] = "<#\(c.id.rawValue)>"
+          if let url = URL(string: "paicord://mention/channel/\(c.id.rawValue)")
+          {
+            attrs[.link] = url
+          }
           // base mention background and text per spec:
           attrs[.backgroundColor] = AppKitOrUIKitColor(
             Color(hexadecimal6: 0x292c52)
           )
           attrs[.foregroundColor] = AppKitOrUIKitColor.secondaryLabelCompatible
-          if let url = URL(string: "paicord://mention/channel/\(c.id.rawValue)")
-          {
-            attrs[.link] = url
-          }
           let name = channel.name ?? c.id.rawValue
           let s = NSAttributedString(
             string: "#\(name)",
@@ -762,13 +772,13 @@ class MarkdownRendererVM {
 
     case .hereMention:
       var attrs = baseAttributes
+      if let url = URL(string: "paicord://mention/here") {
+        attrs[.link] = url
+      }
       attrs[.backgroundColor] = AppKitOrUIKitColor(
         Color(hexadecimal6: 0x292c52)
       )
       attrs[.foregroundColor] = AppKitOrUIKitColor.secondaryLabelCompatible
-      if let url = URL(string: "paicord://mention/here") {
-        attrs[.link] = url
-      }
       container.append(
         NSAttributedString(string: "@here", attributes: attrs)
       )
