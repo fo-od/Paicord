@@ -223,6 +223,8 @@ extension Guild.Member {
       user: self.user,
       nick: self.nick,
       avatar: self.avatar,
+      banner: self.banner,
+      pronouns: self.pronouns,
       roles: self.roles,
       joined_at: self.joined_at,
       premium_since: self.premium_since,
@@ -240,6 +242,8 @@ extension Guild.Member {
     self.user = new.user ?? self.user
     self.nick = new.nick ?? self.nick
     self.avatar = new.avatar ?? self.avatar
+    self.banner = new.banner ?? self.banner
+    self.pronouns = new.pronouns ?? self.pronouns
     self.roles = new.roles ?? self.roles
     self.joined_at = new.joined_at ?? self.joined_at
     self.premium_since = new.premium_since ?? self.premium_since
@@ -260,6 +264,8 @@ extension Guild.PartialMember {
     self.user = new.user ?? self.user
     self.nick = new.nick ?? self.nick
     self.avatar = new.avatar ?? self.avatar
+    self.banner = new.banner ?? self.banner
+    self.pronouns = new.pronouns ?? self.pronouns
     self.roles = new.roles ?? self.roles
     self.joined_at = new.joined_at ?? self.joined_at
     self.premium_since = new.premium_since ?? self.premium_since
@@ -294,12 +300,13 @@ extension DiscordUser {
       discriminator: self.discriminator,
       global_name: self.global_name,
       avatar: self.avatar,
+      banner: self.banner,
+      pronouns: self.pronouns,
       avatar_decoration_data: self.avatar_decoration_data,
       collectibles: self.collectibles,
       primary_guild: self.primary_guild,
       bot: self.bot,
       system: self.system,
-      banner: self.banner,
       accent_color: self.accent_color,
       public_flags: self.public_flags
     )

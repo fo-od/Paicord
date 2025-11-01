@@ -121,6 +121,7 @@ public struct Guild: Sendable, Codable {
     public var nick: String?
     public var avatar: String?
     public var banner: String?
+    public var pronouns: String?
     public var roles: [RoleSnowflake]
     public var joined_at: DiscordTimestamp
     public var premium_since: DiscordTimestamp?
@@ -136,6 +137,8 @@ public struct Guild: Sendable, Codable {
       user: DiscordUser?,
       nick: String?,
       avatar: String?,
+      banner: String?,
+      pronouns: String?,
       roles: [RoleSnowflake],
       joined_at: DiscordTimestamp,
       premium_since: DiscordTimestamp?,
@@ -150,6 +153,8 @@ public struct Guild: Sendable, Codable {
       self.user = user
       self.nick = nick
       self.avatar = avatar
+      self.banner = banner
+      self.pronouns = pronouns
       self.roles = roles
       self.joined_at = joined_at
       self.premium_since = premium_since
@@ -488,6 +493,8 @@ extension Guild {
       user: DiscordUser? = nil,
       nick: String? = nil,
       avatar: String? = nil,
+      banner: String? = nil,
+      pronouns: String? = nil,
       roles: [RoleSnowflake]? = nil,
       joined_at: DiscordTimestamp? = nil,
       premium_since: DiscordTimestamp? = nil,
@@ -502,6 +509,8 @@ extension Guild {
       self.user = user
       self.nick = nick
       self.avatar = avatar
+      self.banner = banner
+      self.pronouns = pronouns
       self.roles = roles
       self.joined_at = joined_at
       self.premium_since = premium_since
@@ -518,6 +527,7 @@ extension Guild {
     public var nick: String?
     public var avatar: String?
     public var banner: String?
+    public var pronouns: String?
     public var roles: [RoleSnowflake]?
     public var joined_at: DiscordTimestamp?
     public var premium_since: DiscordTimestamp?

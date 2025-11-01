@@ -7,10 +7,11 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
     discriminator: String,
     global_name: String? = nil,
     avatar: String? = nil,
+    banner: String? = nil,
     bot: Bool? = nil,
     system: Bool? = nil,
     mfa_enabled: Bool? = nil,
-    banner: String? = nil,
+    pronouns: String? = nil,
     accent_color: DiscordColor? = nil,
     locale: DiscordLocale? = nil,
     verified: Bool? = nil,
@@ -27,6 +28,8 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
     self.discriminator = discriminator
     self.global_name = global_name
     self.avatar = avatar
+    self.banner = banner
+    self.pronouns = pronouns
     self.bot = bot
     self.system = system
     self.mfa_enabled = mfa_enabled
@@ -90,10 +93,11 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
   public var discriminator: String
   public var global_name: String?
   public var avatar: String?
+  public var banner: String?
   public var bot: Bool?
   public var system: Bool?
   public var mfa_enabled: Bool?
-  public var banner: String?
+  public var pronouns: String?
   public var accent_color: DiscordColor?
   public var locale: DiscordLocale?
   public var verified: Bool?
@@ -301,12 +305,13 @@ public struct PartialUser: Sendable, Codable, Equatable, Hashable {
   public var discriminator: String?
   public var global_name: String?
   public var avatar: String?
+  public var banner: String?
+  public var pronouns: String?
   public var avatar_decoration_data: DiscordUser.AvatarDecoration?
   public var collectibles: DiscordUser.Collectibles?
   public var primary_guild: DiscordUser.PrimaryGuild?
   public var bot: Bool?
   public var system: Bool?
-  public var banner: String?
   public var accent_color: DiscordColor?
   public var public_flags: IntBitField<DiscordUser.Flag>?
 
@@ -316,12 +321,13 @@ public struct PartialUser: Sendable, Codable, Equatable, Hashable {
     discriminator: String? = nil,
     global_name: String? = nil,
     avatar: String? = nil,
+    banner: String? = nil,
+    pronouns: String? = nil,
     avatar_decoration_data: DiscordUser.AvatarDecoration? = nil,
     collectibles: DiscordUser.Collectibles? = nil,
     primary_guild: DiscordUser.PrimaryGuild? = nil,
     bot: Bool? = nil,
     system: Bool? = nil,
-    banner: String? = nil,
     accent_color: DiscordColor? = nil,
     public_flags: IntBitField<DiscordUser.Flag>? = nil
   ) {
@@ -330,12 +336,13 @@ public struct PartialUser: Sendable, Codable, Equatable, Hashable {
     self.discriminator = discriminator
     self.global_name = global_name
     self.avatar = avatar
+    self.banner = banner
+    self.pronouns = pronouns
     self.avatar_decoration_data = avatar_decoration_data
     self.collectibles = collectibles
     self.primary_guild = primary_guild
     self.bot = bot
     self.system = system
-    self.banner = banner
     self.accent_color = accent_color
     self.public_flags = public_flags
   }
