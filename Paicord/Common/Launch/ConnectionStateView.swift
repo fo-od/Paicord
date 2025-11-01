@@ -34,6 +34,7 @@ struct ConnectionStateView: View {
 
         Text(Self.loadingString)
           .foregroundStyle(.secondary)
+          .multilineTextAlignment(.center)
           .padding(5)
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -83,6 +84,7 @@ struct ConnectionStateView: View {
     "where's the also try minecraft!",
     "Δ",
     "swift!",
+    "Loomy Loomy, I guess I'm Loomy",
   ].randomElement()!
 }
 

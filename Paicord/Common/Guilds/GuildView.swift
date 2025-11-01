@@ -12,6 +12,7 @@ import SwiftUIX
 
 struct GuildView: View {
   var guild: GuildStore
+  @Environment(\.userInterfaceIdiom) var idiom
   var body: some View {
     ScrollView {
       if let bannerURL = bannerURL(animated: true) {  // maybe add animation control?
@@ -20,15 +21,15 @@ struct GuildView: View {
           .aspectRatio(16 / 9, contentMode: .fill)
       }
 
-      VStack(spacing: 0) {
-        Text(guild.guild?.name ?? "Unknown Guild")
-          .font(.title2)
-          .frame(maxWidth: .infinity, alignment: .leading)
-          .padding(8)
-        Divider()
+      if idiom == .phone {
+        VStack(spacing: 0) {
+          Text(guild.guild?.name ?? "Unknown Guild")
+            .font(.title2)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(8)
+          Divider()
+        }
       }
-      .hidden(on: .mac)
-      .hidden(on: .pad)
 
       let uncategorizedChannels = guild.channels.values
         .filter { $0.parent_id == nil }
