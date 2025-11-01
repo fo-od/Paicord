@@ -9,7 +9,6 @@
 import ColorCube
 import PaicordLib
 import SDWebImageSwiftUI
-import SDWebImage
 import SwiftPrettyPrint
 import SwiftUIX
 
@@ -38,51 +37,41 @@ struct ProfilePopoutView: View {
   }
 
   var body: some View {
+    let profileMeta: DiscordUser.Profile.Metadata? = {
+      if showMainProfile {
+        return profile?.user_profile
+      } else {
+        return profile?.guild_member_profile ?? profile?.user_profile
+      }
+    }()
     ScrollView {
-      VStack {
-        WebImage(url: bannerURL(animated: true)) { phase in
-          switch phase {
-          case .success(let image):
-            image
-              .resizable()
-              .aspectRatio(3, contentMode: .fill)
-          default:
-            let color =
-              profile?.user_profile?.accent_color ?? user.accent_color
-            Rectangle()
-              .aspectRatio(3, contentMode: .fit)
-              .foregroundStyle((color?.asColor() ?? accentColor))
-          }
-        }
-        .reverseMask(alignment: .bottomLeading) {
-          Circle()
-            .frame(width: 80, height: 80)
-            .padding(.leading, 8)
-            .scaleEffect(1.15)
-            .offset(x: -0.5, y: 40)
-        }
-        .overlay(alignment: .bottomLeading) {
-          Profile.AvatarWithPresence(
-            member: member,
-            user: user
-          )
-          .animated(true)
-          .showsAvatarDecoration()
-          .frame(width: 80, height: 80)
-          .padding(.leading, 8)
-          .offset(y: 40)
-        }
+      VStack(alignment: .leading) {
+        bannerView
 
-        Text(
-          member?.nick ?? user.global_name ?? user.username ?? "Unknown User"
-        )
-        .font(.title2)
-        .bold()
-        .lineLimit(1)
-        .minimumScaleFactor(0.5)
-        Text("@\(user.username ?? "unknown")")
+        VStack(alignment: .leading) {
+          Text(
+            member?.nick ?? user.global_name ?? user.username ?? "Unknown User"
+          )
+          .font(.title2)
+          .bold()
+          .lineLimit(1)
+          .minimumScaleFactor(0.5)
+
+          HStack(spacing: 2) {
+            Text("@\(user.username ?? "unknown")")
+            if let pronouns = profileMeta?.pronouns
+              ?? (showMainProfile
+                ? user.pronouns : member?.pronouns ?? user.pronouns),
+              !pronouns.isEmpty
+            {
+              Text("•")
+              Text(pronouns)
+            }
+          }
           .font(.subheadline)
           .foregroundStyle(.secondary)
+        }
+        .padding()
       }
       .minWidth(idiom == .phone ? nil : 300)  // popover limits on larger devices
       .maxWidth(idiom == .phone ? nil : 300)  // popover limits on larger devices
@@ -92,6 +81,43 @@ struct ProfilePopoutView: View {
     .minHeight(idiom == .phone ? nil : 400)  // popover limits on larger devices
     .presentationDetents([.medium, .large])
     .scrollClipDisabled()
+  }
+
+  @ViewBuilder
+  var bannerView: some View {
+    WebImage(url: bannerURL(animated: true)) { phase in
+      switch phase {
+      case .success(let image):
+        image
+          .resizable()
+          .aspectRatio(3, contentMode: .fill)
+      default:
+        let color =
+          profile?.user_profile?.accent_color ?? user.accent_color
+        Rectangle()
+          .aspectRatio(3, contentMode: .fit)
+          .foregroundStyle((color?.asColor() ?? accentColor))
+      }
+    }
+    .reverseMask(alignment: .bottomLeading) {
+      Circle()
+        .frame(width: 80, height: 80)
+        .padding(.leading, 16)
+        .scaleEffect(1.15)
+        .offset(x: -1, y: 40)
+    }
+    .overlay(alignment: .bottomLeading) {
+      Profile.AvatarWithPresence(
+        member: member,
+        user: user
+      )
+      .animated(true)
+      .showsAvatarDecoration()
+      .frame(width: 80, height: 80)
+      .padding(.leading, 16)
+      .offset(y: 40)
+    }
+    .padding(.bottom, 30)
   }
 
   @Sendable
@@ -117,9 +143,9 @@ struct ProfilePopoutView: View {
       }
     }
   }
-  
+
   @State var accentColor = Color.clear
-  
+
   @Sendable
   func grabColor() async {
     let cc = CCColorCube()
@@ -140,7 +166,9 @@ struct ProfilePopoutView: View {
         flags: [.orderByBrightness, .avoidBlack, .avoidWhite]
       )
       if let firstColor = colors?.first {
-        print("[Profile] Extracted accent color: \(firstColor.debugDescription)")
+        print(
+          "[Profile] Extracted accent color: \(firstColor.debugDescription)"
+        )
         DispatchQueue.main.async {
           self.accentColor = Color(firstColor)
         }
