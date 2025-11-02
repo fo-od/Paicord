@@ -37,39 +37,12 @@ struct ProfilePopoutView: View {
   }
 
   var body: some View {
-    let profileMeta: DiscordUser.Profile.Metadata? = {
-      if showMainProfile {
-        return profile?.user_profile
-      } else {
-        return profile?.guild_member_profile ?? profile?.user_profile
-      }
-    }()
     ScrollView {
       VStack(alignment: .leading) {
         bannerView
 
         VStack(alignment: .leading) {
-          Text(
-            member?.nick ?? user.global_name ?? user.username ?? "Unknown User"
-          )
-          .font(.title2)
-          .bold()
-          .lineLimit(1)
-          .minimumScaleFactor(0.5)
-
-          HStack(spacing: 2) {
-            Text("@\(user.username ?? "unknown")")
-            if let pronouns = profileMeta?.pronouns
-              ?? (showMainProfile
-                ? user.pronouns : member?.pronouns ?? user.pronouns),
-              !pronouns.isEmpty
-            {
-              Text("•")
-              Text(pronouns)
-            }
-          }
-          .font(.subheadline)
-          .foregroundStyle(.secondary)
+          profileBody
         }
         .padding()
       }
@@ -118,6 +91,38 @@ struct ProfilePopoutView: View {
       .offset(y: 40)
     }
     .padding(.bottom, 30)
+  }
+
+  @ViewBuilder
+  var profileBody: some View {
+    let profileMeta: DiscordUser.Profile.Metadata? = {
+      if showMainProfile {
+        return profile?.user_profile
+      } else {
+        return profile?.guild_member_profile ?? profile?.user_profile
+      }
+    }()
+    Text(
+      member?.nick ?? user.global_name ?? user.username ?? "Unknown User"
+    )
+    .font(.title2)
+    .bold()
+    .lineLimit(1)
+    .minimumScaleFactor(0.5)
+
+    HStack(spacing: 2) {
+      Text("@\(user.username ?? "unknown")")
+      if let pronouns = profileMeta?.pronouns
+        ?? (showMainProfile
+          ? user.pronouns : member?.pronouns ?? user.pronouns),
+        !pronouns.isEmpty
+      {
+        Text("•")
+        Text(pronouns)
+      }
+    }
+    .font(.subheadline)
+    .foregroundStyle(.secondary)
   }
 
   @Sendable

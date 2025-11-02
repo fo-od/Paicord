@@ -126,6 +126,7 @@ final class GatewayStore {
   let accounts = TokenStore()
   var user = CurrentUserStore()
   var settings = SettingsStore()
+  var messageDrain = MessageDrainStore()
 
   private var channels: [ChannelSnowflake: ChannelStore] = [:]
   func getChannelStore(for id: ChannelSnowflake, from guild: GuildStore? = nil)

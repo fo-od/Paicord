@@ -43,7 +43,6 @@ struct AttributedText: View {
       textView.isSelectable = true
       textView.drawsBackground = false
       textView.textContainer?.lineFragmentPadding = 0
-      textView.textContainer?.maximumNumberOfLines = lineLimit ?? 0
       textView.textStorage?.setAttributedString(attributedString)
       textView.isAutomaticLinkDetectionEnabled = true
       textView.linkTextAttributes = [:]  // use original attributes
@@ -52,9 +51,14 @@ struct AttributedText: View {
 
     func updateNSView(_ nsView: ModifiedCopyingTextView, context: Context) {
       nsView.customCoordinator = context.coordinator
-      nsView.textStorage?.setAttributedString(attributedString)
+
+      if !context.coordinator.isSame(as: attributedString) {
+        nsView.textStorage?.setAttributedString(attributedString)
+        context.coordinator.remember(attributedString: attributedString)
+      }
+
       nsView.textContainer?.maximumNumberOfLines = lineLimit ?? 0
-      nsView.layoutManager?.ensureLayout(for: nsView.textContainer!)
+
     }
 
     func sizeThatFits(
@@ -68,7 +72,6 @@ struct AttributedText: View {
       else {
         return nil
       }
-
       textContainer.containerSize = CGSize(
         width: targetWidth,
         height: .greatestFiniteMagnitude
@@ -81,8 +84,26 @@ struct AttributedText: View {
 
     final class Coordinator: NSObject {
       let openURL: OpenURLAction
+      private var lastAttributedStringHash: Int = 0
+
       init(openURL: OpenURLAction) {
         self.openURL = openURL
+      }
+
+      func isSame(as attributed: NSAttributedString) -> Bool {
+        var hasher = Hasher()
+        hasher.combine(attributed.string)
+        // You can include other attribute-based hashing if necessary; keep it fast.
+        hasher.combine(attributed.length)
+        let h = hasher.finalize()
+        return h == lastAttributedStringHash
+      }
+
+      func remember(attributedString: NSAttributedString) {
+        var hasher = Hasher()
+        hasher.combine(attributedString.string)
+        hasher.combine(attributedString.length)
+        lastAttributedStringHash = hasher.finalize()
       }
     }
   }
@@ -158,21 +179,22 @@ class ModifiedCopyingTextView: NSTextView {
       textView.textContainer.maximumNumberOfLines = lineLimit ?? 0
 
       textView.textStorage.setAttributedString(attributedString)
-      textView.layoutManager.ensureLayout(for: textView.textContainer)
       textView.dataDetectorTypes = [.link]
       textView.isUserInteractionEnabled = true
       textView.linkTextAttributes = [:]
-      textView.isScrollEnabled = false
-      // allow links, but we'll intercept via delegate
-      textView.isEditable = false
-      textView.isSelectable = true
+      
+      // access layoutManager to force textkit compatibility mode on
+      _ = textView.layoutManager
       return textView
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
-      uiView.attributedText = attributedString
+      if !context.coordinator.isSame(as: attributedString) {
+        uiView.attributedText = attributedString
+        context.coordinator.remember(attributedString: attributedString)
+      }
+
       uiView.textContainer.maximumNumberOfLines = lineLimit ?? 0
-      uiView.layoutManager.ensureLayout(for: uiView.textContainer)
       uiView.delegate = context.coordinator
     }
 
@@ -192,8 +214,24 @@ class ModifiedCopyingTextView: NSTextView {
 
     final class Coordinator: NSObject, UITextViewDelegate {
       let openURL: OpenURLAction
+      private var lastAttributedStringHash: Int = 0
       init(openURL: OpenURLAction) {
         self.openURL = openURL
+      }
+
+      func isSame(as attributed: NSAttributedString) -> Bool {
+        var hasher = Hasher()
+        hasher.combine(attributed.string)
+        hasher.combine(attributed.length)
+        let h = hasher.finalize()
+        return h == lastAttributedStringHash
+      }
+
+      func remember(attributedString: NSAttributedString) {
+        var hasher = Hasher()
+        hasher.combine(attributedString.string)
+        hasher.combine(attributedString.length)
+        lastAttributedStringHash = hasher.finalize()
       }
 
       func textView(

@@ -221,7 +221,7 @@ extension MessageCell {
             }
           }
         }
-        .padding(12)
+        .padding(8)
         .frame(maxWidth: embedWidth)
         .padding(.horizontal, 8)
         .background {

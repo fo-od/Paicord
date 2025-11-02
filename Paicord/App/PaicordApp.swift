@@ -6,7 +6,6 @@
 //  Copyright © 2025 Lakhan Lothiyi. All rights reserved.
 //
 
-import Logging
 import PaicordLib
 @_spi(Advanced) import SwiftUIIntrospect
 import SwiftUIX
@@ -26,6 +25,8 @@ struct PaicordApp: App {
   var challenges = Challenges()
 
   @Environment(\.userInterfaceIdiom) var idiom
+
+  @State var showingPanel = false
 
   init() {
     //     i foubnd out this rly cool thing if u avoid logging 40mb of data to console the client isnt slow !!!!
@@ -61,13 +62,13 @@ struct PaicordApp: App {
     }
     #if os(macOS)
       .windowToolbarStyle(.unified)
-    //      .commands {
-    //        CommandGroup(after: .appInfo) {
-    //          CheckForUpdatesView(updater: updaterController.updater)
-    //        }
-    //      }
+      //      .commands {
+      //        CommandGroup(after: .appInfo) {
+      //          CheckForUpdatesView(updater: updaterController.updater)
+      //        }
+      //      }
+      .commands { AccountCommands(gatewayStore: gatewayStore) }
     #endif
-    .commands { AccountCommands(gatewayStore: gatewayStore) }
     .environment(challenges)
     .environment(appState)
     .environment(gatewayStore)

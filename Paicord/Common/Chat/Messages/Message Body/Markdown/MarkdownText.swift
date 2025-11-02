@@ -17,7 +17,16 @@ struct MarkdownText: View {
   @Environment(GatewayStore.self) var gw
   var channelStore: ChannelStore?
 
-  var renderer: MarkdownRendererVM = .init()
+  var renderer: MarkdownRendererVM
+  
+  init(
+    content: String,
+    channelStore: ChannelStore? = nil
+  ) {
+    self.content = content
+    self.channelStore = channelStore
+    self.renderer = MarkdownRendererVM(content)
+  }
 
   @State var userPopover: PartialUser?
 
@@ -212,18 +221,33 @@ class MarkdownRendererVM {
     .init()
   }()
 
-  static let cache: NSCache<NSString, CachedDocument> = .init()
+  // document cache is redundant if we have block cache
+//  static let documentCache: NSCache<NSString, CachedDocument> = .init()
+  static let blockCache: NSCache<NSString, CachedDocumentBlocks> = .init()
 
-  class CachedDocument: NSObject {
-    let document: AST.DocumentNode
-    init(document: AST.DocumentNode) {
-      self.document = document
+//  class CachedDocument: NSObject {
+//    let document: AST.DocumentNode
+//    init(document: AST.DocumentNode) {
+//      self.document = document
+//    }
+//  }
+  class CachedDocumentBlocks: NSObject {
+    let blocks: [BlockElement]
+    init(blocks: [BlockElement]) {
+      self.blocks = blocks
     }
   }
 
   var blocks: [BlockElement] = []
 
-  init() {}
+  init(_ content: String? = nil) {
+    guard let content else { return }
+    // try cache check. do not parse if cache fail.
+    if let cached = Self.blockCache.object(forKey: content as NSString) {
+      self.rawContent = content
+      self.blocks = cached.blocks
+    }
+  }
 
   var gw: GatewayStore!
   var guildStore: GuildStore?
@@ -242,20 +266,20 @@ class MarkdownRendererVM {
     self.rawContent = rawContent
     do {
       let ast: AST.DocumentNode = try await Task.detached {
-        if let cached = Self.cache.object(forKey: rawContent as NSString) {
-          return cached.document
-        }
         let ast = try await Self.parser.parseToAST(rawContent)
-        let cached = CachedDocument(document: ast)
-        Self.cache.setObject(cached, forKey: rawContent as NSString)
         return ast
       }.value
       let blocks = await Task.detached {
+        if let cached = Self.blockCache.object(forKey: rawContent as NSString) {
+          return cached.blocks
+        }
         //        let emojisOnly = ast.isEmojisOnly()
         //        await MainActor.run {
         //          self.isEmojisOnly = emojisOnly
         //        }
         let blocks = self.buildBlocks(from: ast)
+        let cached = CachedDocumentBlocks(blocks: blocks)
+        Self.blockCache.setObject(cached, forKey: rawContent as NSString)
         return blocks
       }.value
       await MainActor.run {
@@ -598,6 +622,9 @@ class MarkdownRendererVM {
 
     case .autolink:
       if let a = node as? AST.AutolinkNode {
+        var attrs = baseAttributes
+        attrs[.link] = URL(string: a.url)
+        attrs[.foregroundColor] = AppKitOrUIKitColor(Color(hexadecimal6: 0x00aafc))
         let s = NSAttributedString(string: a.text, attributes: baseAttributes)
         container.append(s)
       }
