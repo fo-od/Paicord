@@ -46,27 +46,26 @@ struct InputBar: View {
       #endif
 
       #if os(iOS)
-        Group {
-          if text.isEmpty == false {
-            Button(action: sendMessage) {
-              Image(systemName: "paperplane.fill")
-                .imageScale(.large)
-                .padding(5)
-                .foregroundStyle(.white)
-                .background(.primaryButton)
-                .clipShape(.circle)
-            }
-            .buttonStyle(.borderless)
-            .foregroundStyle(.primaryButton)
-            .transition(.move(edge: .trailing).combined(with: .opacity))
+        if text.isEmpty == false {
+          Button(action: sendMessage) {
+            Image(systemName: "paperplane.fill")
+              .imageScale(.large)
+              .padding(5)
+              .foregroundStyle(.white)
+              .background(.primaryButton)
+              .clipShape(.circle)
           }
+          .buttonStyle(.borderless)
+          .foregroundStyle(.primaryButton)
+          .transition(.move(edge: .trailing).combined(with: .opacity))
         }
-        .animation(.default, value: text.isEmpty)
-
       #endif
     }
     .padding([.horizontal, .bottom], 8)
     .padding(.top, 4)
+    #if os(iOS)
+      .animation(.default, value: text.isEmpty)
+    #endif
   }
 
   private func sendMessage() {
@@ -150,7 +149,7 @@ struct InputBar: View {
         textView.drawsBackground = false
         textView.typingAttributes = [
           .font: preferredBodyFont(),
-          .foregroundColor: labelColor()
+          .foregroundColor: labelColor(),
         ]
 
         scrollView.hasVerticalScroller = true
@@ -238,7 +237,7 @@ struct InputBar: View {
           parent.textUpdated(oldText: oldText, newText: newText)
         }
       }
-      
+
       func preferredBodyFont() -> Any {
         #if os(macOS)
           return NSFont.systemFont(ofSize: NSFont.systemFontSize)
@@ -247,13 +246,13 @@ struct InputBar: View {
           return UIFontMetrics(forTextStyle: .body).scaledFont(for: font)
         #endif
       }
-      
+
       func labelColor() -> Any {
-#if os(macOS)
-        return NSColor.labelColor
-#else
-        return UIColor.label
-#endif
+        #if os(macOS)
+          return NSColor.labelColor
+        #else
+          return UIColor.label
+        #endif
       }
     }
   }
