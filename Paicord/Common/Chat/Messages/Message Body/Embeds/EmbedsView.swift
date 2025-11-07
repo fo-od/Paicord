@@ -40,6 +40,7 @@ extension MessageCell {
             WebImage(url: url)
               .resizable()
               .aspectRatio(aspectRatio, contentMode: .fit)
+              .clipShape(.rounded)
               .frame(
                 minWidth: 1,
                 maxWidth: min(image.width?.toCGFloat, 400),
@@ -47,7 +48,6 @@ extension MessageCell {
                 maxHeight: min(image.height?.toCGFloat, 300),
                 alignment: .leading
               )
-              .clipShape(.rounded)
           }
         case .gifv:
           if let video = embed.video {
@@ -253,12 +253,10 @@ extension MessageCell {
         self.media = media
         self.staticMedia = staticMedia
         let sourceURL = URL(string: media.proxyurl)!
-        let item = AVPlayerItem(url: sourceURL)
+        let asset = AVAsset(url: sourceURL)
+        let item: AVPlayerItem = .init(asset: asset)
         self.player = .init(playerItem: item)
-        self.playerLooper = .init(
-          player: player,
-          templateItem: item
-        )
+        self.playerLooper = .init(player: player, templateItem: item)
       }
       var body: some View {
         let aspectRatio: CGFloat? = {
