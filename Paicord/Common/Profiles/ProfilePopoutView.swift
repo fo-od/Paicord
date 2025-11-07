@@ -14,8 +14,8 @@ import SwiftUIX
 
 /// Sheet on iOS, else its the popover on macOS/ipadOS.
 struct ProfilePopoutView: View {
-  @Environment(GatewayStore.self) var gw
-  @Environment(PaicordAppState.self) var appState
+  @Environment(\.gateway) var gw
+  @Environment(\.appState) var appState
   @Environment(\.userInterfaceIdiom) var idiom
   var guild: GuildStore?
   let member: Guild.PartialMember?

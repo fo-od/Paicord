@@ -11,7 +11,7 @@ import PaicordLib
 
 @Observable
 @MainActor
-final class Challenges: ObservableObject {
+final class Challenges {
   // Captcha
   var captchaChallenge: CaptchaChallengeData?
   private var captchaContinuation:

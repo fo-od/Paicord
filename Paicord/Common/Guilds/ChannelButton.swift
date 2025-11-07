@@ -11,7 +11,7 @@ import SDWebImageSwiftUI
 import SwiftUIX
 
 struct ChannelButton: View {
-  @Environment(PaicordAppState.self) var appState
+  @Environment(\.appState) var appState
   var channels: [ChannelSnowflake: DiscordChannel]
   var channel: DiscordChannel
 

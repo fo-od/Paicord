@@ -12,7 +12,7 @@ import SwiftUI
 struct PaicordSheetsAlerts: ViewModifier {
   let gatewayStore: GatewayStore
   @Bindable var appState: PaicordAppState
-  @EnvironmentObject var challenges: Challenges
+  @Bindable var challenges: Challenges
 
   func body(content: Content) -> some View {
     content
@@ -21,14 +21,12 @@ struct PaicordSheetsAlerts: ViewModifier {
           challenges.completeCaptcha(submitData)
         }
         .frame(idealWidth: 400, idealHeight: 400)
-        .environment(gatewayStore)
       }
       .sheet(item: $challenges.mfaVerification) { mfaData in
         MFASheet(verificationData: mfaData) { response in
           challenges.completeMFA(response)
         }
         .frame(idealWidth: 400, idealHeight: 300)
-        .environment(gatewayStore)
       }
       .alert(
         "Error",

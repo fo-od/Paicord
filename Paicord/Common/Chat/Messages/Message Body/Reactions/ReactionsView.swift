@@ -46,7 +46,7 @@ struct ReactionsView: View {
     let emoji: Emoji
     let users: Set<UserSnowflake>
     let countBuff: Int?
-    @Environment(GatewayStore.self) var gw
+    @Environment(\.gateway) var gw
 
     var body: some View {
       let currentUser = gw.user.currentUser?.id

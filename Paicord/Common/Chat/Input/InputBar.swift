@@ -11,8 +11,8 @@ import SwiftUIX
 
 extension ChatView {
   struct InputBar: View {
-    @Environment(PaicordAppState.self) var appState
-    @Environment(GatewayStore.self) var gw
+    @Environment(\.appState) var appState
+    @Environment(\.gateway) var gw
   var vm: ChannelStore
     
     #if os(iOS)
@@ -79,7 +79,7 @@ extension ChatView {
     #endif
       }
         .background {
-          VariableBlurView(blurRadius: 10)
+          VariableBlurView()
           .rotationEffect(.degrees(180))
   #if os(iOS)
           .padding(.bottom, isFocused ? 0 : (safeAreaInsets.bottom * -1) )

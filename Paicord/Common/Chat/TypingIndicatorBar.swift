@@ -11,7 +11,7 @@ import SwiftUIX
 
 extension ChatView {
   struct TypingIndicatorBar: View {
-    @Environment(GatewayStore.self) var gw
+    @Environment(\.gateway) var gw
     @Environment(\.userInterfaceIdiom) var idiom
     var vm: ChannelStore
     var body: some View {

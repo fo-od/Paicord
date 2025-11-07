@@ -14,7 +14,7 @@ final class PaicordAppState {
   static let shared = PaicordAppState()
 
   // MARK: - iOS Specific
-  var chatOpen: Bool = true 
+  var chatOpen: Bool = true
 
   // MARK: - Selected Guild & Channel Persistence
 

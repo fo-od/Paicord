@@ -13,7 +13,7 @@ import SwiftUIX
 
 struct MarkdownText: View {
   var content: String
-  @Environment(GatewayStore.self) var gw
+  @Environment(\.gateway) var gw
   var channelStore: ChannelStore?
 
   var renderer: MarkdownRendererVM

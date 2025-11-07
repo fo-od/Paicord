@@ -439,7 +439,6 @@ extension MessageCell {
   ScrollView {
     MessageCell.EmbedsView.EmbedView(embed: sampleEmbed)
       .padding()
-      .environment(GatewayStore.shared)
   }
   .frame(height: 600)
 }

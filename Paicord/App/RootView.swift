@@ -14,7 +14,7 @@ import SwiftUIX
 struct RootView: View {
   let gatewayStore: GatewayStore
   @Bindable var appState: PaicordAppState
-  @Environment(Challenges.self) var challenges
+  @Environment(\.challenges) var challenges
   @Environment(\.userInterfaceIdiom) var idiom
 
   #if os(macOS)
@@ -26,8 +26,6 @@ struct RootView: View {
       if gatewayStore.accounts.currentAccountID == nil {
         LoginView()
           .tint(.primary) // text tint in buttons etc.
-          .environment(gatewayStore)
-          .environment(appState)
       } else if gatewayStore.state != .connected {
         ConnectionStateView(state: gatewayStore.state)
           .transition(.opacity.combined(with: .scale(scale: 1.1)))
@@ -53,11 +51,10 @@ struct RootView: View {
     .modifier(
       PaicordSheetsAlerts(
         gatewayStore: gatewayStore,
-        appState: appState
+        appState: appState,
+        challenges: challenges! // always exists, ref made in PaicordApp.swift
       )
     )
-    .environment(gatewayStore)
-    .environment(appState)
     .onAppear { setupGatewayCallbacks() }
     #if os(macOS)
       .introspect(.window, on: .macOS(.v14...)) { window in
@@ -83,10 +80,10 @@ struct RootView: View {
 
   private func setupGatewayCallbacks() {
     gatewayStore.captchaCallback = { captcha in
-      await challenges.presentCaptcha(captcha)
+      await challenges?.presentCaptcha(captcha)
     }
     gatewayStore.mfaCallback = { mfaData in
-      await challenges.presentMFA(mfaData)
+      await challenges?.presentMFA(mfaData)
     }
   }
 

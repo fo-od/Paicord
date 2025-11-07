@@ -10,7 +10,7 @@ import PaicordLib
 import SwiftUIX
 
 struct GuildScrollBar: View {
-  @Environment(GatewayStore.self) var gw
+  @Environment(\.gateway) var gw
 
   var body: some View {
     ScrollFadeMask {

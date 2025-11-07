@@ -17,7 +17,7 @@ struct MFAView: View {
 
   let options: [Payloads.MFASubmitData.MFAKind]
 
-  @Environment(PaicordAppState.self) var appState
+  @Environment(\.appState) var appState
 
   @State var mfaTask: Task<Void, Never>? = nil
   @State var taskInProgress: Bool = false

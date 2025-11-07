@@ -15,8 +15,8 @@ struct GuildButton: View {
   var guild: Guild?
   var guilds: [Guild]?
   var folder: DiscordProtos_DiscordUsers_V1_PreloadedUserSettings.GuildFolder?
-  @Environment(PaicordAppState.self) var appState
-  @Environment(GatewayStore.self) var gw
+  @Environment(\.appState) var appState
+  @Environment(\.gateway) var gw
 
   init(guild: Guild?) {
     self.guild = guild
@@ -45,7 +45,7 @@ struct GuildButton: View {
 
   /// Contains its own list of buttons, expands and contracts.
   struct FolderButtons: View {
-    @Environment(GatewayStore.self) var gw
+    @Environment(\.gateway) var gw
 
     var id: Int64
     var folder: DiscordProtos_DiscordUsers_V1_PreloadedUserSettings.GuildFolder

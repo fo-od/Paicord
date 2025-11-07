@@ -33,6 +33,8 @@ class MessageDrainStore: DiscordDataStore {
       for await event in await gateway.events {
         switch event.data {
         case .messageCreate(let message):
+          // when a message is created, we check if its in pendingMessages, and its nonce matches.
+          // the nonce of the message received will match a key of pendingMessages if its one we sent.
           break
         default:
           break

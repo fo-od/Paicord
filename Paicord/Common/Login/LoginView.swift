@@ -10,8 +10,8 @@ import PaicordLib
 import SwiftUI
 
 struct LoginView: View {
-  @Environment(GatewayStore.self) var gw
-  @Environment(PaicordAppState.self) var appState
+  @Environment(\.gateway) var gw
+  @Environment(\.appState) var appState
   var viewModel: LoginViewModel = .init()
 
   // Focus states must be here (cannot live in viewmodel)

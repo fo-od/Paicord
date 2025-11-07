@@ -11,8 +11,8 @@ import SwiftUIX
 /// Discord iOS Home View, the left side is a list of servers, with the right being the selected server's channels etc.
 /// The left side should be 1/5th of the width of both scroll views
 struct HomeView: View {
-  @Environment(GatewayStore.self) var gw
-  @Environment(PaicordAppState.self) var appState
+  @Environment(\.gateway) var gw
+  @Environment(\.appState) var appState
 
   var guild: GuildStore?
 

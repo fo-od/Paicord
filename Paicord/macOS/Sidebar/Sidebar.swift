@@ -10,8 +10,8 @@
 import SwiftUIX
 
 struct SidebarView: View {
-  @Environment(GatewayStore.self) var gw
-  @Environment(PaicordAppState.self) var appState
+  @Environment(\.gateway) var gw
+  @Environment(\.appState) var appState
 
   @Binding var currentGuildStore: GuildStore?
 

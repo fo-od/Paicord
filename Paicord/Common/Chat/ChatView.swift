@@ -12,8 +12,8 @@ import SwiftUIX
 
 struct ChatView: View {
   var vm: ChannelStore
-  @Environment(GatewayStore.self) var gw
-  @Environment(PaicordAppState.self) var appState
+  @Environment(\.gateway) var gw
+  @Environment(\.appState) var appState
   @Environment(\.accessibilityReduceMotion) var accessibilityReduceMotion
   @Environment(\.userInterfaceIdiom) var idiom
 
@@ -91,7 +91,6 @@ struct ChatView: View {
       }
     #endif
     .toolbar {
-      #warning("make channel headers nicer")
       ToolbarItem(placement: .navigation) {
         ChannelHeader(vm: vm)
       }

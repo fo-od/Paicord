@@ -12,8 +12,8 @@ import SwiftUIX
 @available(macOS, unavailable)
 struct SmallBaseplate: View {
   @Bindable var appState: PaicordAppState
-  @Environment(GatewayStore.self) var gw
-
+  @Environment(\.gateway) var gw
+  
   @State var currentGuildStore: GuildStore? = nil
   @State var currentChannelStore: ChannelStore? = nil
 
@@ -50,13 +50,14 @@ struct SmallBaseplate: View {
         }
         .tint(.tertiaryButton)
       }
-
+      .environment(\.guildStore, currentGuildStore)
+      .environment(\.channelStore, currentChannelStore)
     } secondary: {
       NavigationStack {
         if let currentChannelStore {
           ChatView(vm: currentChannelStore)
-            .environment(currentGuildStore)
-            .environment(currentChannelStore)
+            .environment(\.guildStore, currentGuildStore)
+            .environment(\.channelStore, currentChannelStore)
         } else {
           Text(":3")
             .font(.largeTitle)

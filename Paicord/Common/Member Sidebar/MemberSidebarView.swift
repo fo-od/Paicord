@@ -10,7 +10,7 @@ import PaicordLib
 import SwiftUIX
 
 struct MemberSidebarView: View {
-  @Environment(GatewayStore.self) var gw
+  @Environment(\.gateway) var gw
   var guildStore: GuildStore?
   var channelStore: ChannelStore?
   var body: some View {

@@ -12,7 +12,7 @@ import SwiftPrettyPrint
 import SwiftUIX
 
 struct ProfileBar: View {
-  @Environment(GatewayStore.self) var gw
+  @Environment(\.gateway) var gw
   #if os(macOS)
     @Environment(\.openSettings) var openSettings
   #endif

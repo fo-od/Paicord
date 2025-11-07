@@ -9,8 +9,8 @@
 import SwiftUIX
 
 struct SettingsView: View {
-  @Environment(GatewayStore.self) var gw
-  @Environment(PaicordAppState.self) var appState
+  @Environment(\.gateway) var gw
+  @Environment(\.appState) var appState
   @Environment(\.userInterfaceIdiom) var idiom
   var body: some View {
     switch idiom {

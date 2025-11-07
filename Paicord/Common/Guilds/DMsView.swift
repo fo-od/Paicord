@@ -18,8 +18,8 @@ import PaicordLib
 import SwiftUIX
 
 struct DMsView: View {
-  @Environment(GatewayStore.self) var gw
-  @Environment(PaicordAppState.self) var appState
+  @Environment(\.gateway) var gw
+  @Environment(\.appState) var appState
   @Environment(\.userInterfaceIdiom) var idiom
   var body: some View {
     ScrollView {

@@ -12,8 +12,8 @@ import SwiftUIX
 
 // if on macos or ipad
 struct LargeBaseplate: View {
-  @Environment(GatewayStore.self) var gw
-  @Environment(PaicordAppState.self) var appState
+  @Environment(\.gateway) var gw
+  @Environment(\.appState) var appState
   @AppStorage("Paicord.ShowingMembersSidebar") var showingInspector = true
 
   @State var currentGuildStore: GuildStore? = nil
@@ -24,6 +24,8 @@ struct LargeBaseplate: View {
   var body: some View {
     NavigationSplitView(columnVisibility: $columnVisibility) {
       SidebarView(currentGuildStore: $currentGuildStore)
+        .environment(\.guildStore, currentGuildStore)
+        .environment(\.channelStore, currentChannelStore)
         .safeAreaInset(edge: .bottom, spacing: 0) {
           ProfileBar()
         }
@@ -45,8 +47,8 @@ struct LargeBaseplate: View {
       Group {
         if let currentChannelStore {
           ChatView(vm: currentChannelStore)
-            .environment(currentGuildStore)
-            .environment(currentChannelStore)
+            .environment(\.guildStore, currentGuildStore)
+            .environment(\.channelStore, currentChannelStore)
         } else {
           // placeholder
           VStack {
@@ -64,7 +66,9 @@ struct LargeBaseplate: View {
         .toolbar {
           ToolbarItem(placement: .navigation) {
             Button {
-              columnVisibility = (columnVisibility == .all) ? NavigationSplitViewVisibility.detailOnly : NavigationSplitViewVisibility.all
+              withAnimation {
+                columnVisibility = (columnVisibility == .all) ? NavigationSplitViewVisibility.detailOnly : NavigationSplitViewVisibility.all
+              }
             } label: {
               Label("Toggle Sidebar", systemImage: "sidebar.left")
             }

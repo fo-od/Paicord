@@ -11,7 +11,7 @@ import SwiftUI
 
 struct ConnectionStateView: View {
   var state: GatewayState
-  @Environment(GatewayStore.self) var gs
+  @Environment(\.gateway) var gw
   var body: some View {
     ZStack(alignment: .bottom) {
       VStack {
@@ -50,9 +50,9 @@ struct ConnectionStateView: View {
             "Something really bad has happened, gateway connections disabled.\nPlease report this."
           )
           AsyncButton("Log Out") {
-            if let account = gs.accounts.currentAccount {
-              gs.accounts.removeAccount(account)
-              await gs.logOut()
+            if let account = gw.accounts.currentAccount {
+              gw.accounts.removeAccount(account)
+              await gw.logOut()
             }
           } catch: { _ in
           }
@@ -90,5 +90,4 @@ struct ConnectionStateView: View {
 
 #Preview {
   ConnectionStateView(state: .configured)
-    .environment(GatewayStore())
 }

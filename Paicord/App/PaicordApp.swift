@@ -24,10 +24,6 @@ struct PaicordApp: App {
   var appState = PaicordAppState.shared
   var challenges = Challenges()
 
-  @Environment(\.userInterfaceIdiom) var idiom
-
-  @State var showingPanel = false
-
   init() {
     //     i foubnd out this rly cool thing if u avoid logging 40mb of data to console the client isnt slow !!!!
     //    #if DEBUG
@@ -69,15 +65,11 @@ struct PaicordApp: App {
       //      }
       .commands { AccountCommands(gatewayStore: gatewayStore) }
     #endif
-    .environment(challenges)
-    .environment(appState)
-    .environment(gatewayStore)
+      .environment(\.challenges, challenges)
 
     #if os(macOS)
       Settings {
         SettingsView()
-          .environment(gatewayStore)
-          .environment(appState)
       }
     #endif
   }

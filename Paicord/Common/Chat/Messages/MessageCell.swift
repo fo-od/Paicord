@@ -21,7 +21,7 @@ struct MessageCell: View {
   var message: DiscordChannel.Message
   var priorMessage: DiscordChannel.Message?
   var channelStore: ChannelStore
-  @Environment(GatewayStore.self) var gw
+  @Environment(\.gateway) var gw
   @State var cellHighlighted = false
 
   init(
