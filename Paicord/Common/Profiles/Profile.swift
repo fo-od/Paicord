@@ -67,7 +67,7 @@ enum Profile {
           return URL(
             string: CDNEndpoint.userAvatar(userId: user.id, avatar: avatar)
               .url
-              + ".\(animated && avatar.starts(with: "a_") ? "gif" : "png")?size=128&animated=\(animated.description)"
+              + ".\(animated && avatar.starts(with: "a_") ? "gif" : "png")?size=256&animated=\(animated.description)"
           )
         } else {
           return URL(
@@ -110,12 +110,12 @@ enum Profile {
                 userId: id,
                 avatar: avatar
               ).url
-                + ".\(animated && avatar.starts(with: "a_") ? "gif" : "png")?size=128&animated=\(animated.description)"
+                + ".\(animated && avatar.starts(with: "a_") ? "gif" : "png")?size=256&animated=\(animated.description)"
             )
           } else if let avatar = user.avatar {
             return URL(
               string: CDNEndpoint.userAvatar(userId: id, avatar: avatar).url
-                + ".\(animated && avatar.starts(with: "a_") ? "gif" : "png")?size=128&animated=\(animated.description)"
+                + ".\(animated && avatar.starts(with: "a_") ? "gif" : "png")?size=256&animated=\(animated.description)"
             )
           }
         } else {
@@ -164,7 +164,7 @@ enum Profile {
   }
 
   struct AvatarWithPresence: View {
-    @Environment(GatewayStore.self) var gw
+    @Environment(\.gateway) var gw
     let member: Guild.PartialMember?
     let user: PartialUser
     var hideOffline: Bool = false
@@ -471,6 +471,5 @@ struct AvatarDecorationView: View {
     .frame(width: 100, height: 100)
 
   }
-  .environment(GatewayStore())
   //  .padding()
 }
