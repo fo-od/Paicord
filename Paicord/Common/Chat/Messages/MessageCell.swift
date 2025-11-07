@@ -79,6 +79,7 @@ struct MessageCell: View {
         }
       }
     }
+    .background(Color.almostClear)
     .equatable(by: cellHash)
     /// stop updates to messages unless messages change.
     /// prevent updates to messages unless they change
@@ -97,6 +98,7 @@ struct MessageCell: View {
       Color(hexadecimal6: 0xce9c5c).opacity(userMentioned ? 1 : 0)
         .maxWidth(2)
     }
+    .entityContextMenu(for: message)
     .padding(.top, inline ? 0 : 15)  // adds space between message groups
 
   }

@@ -15,31 +15,43 @@ struct GuildView: View {
   @Environment(\.userInterfaceIdiom) var idiom
   var body: some View {
     ScrollView {
-      if let bannerURL = bannerURL(animated: true) {  // maybe add animation control?
-        AnimatedImage(url: bannerURL)
-          .resizable()
-          .aspectRatio(16 / 9, contentMode: .fill)
-      }
-
-      if idiom == .phone {
-        VStack(spacing: 0) {
-          Text(guild.guild?.name ?? "Unknown Guild")
-            .font(.title2)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(8)
-          Divider()
+      VStack(spacing: 0) {
+        if let bannerURL = bannerURL(animated: true) {  // maybe add animation control?
+          AnimatedImage(url: bannerURL)
+            .resizable()
+            .aspectRatio(16 / 9, contentMode: .fill)
         }
-      }
 
-      let uncategorizedChannels = guild.channels.values
-        .filter { $0.parent_id == nil }
-        .sorted { ($0.position ?? 0) < ($1.position ?? 0) }
+        if idiom == .phone {
+          VStack(spacing: 0) {
+            VStack(alignment: .leading) {
+              Text(guild.guild?.name ?? "Unknown Guild")
+                .font(.headline)
+                .bold()
+                .frame(maxWidth: .infinity, alignment: .leading)
+              Text("\(guild.guild?.member_count ?? 0) members")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            }
+            .padding()
 
-      ForEach(uncategorizedChannels) { channel in
-        ChannelButton(channels: guild.channels, channel: channel)
-          .padding(.horizontal, 10)
-          .padding(.vertical, 5)
-          .frame(maxWidth: .infinity, alignment: .leading)
+            Divider()
+              .padding(.bottom, 4)
+          }
+        }
+
+        // these are channels without a category, aka categories themselves or actually uncategorized channels
+        let uncategorizedChannels = guild.channels.values
+          .filter { $0.parent_id == nil }
+          .sorted { ($0.position ?? 0) < ($1.position ?? 0) }
+
+        VStack(spacing: 4) {
+          ForEach(uncategorizedChannels) { channel in
+            ChannelButton(channels: guild.channels, channel: channel)
+              .padding(.horizontal, 10)
+              .frame(maxWidth: .infinity, alignment: .leading)
+          }
+        }
       }
     }
     .frame(maxWidth: .infinity)

@@ -31,7 +31,7 @@ class ChannelStore: DiscordDataStore {
   // as there could be thousands.
   var buffReactions: [MessageSnowflake: BuffReactions] = [:]
   var buffBurstReactions: [MessageSnowflake: BuffReactions] = [:]
-
+  
   typealias Reactions = OrderedDictionary<Emoji, Set<UserSnowflake>>
   typealias BuffReactions = OrderedDictionary<Emoji, Int>
   
@@ -164,6 +164,12 @@ class ChannelStore: DiscordDataStore {
     if let userId = message.author?.id {
       typingTimeoutTokens.removeValue(forKey: userId)
     }
+    
+    // store user data in user cache
+    for mention in messageData.mentions {
+      let user = mention.toPartialUser()
+      gateway?.user.users[user.id, default: user].update(with: user)
+    }
 
     // Update channel's last message id if we have the channel
     guard var currentChannel = channel else { return }
@@ -172,14 +178,9 @@ class ChannelStore: DiscordDataStore {
 
     // Update guild member info if we have a guild store
     if let guildStore, let authorId = message.author?.id,
-      let msgMember = message.member
+      let member = message.member
     {
-      if var member = guildStore.members[authorId] {
-        member.update(with: msgMember)
-        guildStore.members[authorId] = member
-      } else {
-        guildStore.members[authorId] = msgMember
-      }
+      guildStore.members[authorId, default: member].update(with: member)
     }
     
     if let guildStore {
@@ -206,6 +207,12 @@ class ChannelStore: DiscordDataStore {
     guard var msg = messages[partialMessage.id] else { return }
     msg.update(with: partialMessage)
     messages.updateValue(msg, forKey: msg.id)
+    
+    // store user data in user cache
+    for mention in partialMessage.mentions ?? [] {
+      let user = mention.toPartialUser()
+      gateway?.user.users[user.id, default: user].update(with: user)
+    }
     
     // check for unknown member data from mentions if we have a guild store
     if let guildStore {
@@ -244,12 +251,7 @@ class ChannelStore: DiscordDataStore {
       let userId = member.user?.id
     {
       // Update guild member info
-      if var existingMember = guildStore.members[userId] {
-        existingMember.update(with: member)
-        guildStore.members[userId] = existingMember
-      } else {
-        guildStore.members[userId] = member
-      }
+      guildStore.members[userId, default: member].update(with: member)
     }
     func addToReactionsList(
       reactions: inout [MessageSnowflake: Reactions]

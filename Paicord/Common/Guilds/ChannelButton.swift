@@ -16,12 +16,8 @@ struct ChannelButton: View {
   var channel: DiscordChannel
 
   var body: some View {
+    // switch channel type
     switch channel.type {
-    case .guildText:
-      textChannelButton { _ in
-        Text("# \(channel.name ?? "unknown")")
-      }
-      .tint(.primary)
     case .dm:
       textChannelButton { hovered in
         let selected = appState.selectedChannel == channel.id
@@ -98,11 +94,35 @@ struct ChannelButton: View {
       }
       .tint(.primary)
       .disabled(true)
+    case .guildText:
+      textChannelButton { _ in
+        HStack {
+          Image(systemName: "number")
+            .imageScale(.medium)
+          Text(channel.name ?? "unknown")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .minHeight(35)
+        .padding(.horizontal, 4)
+      }
+      .tint(.primary)
+    case .guildAnnouncement:
+      textChannelButton { _ in
+        HStack {
+          Image(systemName: "megaphone.fill")
+            .imageScale(.medium)
+          Text(channel.name ?? "unknown")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .minHeight(35)
+        .padding(.horizontal, 4)
+      }
+      .tint(.primary)
     default:
       textChannelButton { _ in
         VStack(alignment: .leading) {
           Text(channel.name ?? "unknown")
-          Text(String(describing: channel.type))
+          Text("\(channel.type)")
         }
       }
       .tint(.primary)
@@ -112,24 +132,35 @@ struct ChannelButton: View {
 
   // Shim
   struct TextChannelButton<Content: View>: View {
-    @Environment(PaicordAppState.self) var appState
+    @Environment(\.appState) var appState
+    @Environment(\.guildStore) var guild
     @State private var isHovered = false
     var channels: [ChannelSnowflake: DiscordChannel]
     var channel: DiscordChannel
     var content: (_ hovered: Bool) -> Content
+
+    var shouldHide: Bool {
+      guard let guild else { return false }
+      return guild.hasPermission(
+        channel: channel,
+        permission: .viewChannel
+      ) == false
+    }
     var body: some View {
-      Button {
-        appState.selectedChannel = channel.id
-        #if os(iOS)
-          withAnimation {
-            appState.chatOpen.toggle()
-          }
-        #endif
-      } label: {
-        content(isHovered)
+      if !shouldHide {
+        Button {
+          appState.selectedChannel = channel.id
+          #if os(iOS)
+            withAnimation {
+              appState.chatOpen.toggle()
+            }
+          #endif
+        } label: {
+          content(isHovered)
+        }
+        .onHover { isHovered = $0 }
+        .buttonStyle(.borderless)
       }
-      .onHover { isHovered = $0 }
-      .buttonStyle(.borderless)
     }
   }
 
@@ -146,6 +177,7 @@ struct ChannelButton: View {
     ) { hovered in
       label(hovered)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .lineLimit(1)
         .background(
           Group {
             if hovered {
@@ -166,25 +198,102 @@ struct ChannelButton: View {
           }
           .clipShape(.rounded)
         )
-        .padding(.horizontal, 4)
+    }
+  }
+
+  struct CategoryButton: View {
+    @Environment(\.userInterfaceIdiom) var idiom
+    @Environment(\.guildStore) var guild
+    var channelIDs: [ChannelSnowflake]
+    var channels: [ChannelSnowflake: DiscordChannel]
+    var channel: DiscordChannel
+
+    @State private var isExpanded: Bool {
+      didSet {
+        UserDefaults.standard.set(
+          isExpanded,
+          forKey: "GuildCategory.\(channel.id).Expanded"
+        )
+      }
+    }
+
+    /// Set by initialiser, hides the category if there are no visible channels inside it.
+    var shouldHide: Bool {
+      // reduce channels by bool
+      let channels = channelIDs.compactMap { self.channels[$0] }
+      let allHidden = channels.reduce(true) { partialResult, channel in
+        partialResult
+          && guild?.hasPermission(channel: channel, permission: .viewChannel)
+            == false
+      }
+      return allHidden
+    }
+
+    init(
+      channelIDs: [ChannelSnowflake],
+      channels: [ChannelSnowflake: DiscordChannel],
+      channel: DiscordChannel
+    ) {
+      self.channelIDs = channelIDs
+      self.channels = channels
+      self.channel = channel
+      self._isExpanded = .init(
+        initialValue: UserDefaults.standard.bool(
+          forKey: "GuildCategory.\(channel.id).Expanded"
+        )
+      )
+    }
+
+    var body: some View {
+      if !shouldHide {
+        VStack {
+          Button {
+            withAnimation {
+              isExpanded.toggle()
+            }
+          } label: {
+            HStack {
+              if idiom == .phone || idiom == .pad {
+                Image(systemName: "chevron.down")
+                  .imageScale(.small)
+                  .rotationEffect(.degrees(isExpanded ? 0 : -90))
+              }
+              Text(channel.name ?? "Unknown Category")
+                .font(.subheadline)
+              
+              if idiom == .mac {
+                Image(systemName: "chevron.down")
+                  .imageScale(.small)
+                  .rotationEffect(.degrees(isExpanded ? 0 : -90))
+              }
+              
+              Spacer()
+            }
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+          }
+          .buttonStyle(.borderless)
+
+          if isExpanded {
+            ForEach(channelIDs, id: \.self) { channelId in
+              if let channel = channels[channelId] {
+                ChannelButton(channels: channels, channel: channel)
+                  .frame(maxWidth: .infinity, alignment: .leading)
+              }
+            }
+          }
+        }
+      }
     }
   }
 
   /// A disclosure group for a category, showing its child channels when expanded
   @ViewBuilder
   func category(channelIDs: [ChannelSnowflake]) -> some View {
-    DisclosureGroup {
-      ForEach(channelIDs, id: \.self) { channelId in
-        if let channel = channels[channelId] {
-          ChannelButton(channels: channels, channel: channel)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-      }
-    } label: {
-      Text(channel.name ?? "Unknown Category")
-        .font(.headline)
-    }
+    CategoryButton(
+      channelIDs: channelIDs,
+      channels: channels,
+      channel: channel
+    )
   }
 }
