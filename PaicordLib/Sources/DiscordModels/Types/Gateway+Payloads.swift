@@ -569,6 +569,7 @@ extension Gateway {
       self.public_updates_channel_id = new.public_updates_channel_id
       self.max_video_channel_users = new.max_video_channel_users
       self.max_stage_video_channel_users = new.max_stage_video_channel_users
+      self.member_count = new.member_count ?? self.member_count
       self.approximate_member_count = new.approximate_member_count
       self.approximate_presence_count = new.approximate_presence_count
       self.welcome_screen = new.welcome_screen

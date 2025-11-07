@@ -45,6 +45,7 @@ extension Guild {
     self.public_updates_channel_id = new.public_updates_channel_id
     self.max_video_channel_users = new.max_video_channel_users
     self.max_stage_video_channel_users = new.max_stage_video_channel_users
+    self.member_count = new.member_count
     self.approximate_member_count = new.approximate_member_count
     self.approximate_presence_count = new.approximate_presence_count
     self.welcome_screen = new.welcome_screen
@@ -101,6 +102,7 @@ extension Gateway.GuildCreate {
       public_updates_channel_id: public_updates_channel_id,
       max_video_channel_users: max_video_channel_users,
       max_stage_video_channel_users: max_stage_video_channel_users,
+      member_count: member_count,
       approximate_member_count: approximate_member_count,
       approximate_presence_count: approximate_presence_count,
       welcome_screen: welcome_screen,
@@ -310,5 +312,45 @@ extension DiscordUser {
       accent_color: self.accent_color,
       public_flags: self.public_flags
     )
+  }
+}
+
+extension MentionUser {
+  func toPartialUser() -> PartialUser {
+    .init(
+      id: self.id,
+      username: self.username,
+      discriminator: self.discriminator,
+      global_name: self.global_name,
+      avatar: self.avatar,
+      banner: self.banner,
+      pronouns: self.pronouns,
+      avatar_decoration_data: self.avatar_decoration_data,
+      collectibles: self.collectibles,
+      primary_guild: self.primary_guild,
+      bot: self.bot,
+      system: self.system,
+      accent_color: self.accent_color,
+      public_flags: self.public_flags
+    )
+  }
+}
+
+extension PartialUser {
+  mutating func update(with new: PartialUser) {
+    self.username = new.username ?? self.username
+    self.discriminator = new.discriminator ?? self.discriminator
+    self.global_name = new.global_name ?? self.global_name
+    self.avatar = new.avatar ?? self.avatar
+    self.banner = new.banner ?? self.banner
+    self.pronouns = new.pronouns ?? self.pronouns
+    self.avatar_decoration_data =
+      new.avatar_decoration_data ?? self.avatar_decoration_data
+    self.collectibles = new.collectibles ?? self.collectibles
+    self.primary_guild = new.primary_guild ?? self.primary_guild
+    self.bot = new.bot ?? self.bot
+    self.system = new.system ?? self.system
+    self.accent_color = new.accent_color ?? self.accent_color
+    self.public_flags = new.public_flags ?? self.public_flags
   }
 }

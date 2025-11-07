@@ -39,6 +39,7 @@ public struct Guild: Sendable, Codable {
     public_updates_channel_id: ChannelSnowflake? = nil,
     max_video_channel_users: Int? = nil,
     max_stage_video_channel_users: Int? = nil,
+    member_count: Int? = nil,
     approximate_member_count: Int? = nil,
     approximate_presence_count: Int? = nil,
     welcome_screen: [WelcomeScreen]? = nil,
@@ -90,6 +91,7 @@ public struct Guild: Sendable, Codable {
     self.public_updates_channel_id = public_updates_channel_id
     self.max_video_channel_users = max_video_channel_users
     self.max_stage_video_channel_users = max_stage_video_channel_users
+    self.member_count = member_count
     self.approximate_member_count = approximate_member_count
     self.approximate_presence_count = approximate_presence_count
     self.welcome_screen = welcome_screen
@@ -414,6 +416,7 @@ public struct Guild: Sendable, Codable {
   public var public_updates_channel_id: ChannelSnowflake?
   public var max_video_channel_users: Int?
   public var max_stage_video_channel_users: Int?
+  public var member_count: Int?
   public var approximate_member_count: Int?
   public var approximate_presence_count: Int?
   public var welcome_screen: [WelcomeScreen]?

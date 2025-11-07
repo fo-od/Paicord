@@ -357,6 +357,7 @@ public struct MentionUser: Sendable, Codable, Equatable, Hashable {
   public var discriminator: String
   public var global_name: String?
   public var avatar: String?
+  public var pronouns: String?
   public var bot: Bool?
   public var system: Bool?
   public var mfa_enabled: Bool?
@@ -371,6 +372,8 @@ public struct MentionUser: Sendable, Codable, Equatable, Hashable {
   @available(*, deprecated, renamed: "avatar_decoration_data")
   public var avatar_decoration: String?
   public var avatar_decoration_data: DiscordUser.AvatarDecoration?
+  public var collectibles: DiscordUser.Collectibles?
+  public var primary_guild: DiscordUser.PrimaryGuild?
   public var member: Guild.PartialMember?
 }
 
