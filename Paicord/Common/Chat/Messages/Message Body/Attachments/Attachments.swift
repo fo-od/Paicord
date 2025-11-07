@@ -172,7 +172,9 @@ extension MessageCell {
               .overlay(
                 Button {
                   wantsPlayback = true
-                  try? AVAudioSession.sharedInstance().setCategory(.playback)
+                  #if os(iOS)
+                    try? AVAudioSession.sharedInstance().setCategory(.playback)
+                  #endif
                 } label: {
                   Image(systemName: "play.fill")
                     .resizable()
@@ -189,26 +191,26 @@ extension MessageCell {
             VideoPlayerView(attachment: attachment)
           }
         }
-        
+
         struct VideoPlayerView: View {
           var attachment: DiscordMedia
           var player: AVPlayer
-          
+
           init(attachment: DiscordMedia) {
             self.attachment = attachment
             self.player = AVPlayer(
               url: URL(string: attachment.proxyurl)!
             )
-            
+
             // Auto-play
             self.player.play()
           }
-          
+
           var body: some View {
             VideoPlayer(player: player)
           }
         }
-        
+
       }
     }
 
