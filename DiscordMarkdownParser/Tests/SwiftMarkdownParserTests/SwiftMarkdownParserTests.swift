@@ -1166,6 +1166,19 @@ final class DiscordMarkdownParserTests: XCTestCase {
     XCTAssertNotNil(maybeText2)
     XCTAssertEqual(maybeText2?.content, " test")
   }
+  
+  func testListEdgeCases() async throws {
+    let markdown1 = """
+      1.  **test `list` item**
+          ```bash
+          echo "hello"
+          ```
+      2.  gm
+      """
+    
+    let document1 = try await parser.parseToAST(markdown1)
+    print(document1)
+  }
 }
 
 // MARK: - Safe indexing helper used above

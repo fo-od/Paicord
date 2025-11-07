@@ -46,6 +46,7 @@ struct AttributedText: View {
       textView.textStorage?.setAttributedString(attributedString)
       textView.isAutomaticLinkDetectionEnabled = false
       textView.linkTextAttributes = [:]  // use original attributes
+      textView.delegate = context.coordinator
       return textView
     }
 
@@ -82,7 +83,7 @@ struct AttributedText: View {
       return CGSize(width: targetWidth, height: usedRect.height)
     }
 
-    final class Coordinator: NSObject {
+    final class Coordinator: NSObject, NSTextViewDelegate {
       let openURL: OpenURLAction
       private var lastAttributedStringHash: Int = 0
 
@@ -108,53 +109,62 @@ struct AttributedText: View {
     }
   }
 
-class ModifiedCopyingTextView: NSTextView {
-  weak fileprivate var customCoordinator: _AttributedTextView.Coordinator?
-  
-  override func clicked(onLink link: Any, at charIndex: Int) {
-    if let url = link as? URL {
-      customCoordinator?.openURL(url)
-    } else {
-      super.clicked(onLink: link, at: charIndex)
-    }
-  }
-  
-  override func writeSelection(
-    to pboard: NSPasteboard,
-    type: NSPasteboard.PasteboardType
-  ) -> Bool {
-    let selectedAttributedString = attributedString().attributedSubstring(
-      from: selectedRange()
-    )
-    let selectedAttributedStringCopy = NSMutableAttributedString(
-      attributedString: selectedAttributedString
-    )
+  // custom NSTextView to override copy behavior and additionally right click behavior
+  class ModifiedCopyingTextView: NSTextView {
     
-    selectedAttributedStringCopy.enumerateAttribute(
-      NSAttributedString.Key.accessibilityCustomText,
-      in: NSMakeRange(0, selectedAttributedString.string.count),
-      options: .reverse
-    ) { value, range, _ in
-      if let customText = value as? String {
-        // Preserve existing attributes
-        var range2 = NSRange(location: 0, length: 0)
-        let attributes = selectedAttributedStringCopy.attributes(
-          at: range.location,
-          effectiveRange: &range2
-        )
-        
-        selectedAttributedStringCopy.replaceCharacters(
-          in: range,
-          with: NSAttributedString(string: customText, attributes: attributes)
-        )
+    // let swiftui handle context menu
+    override func rightMouseDown(with event: NSEvent) {
+      // instead of super.rightMouseDown, pass to next responder
+      self.nextResponder?.rightMouseDown(with: event)
+    }
+    // could also handle mouseDown with control key pressed but i think its good to keep that.
+    
+    weak fileprivate var customCoordinator: _AttributedTextView.Coordinator?
+
+    override func clicked(onLink link: Any, at charIndex: Int) {
+      if let url = link as? URL {
+        customCoordinator?.openURL(url)
+      } else {
+        super.clicked(onLink: link, at: charIndex)
       }
     }
-    
-    pboard.clearContents()
-    pboard.writeObjects([selectedAttributedStringCopy.string as NSString])
-    return true
+
+    override func writeSelection(
+      to pboard: NSPasteboard,
+      type: NSPasteboard.PasteboardType
+    ) -> Bool {
+      let selectedAttributedString = attributedString().attributedSubstring(
+        from: selectedRange()
+      )
+      let selectedAttributedStringCopy = NSMutableAttributedString(
+        attributedString: selectedAttributedString
+      )
+
+      selectedAttributedStringCopy.enumerateAttribute(
+        NSAttributedString.Key.accessibilityCustomText,
+        in: NSMakeRange(0, selectedAttributedString.string.count),
+        options: .reverse
+      ) { value, range, _ in
+        if let customText = value as? String {
+          // Preserve existing attributes
+          var range2 = NSRange(location: 0, length: 0)
+          let attributes = selectedAttributedStringCopy.attributes(
+            at: range.location,
+            effectiveRange: &range2
+          )
+
+          selectedAttributedStringCopy.replaceCharacters(
+            in: range,
+            with: NSAttributedString(string: customText, attributes: attributes)
+          )
+        }
+      }
+
+      pboard.clearContents()
+      pboard.writeObjects([selectedAttributedStringCopy.string as NSString])
+      return true
+    }
   }
-}
 #elseif os(iOS)
   import UIKit
 
@@ -182,7 +192,7 @@ class ModifiedCopyingTextView: NSTextView {
       textView.dataDetectorTypes = []
       textView.isUserInteractionEnabled = true
       textView.linkTextAttributes = [:]
-      
+
       // access layoutManager to force textkit compatibility mode on
       _ = textView.layoutManager
       return textView

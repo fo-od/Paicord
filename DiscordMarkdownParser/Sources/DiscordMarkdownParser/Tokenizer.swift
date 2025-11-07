@@ -1258,7 +1258,28 @@ public final class MarkdownTokenizer {
       advance()
     }
 
-    // Must have at least 4 spaces
+    // If the indentation is followed by a fence (``` or ~~~), prefer treating
+    // it as a fenced code block. Backtrack and return nil so the fence
+    // detection path can handle it.
+    if !isAtEnd && (currentChar == "`" || currentChar == "~") {
+      // Count consecutive fence characters without consuming permanently
+      var pos = position
+      let fenceChar = currentChar
+      var fenceCount = 0
+      while pos < characters.count && characters[pos] == fenceChar {
+        fenceCount += 1
+        pos += 1
+      }
+      if fenceCount >= 3 {
+        // Backtrack to start and allow fenced code detection to proceed
+        position = startLocation.offset
+        line = startLocation.line
+        column = startLocation.column
+        return nil
+      }
+    }
+
+    // Must have at least 4 spaces to be an indented code block
     guard spaceCount >= 4 else {
       // Backtrack
       position = startLocation.offset

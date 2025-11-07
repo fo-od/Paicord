@@ -9,7 +9,6 @@ import DiscordMarkdownParser
 import Foundation
 import HighlightSwift
 import PaicordLib
-import Playgrounds
 import SwiftUIX
 
 struct MarkdownText: View {
@@ -40,6 +39,9 @@ struct MarkdownText: View {
       if renderer.blocks.isEmpty {
         Text(markdown: content)  // apple's markdown
           .opacity(0.6)
+      } else {
+        let _ = gw.user.users
+        let _ = channelStore?.guildStore?.members
       }
     }
     .task(id: content) {
