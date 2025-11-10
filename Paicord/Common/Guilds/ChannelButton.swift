@@ -52,6 +52,7 @@ struct ChannelButton: View {
         .clipShape(.rounded)
       }
       .tint(.primary)
+      .padding(.horizontal, 4)
     case .groupDm:
       textChannelButton { _ in
         HStack {
@@ -76,8 +77,9 @@ struct ChannelButton: View {
         .frame(height: 38)
         .padding(4)
       }
-      .buttonStyle(.borderless)
       .tint(.primary)
+      .padding(.horizontal, 4)
+
     case .guildCategory:
       let expectedParentID = channel.id
       let childChannels = channels.values
@@ -87,13 +89,6 @@ struct ChannelButton: View {
 
       category(channelIDs: childChannels)
         .tint(.primary)
-    case .guildVoice:
-      textChannelButton { _ in
-        Text(Image(systemName: "speaker.wave.2.fill"))
-          + Text(" \(channel.name ?? "unknown")")
-      }
-      .tint(.primary)
-      .disabled(true)
     case .guildText:
       textChannelButton { _ in
         HStack {
@@ -103,7 +98,7 @@ struct ChannelButton: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .minHeight(35)
-        .padding(.horizontal, 4)
+        .padding(.horizontal, 12)
       }
       .tint(.primary)
     case .guildAnnouncement:
@@ -115,15 +110,35 @@ struct ChannelButton: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .minHeight(35)
-        .padding(.horizontal, 4)
+        .padding(.horizontal, 12)
       }
       .tint(.primary)
+  case .guildVoice:
+    textChannelButton { _ in
+      HStack {
+        Image(systemName: "speaker.wave.2.fill")
+          .imageScale(.medium)
+        Text(channel.name ?? "unknown")
+      }
+      .frame(maxWidth: .infinity, alignment: .leading)
+      .minHeight(35)
+      .padding(.horizontal, 12)
+    }
+    .tint(.primary)
+    .disabled(true)
     default:
       textChannelButton { _ in
-        VStack(alignment: .leading) {
-          Text(channel.name ?? "unknown")
-          Text("\(channel.type)")
+        HStack {
+          Image(systemName: "number")
+            .imageScale(.medium)
+          VStack(alignment: .leading) {
+            Text(channel.name ?? "unknown")
+            Text("\(channel.type!)")
+          }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .minHeight(35)
+        .padding(.horizontal, 12)
       }
       .tint(.primary)
       .disabled(true)
@@ -246,7 +261,7 @@ struct ChannelButton: View {
 
     var body: some View {
       if !shouldHide {
-        VStack {
+        VStack(spacing: 1) {
           Button {
             withAnimation {
               isExpanded.toggle()
@@ -295,5 +310,7 @@ struct ChannelButton: View {
       channels: channels,
       channel: channel
     )
+    .padding(.top, 10)
+    .padding(.horizontal, 4)
   }
 }

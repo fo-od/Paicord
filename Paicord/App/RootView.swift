@@ -21,12 +21,26 @@ struct RootView: View {
     @Weak var window: NSWindow?
   #endif
 
+  #if os(iOS)
+    @ViewStorage var hasLaunchedAlready: Bool = false
+  #endif
+
+  #if os(iOS)
+    var isConnected: Bool {
+      hasLaunchedAlready == false && gatewayStore.state != .connected
+    }
+  #else
+    var isConnected: Bool {
+      gatewayStore.state != .connected
+    }
+  #endif
+
   var body: some View {
     Group {
       if gatewayStore.accounts.currentAccountID == nil {
         LoginView()
-          .tint(.primary) // text tint in buttons etc.
-      } else if gatewayStore.state != .connected {
+          .tint(.primary)  // text tint in buttons etc.
+      } else if isConnected {
         ConnectionStateView(state: gatewayStore.state)
           .transition(.opacity.combined(with: .scale(scale: 1.1)))
           .task { await gatewayStore.connectIfNeeded() }
@@ -42,6 +56,9 @@ struct RootView: View {
         }
         .task {
           appState.loadPrevGuild()
+          #if os(iOS)
+            self.hasLaunchedAlready = true
+          #endif
         }
       }
     }
@@ -52,7 +69,7 @@ struct RootView: View {
       PaicordSheetsAlerts(
         gatewayStore: gatewayStore,
         appState: appState,
-        challenges: challenges! // always exists, ref made in PaicordApp.swift
+        challenges: challenges!  // always exists, ref made in PaicordApp.swift
       )
     )
     .onAppear { setupGatewayCallbacks() }

@@ -34,7 +34,7 @@ struct DMsView: View {
       }
 
       let channels = Array(gw.user.privateChannels.values)
-      LazyVStack {
+      LazyVStack(spacing: 4) {
         ForEach(channels) { channel in
           ChannelButton(channels: [:], channel: channel)
         }
