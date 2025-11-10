@@ -66,6 +66,10 @@ let package = Package(
 			url: "https://github.com/apple/swift-protobuf.git",
 			from: "1.27.0"
 		),
+    .package(
+      url: "https://github.com/Jitsusama/UInt128.git", 
+      branch: "master"
+    ),
 	],
 	targets: [
 		.target(
@@ -114,7 +118,8 @@ let package = Package(
 				.product(name: "MultipartKit", package: "multipart-kit"),
 				.target(name: "DiscordCore"),
 				.target(name: "UnstableEnumMacro"),
-				.product(name: "SwiftProtobuf", package: "swift-protobuf")
+				.product(name: "SwiftProtobuf", package: "swift-protobuf"),
+        .product(name: "UInt128", package: "UInt128"),
 			],
 			swiftSettings: swiftSettings
 		),

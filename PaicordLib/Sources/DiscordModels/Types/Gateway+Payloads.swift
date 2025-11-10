@@ -21,7 +21,7 @@ extension Gateway {
 
       public var os: String
       public var browser: String
-      public var device: String
+      public var device: String?
 
       public var release_channel: String?
       public var client_version: String?
@@ -31,6 +31,7 @@ extension Gateway {
       public var system_locale: String?
       public var has_client_mods: Bool?
       public var client_launch_id: String?
+      public var launch_signature: String?
       public var device_vendor_id: String?
       public var browser_user_agent: String?
       public var browser_version: String?
@@ -65,7 +66,10 @@ extension Gateway {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.os = try container.decode(String.self, forKey: .os)
         self.browser = try container.decode(String.self, forKey: .browser)
-        self.device = try container.decode(String.self, forKey: .device)
+        self.device = try container.decodeIfPresent(
+          String.self,
+          forKey: .device
+        )
         self.release_channel = try container.decodeIfPresent(
           String.self,
           forKey: .release_channel
@@ -141,7 +145,7 @@ extension Gateway {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.os, forKey: .os)
         try container.encode(self.browser, forKey: .browser)
-        try container.encode(self.device, forKey: .device)
+        try container.encodeIfPresent(self.device, forKey: .device)
         try container.encode(self.release_channel, forKey: .release_channel)
         try container.encode(self.client_version, forKey: .client_version)
         try container.encode(self.os_version, forKey: .os_version)
@@ -834,6 +838,7 @@ extension Gateway {
     public var message_reference: DiscordChannel.Message.MessageReference?
     public var flags: IntBitField<DiscordChannel.Message.Flag>?
     public var referenced_message: DereferenceBox<MessageCreate>?
+    public var message_snapshots: [DiscordChannel.MessageSnapshot]?
     //		@_spi(UserInstallableApps) @DecodeOrNil
     //		public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?
     public var interaction: MessageInteraction?
@@ -999,7 +1004,10 @@ extension Gateway {
       )?.compactMap {
         DiscordColor(hex: $0)
       }
-      self.member = try container.decode(Guild.Member.self, forKey: .member)
+      self.member = try container.decodeIfPresent(
+        Guild.Member.self,
+        forKey: .member
+      )
       self.emoji = try container.decode(Emoji.self, forKey: .emoji)
       self.message_author_id = try container.decodeIfPresent(
         UserSnowflake.self,
@@ -1092,7 +1100,7 @@ extension Gateway {
       self.web = web
       self.embedded = embedded
     }
-    
+
     public var desktop: Status?
     public var mobile: Status?
     public var web: Status?
@@ -1106,7 +1114,7 @@ extension Gateway {
       guild_id: GuildSnowflake? = nil,
       status: Status,
       activities: [Activity],
-      hidden_activities: [Activity] = [],
+      hidden_activities: [Activity]? = nil,
       client_status: ClientStatus
     ) {
       self.user = user
@@ -1121,7 +1129,7 @@ extension Gateway {
     public var guild_id: GuildSnowflake?
     public var status: Status
     public var activities: [Activity]
-    public var hidden_activities: [Activity]
+    public var hidden_activities: [Activity]?
     public var client_status: ClientStatus
   }
 
@@ -1432,7 +1440,7 @@ extension Gateway {
   public struct VoiceChannelStatusUpdate: Sendable, Codable {
     public var id: ChannelSnowflake
     public var guild_id: GuildSnowflake
-    public var status: String
+    public var status: String?
   }
 
   /// https://docs.discord.food/topics/gateway-events#call-create
@@ -1698,7 +1706,7 @@ extension Gateway {
     public var client_info: ClientInfo
     public var status: Status
     public var activities: [Activity]
-    public var hidden_activities: [Activity]
+    public var hidden_activities: [Activity]?
     public var active: Bool?
 
     public var isHeadless: Bool {
@@ -1809,17 +1817,17 @@ extension Gateway {
       case .preloaded:
         let preloaded = try container.decode(
           DiscordProtos_DiscordUsers_V1_PreloadedUserSettings.self,
-          forKey: .settings
+          forKey: .proto
         )
         self = .preloaded(preloaded)
       case .frecency:
         let frecency = try container.decode(
           DiscordProtos_DiscordUsers_V1_FrecencyUserSettings.self,
-          forKey: .settings
+          forKey: .proto
         )
         self = .frecency(frecency)
       default:
-        let str = try container.decode(String.self, forKey: .settings)
+        let str = try container.decode(String.self, forKey: .proto)
         self = .unknown(str)
       }
     }
@@ -1835,17 +1843,17 @@ extension Gateway {
       }()
       switch self {
       case .preloaded(let data):
-        try container.encode(data, forKey: .settings)
+        try container.encode(data, forKey: .proto)
       case .frecency(let data):
-        try container.encode(data, forKey: .settings)
+        try container.encode(data, forKey: .proto)
       case .unknown(let string):
-        try container.encode(string, forKey: .settings)
+        try container.encode(string, forKey: .proto)
       }
       try container.encode(kind, forKey: .type)
     }
 
     private enum CodingKeys: String, CodingKey {
-      case settings  // the string b64 value
+      case proto  // the string b64 value
       case type  // the type hint
     }
 
@@ -1879,7 +1887,7 @@ extension Gateway {
   ///		]
   /// }
   ///
-  /// I believe Accord probably has stuff on the topic
+  /// I believe Accord probably has stuff on the topic, note to self look into it later.
   /// dolfies says its complicated, be sure to ask him later if he finishes docs
   ///
   /// from guessing, guild id might be nil for dms?
@@ -1892,5 +1900,13 @@ extension Gateway {
       public var last_message_id: MessageSnowflake
       public var id: ChannelSnowflake
     }
+  }
+  
+  public struct MessageAcknowledge: Sendable, Codable {
+    public var version: Int
+    public var message_id: MessageSnowflake
+    public var last_viewed: Int
+    public var flags: Int
+    public var channel_id: ChannelSnowflake
   }
 }
