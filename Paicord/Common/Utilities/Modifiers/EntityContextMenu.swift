@@ -253,7 +253,7 @@ struct EntityContextMenu<Entity>: ViewModifier {
   func hasPermission(
     _ permission: Permission
   ) -> Bool {
-    guard let guild else { return false }
+    guard let guild else { return true }
     return guild.hasPermission(
       channel: channel,
       permission: permission
