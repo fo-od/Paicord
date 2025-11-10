@@ -1,5 +1,5 @@
 {
-  "originHash" : "214c4c707eac582de9ad8d7a05b02160e1fdd828098026caaa70e7fc883e537d",
+  "originHash" : "b408b4ff9b9bad3f55ae3478d9016091e28cb2bc15839bd25e64c54cd0a5badc",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -386,6 +386,15 @@
       "state" : {
         "branch" : "master",
         "revision" : "56175334751a03f80d3a650c497b8525237d4e43"
+      }
+    },
+    {
+      "identity" : "uint128",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Jitsusama/UInt128",
+      "state" : {
+        "branch" : "master",
+        "revision" : "58bd8a247df0c2ece73b6c760f22c93ad6a47492"
       }
     },
     {

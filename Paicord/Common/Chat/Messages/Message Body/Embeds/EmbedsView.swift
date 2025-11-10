@@ -15,7 +15,6 @@ import SwiftUIX
 
 extension MessageCell {
   struct EmbedsView: View {
-    var message: DiscordChannel.Message
     var embeds: [Embed]
 
     var body: some View {
@@ -182,13 +181,28 @@ extension MessageCell {
             }
           }
 
-          if let imageURL = embed.image?.proxy_url,
+          if let image = embed.image,
+             let imageURL = image.proxy_url,
             let url = URL(string: imageURL)
           {
+            let aspectRatio: CGFloat? = {
+              if let width = image.width, let height = image.height {
+                return width.toCGFloat / height.toCGFloat
+              } else {
+                return nil
+              }
+            }()
             WebImage(url: url)
               .resizable()
-              .scaledToFit()
-              .cornerRadius(8)
+              .aspectRatio(aspectRatio, contentMode: .fit)
+              .clipShape(.rounded)
+              .frame(
+                minWidth: 1,
+                maxWidth: min(image.width?.toCGFloat, 400),
+                minHeight: 1,
+                maxHeight: min(image.height?.toCGFloat, 300),
+                alignment: .leading
+              )
           }
 
           if embed.footer != nil || embed.timestamp != nil {
@@ -229,12 +243,12 @@ extension MessageCell {
           if let color = embed.color?.asColor() {
             Rectangle()
               .fill(color)
-              .frame(width: 2.5)
+              .frame(width: 3)
               .frame(maxWidth: .infinity, alignment: .leading)
           } else {
             Rectangle()
               .fill(Color(hexadecimal6: 0x202225))
-              .frame(width: 2.5)
+              .frame(width: 3)
               .frame(maxWidth: .infinity, alignment: .leading)
           }
         }

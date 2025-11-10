@@ -9,6 +9,7 @@
 import PaicordLib
 @_spi(Advanced) import SwiftUIIntrospect
 import SwiftUIX
+import Collections
 
 struct ChatView: View {
   var vm: ChannelStore
@@ -23,7 +24,7 @@ struct ChatView: View {
   init(vm: ChannelStore) { self.vm = vm }
 
   var body: some View {
-    let orderedMessages = Array(vm.messages.values)
+    let orderedMessages = vm.messages.values
     VStack(spacing: 0) {
       ScrollViewReader { proxy in
         ScrollView {
@@ -49,20 +50,22 @@ struct ChatView: View {
         .bottomAnchored()
         .scrollDismissesKeyboard(.interactively)
         .onAppear {
-          scheduleScrollToBottom(
-            proxy: proxy,
-            messages: orderedMessages
+          NotificationCenter.default.post(
+            name: .chatViewShouldScrollToBottom,
+            object: nil
           )
         }
-        .onChange(of: vm.messages.count) {
-          if isNearBottom {
-            scheduleScrollToBottom(
-              proxy: proxy,
-              messages: orderedMessages
-            )
-          }
-        }
         .onChange(of: vm.channelId) {
+          NotificationCenter.default.post(
+            name: .chatViewShouldScrollToBottom,
+            object: nil
+          )
+        }
+        .onReceive(
+          NotificationCenter.default.publisher(
+            for: .chatViewShouldScrollToBottom
+          )
+        ) { _ in
           scheduleScrollToBottom(
             proxy: proxy,
             messages: orderedMessages
@@ -120,7 +123,7 @@ struct ChatView: View {
 
   private func scheduleScrollToBottom(
     proxy: ScrollViewProxy,
-    messages: [DiscordChannel.Message]?
+    messages: OrderedDictionary<MessageSnowflake, DiscordChannel.Message>.Values?
   ) {
     pendingScrollWorkItem?.cancel()
     guard let lastID = messages?.last?.id else { return }
@@ -163,4 +166,9 @@ extension View {
         .defaultScrollAnchor(.bottom)
     }
   }
+}
+
+// add a new notification that channelstore can notify to scroll down in chat
+extension Notification.Name {
+  static let chatViewShouldScrollToBottom = Notification.Name("chatViewShouldScrollToBottom")
 }
