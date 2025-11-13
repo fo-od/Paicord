@@ -605,7 +605,7 @@ extension DiscordChannel {
       public var timestamp: DiscordTimestamp
       public var edited_timestamp: DiscordTimestamp?
       public var mentions: [MentionUser]
-      public var mention_roles: [RoleSnowflake]
+      public var mention_roles: [RoleSnowflake]?
       public var attachments: [DiscordChannel.Message.Attachment]
       public var embeds: [Embed]
       public var type: DiscordChannel.Message.Kind
