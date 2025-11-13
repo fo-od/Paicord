@@ -373,7 +373,6 @@ final class DiscordMarkdownParserTests: XCTestCase {
   func testTripleUnderscoreUnderlineAndItalic() async throws {
     let markdown = "___triple___"
     let document = try await parser.parseToAST(markdown)
-    print(document)
     guard let paragraphNode = document.children.first,
       paragraphNode.nodeType == .paragraph
     else {
@@ -413,7 +412,6 @@ final class DiscordMarkdownParserTests: XCTestCase {
       in markdowns
     {
       let document = try await parser.parseToAST(markdown)
-      print(document)
       guard let node = document.children.first else {
         XCTFail("No node found for: \(markdown)")
         continue
@@ -915,7 +913,6 @@ final class DiscordMarkdownParserTests: XCTestCase {
 
     let document = try await parser.parseToAST(markdown)
     //    XCTAssertEqual(document.children.count, 0) // set this in a sec
-    print(document)
     guard document.children[0] as? AST.HeadingNode != nil else {
       XCTFail("No heading node found")
       return
@@ -1035,7 +1032,6 @@ final class DiscordMarkdownParserTests: XCTestCase {
   func testNestedFormattingInsideStrikethrough() async throws {
     let markdown = "~~***__hi__***~~"
     let document = try await parser.parseToAST(markdown)
-    print(document)
     guard let paragraph = document.children.first as? AST.ParagraphNode else {
       XCTFail("No paragraph node found")
       return
@@ -1109,7 +1105,6 @@ final class DiscordMarkdownParserTests: XCTestCase {
       """
     let document1 = try await parser.parseToAST(markdown1)
     // there is no blockquote here - the > is treated as a literal character
-    print(document1)
     XCTAssertEqual(document1.children.count, 1)
     guard let paragraph1 = document1.children.first as? AST.ParagraphNode else {
       XCTFail("No paragraph node found")
@@ -1167,7 +1162,7 @@ final class DiscordMarkdownParserTests: XCTestCase {
     XCTAssertEqual(maybeText2?.content, " test")
     
     let markdown3 =
-      "https://cf407f6265b8.ngrok-free.app/latex-solver.php?step-by-step=true&q=[\int%20\frac{\sec^2%20x}{\sqrt{\tan^2\big(\sinh^{-1}(\sqrt{\sec^2%20x%20-%201})\big)%20+%201}}%20,%20dx]"
+      "https://cf407f6265b8.ngrok-free.app/latex-solver.php?step-by-step=true&q=[\\int%20\\frac{\\sec^2%20x}{\\sqrt{\\tan^2\\big(\\sinh^{-1}(\\sqrt{\\sec^2%20x%20-%201})\\big)%20+%201}}%20,%20dx]"
     let document3 = try await parser.parseToAST(markdown3)
     // Validate structure: [AutolinkNode]
     guard let para3 = document3.children.first as? AST.ParagraphNode else {
@@ -1189,7 +1184,60 @@ final class DiscordMarkdownParserTests: XCTestCase {
       """
     
     let document1 = try await parser.parseToAST(markdown1)
+  }
+  
+  func testMaskedLinks() async throws {
+    let markdown1 = "[test](https://x.com/Leopeva64/status/1983735129140031680?t=I3-sVisE9mMRb50sCDuP5Q&s=19)"
+    let document1 = try await parser.parseToAST(markdown1)
     print(document1)
+    guard let paragraphNode = document1.children.first,
+      paragraphNode.nodeType == .paragraph,
+      let linkNode = paragraphNode.children.first as? AST.LinkNode
+    else {
+      XCTFail("No link node found")
+      return
+    }
+  }
+  
+  func testTokenizeLink() throws {
+    let markdown = "[**bold** <:smile:123456>](https://example.com)"
+    let tokenizer = MarkdownTokenizer(markdown)
+    let tokens = tokenizer.tokenize()
+    
+    print("=== TOKENS ===")
+    for (index, token) in tokens.enumerated() {
+      print("\(index): \(token.type) = '\(token.content)'")
+    }
+  }
+  
+  func testMaskedLinksWithBracketsInURL() async throws {
+    let complexURL = "https://cf407f6265b8.ngrok-free.app/latex-solver.php?step-by-step=true&q=[\\int%20\\frac{\\sec^2%20x}{\\sqrt{\\tan^2\\big(\\sinh^{-1}(\\sqrt{\\sec^2%20x%20-%201})\\big)%20+%201}}%20,%20dx]"
+    let markdown = "[LaTeX Solver](\(complexURL))"
+    print(markdown)
+    let document = try await parser.parseToAST(markdown)
+    guard let paragraphNode = document.children.first,
+      paragraphNode.nodeType == .paragraph,
+      let linkNode = paragraphNode.children.first as? AST.LinkNode
+    else {
+      XCTFail("No link node found")
+      return
+    }
+    XCTAssertEqual(linkNode.url, complexURL, "URL with complex brackets should be preserved correctly")
+    
+    let linkText = linkNode.children.compactMap { $0 as? AST.TextNode }.first?.content
+    XCTAssertEqual(linkText, "LaTeX Solver")
+    
+    // Also test a simpler case
+    let simpleMarkdown = "[test](https://example.com/path?q=[value])"
+    let simpleDoc = try await parser.parseToAST(simpleMarkdown)
+    guard let simplePara = simpleDoc.children.first,
+      simplePara.nodeType == .paragraph,
+      let simpleLink = simplePara.children.first as? AST.LinkNode
+    else {
+      XCTFail("No link node found for simple case")
+      return
+    }
+    XCTAssertEqual(simpleLink.url, "https://example.com/path?q=[value]")
   }
 }
 

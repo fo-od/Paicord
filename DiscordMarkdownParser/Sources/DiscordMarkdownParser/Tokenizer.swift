@@ -1120,12 +1120,14 @@ public final class MarkdownTokenizer {
 
       // Stop on whitespace or explicit token delimiters
       if c.isWhitespace || c == "<" || c == ">" || c == "\"" || c == "'"
-        //|| c == "(" || c == ")" || c == "[" || c == "]"
       {
         break
       }
+      if c == ")" {
+        break
+      }
 
-      // Accept everything else as part of the URL (this includes ?,=,&,_,%,+,/,:,#, etc.)
+      // Accept everything else as part of the URL (this includes ?,=,&,_,%,+,/,:,#,(,[,], etc.)
       content.append(c)
       advance()
     }
@@ -1574,3 +1576,5 @@ public final class TokenStream {
     position = max(0, min(pos, tokens.count))
   }
 }
+
+
