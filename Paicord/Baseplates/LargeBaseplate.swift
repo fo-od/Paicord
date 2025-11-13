@@ -41,7 +41,7 @@ struct LargeBaseplate: View {
               .bold()
           }
         }
-        .navigationSplitViewColumnWidth(min: 280, ideal: 300, max: 360)
+        .navigationSplitViewColumnWidth(min: 280, ideal: 310, max: 360)
 
     } detail: {
       Group {
@@ -81,6 +81,7 @@ struct LargeBaseplate: View {
         guildStore: currentGuildStore,
         channelStore: currentChannelStore
       )
+      .inspectorColumnWidth(min: 280, ideal: 300, max: 360)
     }
     .toolbar {
       Button {
