@@ -11,6 +11,7 @@ import SDWebImageSwiftUI
 import SwiftUIX
 
 struct ChannelButton: View {
+  @Environment(\.gateway) var gw
   @Environment(\.appState) var appState
   var channels: [ChannelSnowflake: DiscordChannel]
   var channel: DiscordChannel
@@ -66,6 +67,41 @@ struct ChannelButton: View {
               .scaledToFit()
               .clipShape(.circle)
               .padding(2)
+          } else {
+            VStack {
+              if let firstUser = channel.recipients?.first(where: {$0.id != gw.user.currentUser?.id}),
+                 let lastUser = channel.recipients?.last(where: { $0.id != gw.user.currentUser?.id && $0.id != firstUser.id }) {
+                  Group {
+                    Profile.Avatar(
+                      member: nil,
+                      user: firstUser.toPartialUser()
+                    )
+                    .showsAvatarDecoration()
+                    .scaleEffect(0.75, anchor: .topLeading)
+                    .overlay(
+                      Profile.Avatar(
+                        member: nil,
+                        user: lastUser.toPartialUser()
+                      )
+                      .showsAvatarDecoration()
+                      .scaleEffect(0.75, anchor: .bottomTrailing)
+                    )
+                  }
+                  .padding(2)
+              } else if let user = channel.recipients?.first {
+                Profile.Avatar(
+                  member: nil,
+                  user: user.toPartialUser()
+                )
+                .showsAvatarDecoration()
+                .padding(2)
+              } else {
+                  Circle()
+                    .fill(Color.gray)
+                    .padding(2)
+              }
+            }
+            .aspectRatio(1, contentMode: .fit)
           }
           Text(
             channel.name ?? channel.recipients?.map({
