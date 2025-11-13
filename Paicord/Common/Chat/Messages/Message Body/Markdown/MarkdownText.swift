@@ -28,7 +28,7 @@ struct MarkdownText: View {
   }
 
   @State var userPopover: PartialUser?
-  
+
   @State var lastGuildMemberCount: Int = -1
 
   var body: some View {
@@ -60,19 +60,19 @@ struct MarkdownText: View {
       )
     }
   }
-  
+
   @Sendable
   func render() async {
     if let count = channelStore?.guildStore?.members.count {
       // re-render if member count changed (for mentions resolving), ignoring content similarity.
       // but if count is same as last time, do the normal content check.
       if count != lastGuildMemberCount {
-        lastGuildMemberCount = count // resolved mentions, render
+        lastGuildMemberCount = count  // resolved mentions, render
       } else {
-        guard content != renderer.rawContent else { return } // avoid redundant renders
+        guard content != renderer.rawContent else { return }  // avoid redundant renders
       }
     } else {
-      guard content != renderer.rawContent else { return } // avoid redundant renders
+      guard content != renderer.rawContent else { return }  // avoid redundant renders
     }
     renderer.passRefs(
       gw: gw,
@@ -214,16 +214,18 @@ struct MarkdownText: View {
           }
         }
         .onHover { self.isHovered = $0 }
-        
+
         // instead of resizing the codeblock, we use a spacer that fills the smaller area.
         // fixes codeblocks leaving blockquotes, and fixes codeblocks inside embeds.
         Spacer()
-          .containerRelativeFrame(.horizontal, alignment: .leading) { length, _ in
+          .containerRelativeFrame(.horizontal, alignment: .leading) {
+            length,
+            _ in
             #if os(iOS)
-            let value = min(length * 0.2, 50) - 200
-            return max(0, value)
+              let value = min(length * 0.2, 50) - 200
+              return max(0, value)
             #else
-            min(length * 0.2, 50)
+              min(length * 0.2, 50)
             #endif
           }
       }
@@ -627,13 +629,6 @@ class MarkdownRendererVM {
     case .link:
       if let link = node as? AST.LinkNode {
         let inner = NSMutableAttributedString()
-        for child in link.children {
-          append(
-            node: child,
-            to: inner,
-            baseAttributes: baseAttributes
-          )
-        }
         var newAttrs = baseAttributes
         if let url = URL(string: link.url) {
           newAttrs[.link] = url
@@ -646,16 +641,23 @@ class MarkdownRendererVM {
           newAttrs,
           range: NSRange(location: 0, length: inner.length)
         )
+        for child in link.children {
+          append(
+            node: child,
+            to: inner,
+            baseAttributes: newAttrs
+          )
+        }
         container.append(inner)
       }
 
     case .autolink:
       if let a = node as? AST.AutolinkNode {
         var attrs = baseAttributes
-        attrs[.link] = URL(string: a.url)
         attrs[.foregroundColor] = AppKitOrUIKitColor(
           Color(hexadecimal6: 0x00aafc)
         )
+        attrs[.link] = URL(string: a.url)
         let s = NSAttributedString(string: a.text, attributes: attrs)
         container.append(s)
       }
@@ -717,6 +719,9 @@ class MarkdownRendererVM {
         }
 
         var attrs = baseAttributes
+        if let font = attrs[.font] {
+          attrs[.font] = FontHelpers.makeFontBold(font)
+        }
         // add clickable paicord link for user mention (use rawValue!)
         if let url = URL(string: "paicord://mention/user/\(m.id.rawValue)") {
           attrs[.link] = url
@@ -727,7 +732,9 @@ class MarkdownRendererVM {
         attrs[.backgroundColor] = AppKitOrUIKitColor(
           Color(hexadecimal6: 0x383c6f).opacity(0.8)
         )
-        attrs[.foregroundColor] = AppKitOrUIKitColor(Color(AppKitOrUIKitColor.white).opacity(0.8))
+        attrs[.foregroundColor] = AppKitOrUIKitColor(
+          Color(AppKitOrUIKitColor.white).opacity(0.8)
+        )
         attrs[.underlineStyle] = .none
 
         let s = NSAttributedString(string: "@\(name)", attributes: attrs)
@@ -738,6 +745,9 @@ class MarkdownRendererVM {
       if let r = node as? AST.RoleMentionNode {
         if let role = guildStore?.roles[r.id] {
           var attrs = baseAttributes
+          if let font = attrs[.font] {
+            attrs[.font] = FontHelpers.makeFontBold(font)
+          }
           #if os(macOS)
             attrs[.accessibilityCustomText] = "<@&\(r.id.rawValue)>"
           #endif
@@ -753,7 +763,9 @@ class MarkdownRendererVM {
             attrs[.backgroundColor] = AppKitOrUIKitColor(
               Color(hexadecimal6: 0x383c6f).opacity(0.8)
             )
-            attrs[.foregroundColor] = AppKitOrUIKitColor(Color(AppKitOrUIKitColor.white).opacity(0.8))
+            attrs[.foregroundColor] = AppKitOrUIKitColor(
+              Color(AppKitOrUIKitColor.white).opacity(0.8)
+            )
 
           }
 
@@ -781,6 +793,9 @@ class MarkdownRendererVM {
       if let c = node as? AST.ChannelMentionNode {
         if let channel = guildStore?.channels[c.id] {
           var attrs = baseAttributes
+          if let font = attrs[.font] {
+            attrs[.font] = FontHelpers.makeFontBold(font)
+          }
           #if os(macOS)
             attrs[.accessibilityCustomText] = "<#\(c.id.rawValue)>"
           #endif
@@ -788,11 +803,12 @@ class MarkdownRendererVM {
           {
             attrs[.link] = url
           }
-          // base mention background and text per spec:
           attrs[.backgroundColor] = AppKitOrUIKitColor(
-            Color(hexadecimal6: 0x383c6f)
+            Color(hexadecimal6: 0x383c6f).opacity(0.8)
           )
-          attrs[.foregroundColor] = AppKitOrUIKitColor(Color(AppKitOrUIKitColor.white).opacity(0.8))
+          attrs[.foregroundColor] = AppKitOrUIKitColor(
+            Color(AppKitOrUIKitColor.white).opacity(0.8)
+          )
           let name = channel.name ?? c.id.rawValue
           let s = NSAttributedString(
             string: "#\(name)",
@@ -816,10 +832,15 @@ class MarkdownRendererVM {
     case .everyoneMention:
       // everyone/here should be clickable and follow the same visual style
       var attrs = baseAttributes
+      if let font = attrs[.font] {
+        attrs[.font] = FontHelpers.makeFontBold(font)
+      }
       attrs[.backgroundColor] = AppKitOrUIKitColor(
         Color(hexadecimal6: 0x383c6f)
       )
-      attrs[.foregroundColor] = AppKitOrUIKitColor(Color(AppKitOrUIKitColor.white).opacity(0.8))
+      attrs[.foregroundColor] = AppKitOrUIKitColor(
+        Color(AppKitOrUIKitColor.white).opacity(0.8)
+      )
       if let url = URL(string: "paicord://mention/everyone") {
         attrs[.link] = url
       }
@@ -829,13 +850,18 @@ class MarkdownRendererVM {
 
     case .hereMention:
       var attrs = baseAttributes
+      if let font = attrs[.font] {
+        attrs[.font] = FontHelpers.makeFontBold(font)
+      }
       if let url = URL(string: "paicord://mention/here") {
         attrs[.link] = url
       }
       attrs[.backgroundColor] = AppKitOrUIKitColor(
         Color(hexadecimal6: 0x383c6f)
       )
-      attrs[.foregroundColor] = AppKitOrUIKitColor(Color(AppKitOrUIKitColor.white).opacity(0.8))
+      attrs[.foregroundColor] = AppKitOrUIKitColor(
+        Color(AppKitOrUIKitColor.white).opacity(0.8)
+      )
       container.append(
         NSAttributedString(string: "@here", attributes: attrs)
       )
@@ -1008,7 +1034,93 @@ private enum FontHelpers {
       return UIFontMetrics(forTextStyle: style).scaledFont(for: base)
     }
   #endif
+
+  static func makeFontBold(_ font: Any) -> Any {
+  #if os(macOS)
+      guard let f = font as? NSFont else { return font }
+
+      if let semi = f.withWeight(weight: .semibold) {
+          return semi
+      }
+
+      // Fallback: system semibold
+      return NSFont.systemFont(ofSize: f.pointSize, weight: .semibold)
+
+  #else
+      guard let f = font as? UIFont else { return font }
+
+      // If the font is already semibold or heavier, return as-is
+      if let traits = f.fontDescriptor.fontAttributes[.traits] as? [UIFontDescriptor.TraitKey: Any],
+         let weightValue = traits[.weight] as? CGFloat,
+         weightValue >= UIFont.Weight.semibold.rawValue {
+          return f
+      }
+
+      // Create a semibold descriptor
+      let descriptor = f.fontDescriptor.addingAttributes([
+          UIFontDescriptor.AttributeName.traits: [
+              UIFontDescriptor.TraitKey.weight: UIFont.Weight.semibold
+          ]
+      ])
+
+      let updated = UIFont(descriptor: descriptor, size: f.pointSize)
+      let scaled = UIFontMetrics.default.scaledFont(for: updated)
+
+      // Fallback if the font didn’t actually change
+      if scaled.fontName == f.fontName {
+          return UIFont.systemFont(ofSize: f.pointSize, weight: .semibold)
+      }
+
+      return scaled
+  #endif
+  }
 }
+
+#if os(macOS)
+// Source - https://stackoverflow.com/a/76143011
+// Posted by Sören Kuklau
+// Retrieved 2025-11-13, License - CC BY-SA 4.0
+
+extension NSFont
+{
+    /// Rough mapping from behavior of `.systemFont(…weight:)`
+    /// to `NSFontManager`'s `Int`-based weight,
+    /// as of 13.4 Ventura
+    func withWeight(weight: NSFont.Weight) -> NSFont?
+    {
+        let fontManager=NSFontManager.shared
+
+        var intWeight: Int
+
+        switch weight
+        {
+        case .ultraLight:
+            intWeight=0
+        case .light:
+            intWeight=2 // treated as ultraLight
+        case .thin:
+            intWeight=3
+        case .medium:
+            intWeight=6
+        case .semibold:
+            intWeight=8 // treated as bold
+        case .bold:
+            intWeight=9
+        case .heavy:
+            intWeight=10 // treated as bold
+        case .black:
+            intWeight=15 // .systemFont does bold here; we do condensed black
+        default:
+            intWeight=5 // treated as regular
+        }
+
+        return fontManager.font(withFamily: self.familyName ?? "",
+                                traits: .unboldFontMask,
+                                weight: intWeight,
+                                size: self.pointSize)
+    }
+}
+#endif
 
 // UIColor wrappers for cross-platform compatibility
 extension AppKitOrUIKitColor {
@@ -1037,6 +1149,23 @@ extension AppKitOrUIKitColor {
     #endif
   }
 }
+
+#if os(iOS)
+  extension UIFont {
+    /// Returns a rounded system font with the given size and weight.
+    fileprivate static func roundedFont(
+      ofSize size: CGFloat,
+      weight: UIFont.Weight
+    ) -> UIFont {
+      let base = UIFont.systemFont(ofSize: size, weight: weight)
+      if let descriptor = base.fontDescriptor.withDesign(.rounded) {
+        return UIFont(descriptor: descriptor, size: size)
+      } else {
+        return base
+      }
+    }
+  }
+#endif
 
 // used as fallback whilst parsing markdown (almost instant)
 extension Text {
@@ -1223,7 +1352,7 @@ enum PaicordChatLink {
         let guildSnowflake = guildId == "@me" ? nil : GuildSnowflake(guildId)
         let channelSnowflake = ChannelSnowflake(channelId)
         let messageSnowflake = MessageSnowflake(messageId)
-        
+
         self = .discordMessageLink(
           guildSnowflake,
           channelSnowflake,
