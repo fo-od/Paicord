@@ -14,22 +14,36 @@ extension ChatView {
     var vm: ChannelStore
 
     var body: some View {
-      if let name = vm.channel?.name {
+      switch vm.channel?.type {
+      case .dm, .groupDm:
+        if let name = vm.channel?.name, !name.isEmpty {
+          HStack(spacing: 4) {
+            Image(systemName: "number")
+              .foregroundStyle(.secondary)
+              .imageScale(idiom == .phone ? .medium : .large)
+            let name = vm.channel?.name ?? "Unknown Channel"
+            Text(name)
+              .font(idiom == .phone ? .headline : .title3)
+              .fontWeight(.semibold)
+          }
+        } else {
+          let ppl = vm.channel?.recipients ?? []
+          Text(
+            ppl.map({
+              $0.global_name ?? $0.username
+            }).joined(separator: ", ")
+          )
+        }
+      default:
         HStack(spacing: 4) {
           Image(systemName: "number")
             .foregroundStyle(.secondary)
             .imageScale(idiom == .phone ? .medium : .large)
-
+          let name = vm.channel?.name ?? "Unknown Channel"
           Text(name)
             .font(idiom == .phone ? .headline : .title3)
             .fontWeight(.semibold)
         }
-      } else if let ppl = vm.channel?.recipients {
-        Text(
-          ppl.map({
-            $0.global_name ?? $0.username
-          }).joined(separator: ", ")
-        )
       }
     }
   }
