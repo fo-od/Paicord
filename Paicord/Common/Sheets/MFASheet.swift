@@ -187,10 +187,10 @@ struct SixDigitInput: View {
       textfield = true
     }
     .background(.appBackground.opacity(0.001))
-    .background(
+    .overlay(
       TextField("", text: $input)
         .textContentType(.oneTimeCode)
-        .opacity(0.01)
+        .opacity(0.008)
         .onChange(of: input) {
           let filtered = input.filter { $0.isNumber }
           if filtered.count > 6 {
@@ -202,7 +202,7 @@ struct SixDigitInput: View {
             onCommit(input)
           }
         }
-        .frame(width: 0, height: 0)
+        .frame(width: 260, height: 50)
         .focused($textfield)
         .disabled(!enabled)  // redundant but whatevs
     )
