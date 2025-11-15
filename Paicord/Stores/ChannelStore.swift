@@ -76,7 +76,7 @@ class ChannelStore: DiscordDataStore {
       do {
         try await self.fetchMessages()
       } catch {
-        PaicordAppState.shared.error = error
+        PaicordAppState.instances.first?.value.error = error
       }
     }
     eventTask = Task { @MainActor in
@@ -449,9 +449,9 @@ class ChannelStore: DiscordDataStore {
       }
     } catch {
       if let error = res.asError() {
-        PaicordAppState.shared.error = error
+        PaicordAppState.instances.first?.value.error = error
       } else {
-        PaicordAppState.shared.error = error
+        PaicordAppState.instances.first?.value.error = error
       }
     }
   }

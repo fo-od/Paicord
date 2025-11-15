@@ -126,7 +126,10 @@ final class GatewayStore {
     channels = [:]
     guilds = [:]
     subscribedGuilds = []
-    PaicordAppState.shared.resetStore()
+    _ = PaicordAppState.instances.mapValues { appState in
+      appState.resetStore()
+    }
+    
   }
 
   // MARK: - Data Stores
@@ -192,11 +195,8 @@ final class GatewayStore {
   private func handleReady(_ data: Gateway.Ready) {
     guard self.subscribedGuilds.isEmpty == false else { return }
     print("[GatewayStore] Reconnected, removing ChannelStore instances excluding focused channel.")
-    if let channelId = PaicordAppState.shared.selectedChannel {
-      channels = channels.filter { $0.key == channelId }
-    } else {
-      channels = [:]
-    }
+    let channelIds = PaicordAppState.instances.compactMap(\.value.selectedChannel)
+    channels = channels.filter { channelIds.contains($0.key) }
     if let channel = channels.values.first {
       print("[GatewayStore] Refetching messages on behalf of focused channel \(channel.channelId.rawValue).")
       channel.messages.removeAll()
@@ -204,14 +204,13 @@ final class GatewayStore {
         do {
           try await channel.fetchMessages()
         } catch {
-          PaicordAppState.shared.error = error
+          PaicordAppState.instances.first?.value.error = error
         }
       }
     }
     print("[GatewayStore] Reconnected, guild subscriptions invalidated.")
     self.subscribedGuilds = []
-    if let guildId = PaicordAppState.shared.selectedGuild {
-      print("[GatewayStore] Resubscribing to focused guild.")
+    PaicordAppState.instances.compactMap(\.value.selectedGuild).forEach { guildId in
       _ = getGuildStore(for: guildId)
     }
   }

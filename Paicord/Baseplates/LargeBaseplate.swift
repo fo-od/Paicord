@@ -19,7 +19,7 @@ struct LargeBaseplate: View {
   @State var currentGuildStore: GuildStore? = nil
   @State var currentChannelStore: ChannelStore? = nil
 
-  @State private var columnVisibility: NavigationSplitViewVisibility = .all
+  @State private var columnVisibility: NavigationSplitViewVisibility = .doubleColumn
 
   var body: some View {
     NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -67,7 +67,7 @@ struct LargeBaseplate: View {
           ToolbarItem(placement: .navigation) {
             Button {
               withAnimation {
-                columnVisibility = (columnVisibility == .all) ? NavigationSplitViewVisibility.detailOnly : NavigationSplitViewVisibility.all
+                columnVisibility = (columnVisibility == .doubleColumn) ? NavigationSplitViewVisibility.detailOnly : NavigationSplitViewVisibility.doubleColumn
               }
             } label: {
               Label("Toggle Sidebar", systemImage: "sidebar.left")

@@ -13,7 +13,7 @@ import SwiftUIX
 
 struct RootView: View {
   let gatewayStore: GatewayStore
-  @Bindable var appState: PaicordAppState
+  @State var appState: PaicordAppState = .init()
   @Environment(\.challenges) var challenges
   @Environment(\.userInterfaceIdiom) var idiom
 
@@ -62,6 +62,7 @@ struct RootView: View {
         }
       }
     }
+    .environment(\.appState, appState)
     .navigationTitle("")
     .animation(.default, value: gatewayStore.state.hashValue)
     .fontDesign(.rounded)
@@ -73,6 +74,12 @@ struct RootView: View {
       )
     )
     .onAppear { setupGatewayCallbacks() }
+    .onAppear {
+      PaicordAppState.instances[appState.id] = appState
+    }
+    .onDisappear {
+      PaicordAppState.instances.removeValue(forKey: appState.id)
+    }
     #if os(macOS)
       .introspect(.window, on: .macOS(.v14...)) { window in
         self.window = window

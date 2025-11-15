@@ -11,8 +11,10 @@ import SwiftUIX
 
 @Observable
 final class PaicordAppState {
-  static let shared = PaicordAppState()
-
+  static var instances: [UUID: PaicordAppState] = [:]
+  
+  let id = UUID()
+  
   // MARK: - iOS Specific
   var chatOpen: Bool = true
 
@@ -65,7 +67,7 @@ final class PaicordAppState {
   @ObservationIgnored
   private var rawPrevSelectedChannels: [String: String] = [:]
 
-  private init() {
+  init() {
     loadPrevSelectedChannels()
     if let lastDM = self.rawPrevSelectedChannels[
       self.selectedGuild?.rawValue ?? "nil"

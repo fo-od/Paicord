@@ -21,10 +21,36 @@ import SwiftUIX
 @main
 struct PaicordApp: App {
   let gatewayStore = GatewayStore.shared
-  var appState = PaicordAppState.shared
   var challenges = Challenges()
 
+  #if os(iOS)
+    class AppDelegate: NSObject, UIApplicationDelegate {
+
+      // This method is called by the system to check if state restoration should occur.
+      func application(
+        _ application: UIApplication,
+        shouldRestoreSecureApplicationState coder: NSCoder
+      ) -> Bool {
+        // Return false to prevent the app from restoring its previous state and windows.
+        return false
+      }
+
+      // You might also want to prevent the system from saving the state in the first place:
+      func application(
+        _ application: UIApplication,
+        shouldSaveSecureApplicationState coder: NSCoder
+      ) -> Bool {
+        // Return false to prevent the app from saving its current state when it is terminated.
+        return false
+      }
+    }
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+  #endif
+
   init() {
+    #if os(macOS)
+      UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")  // disable restoring windows on macOS
+    #endif
     //     i foubnd out this rly cool thing if u avoid logging 40mb of data to console the client isnt slow !!!!
     //    #if DEBUG
     //      DiscordGlobalConfiguration.makeLogger = { loggerLabel in
@@ -47,8 +73,7 @@ struct PaicordApp: App {
   var body: some Scene {
     WindowGroup {
       RootView(
-        gatewayStore: gatewayStore,
-        appState: appState
+        gatewayStore: gatewayStore
       )
       .onAppear {
         #if canImport(FLEX)
@@ -65,12 +90,13 @@ struct PaicordApp: App {
       //      }
       .commands { AccountCommands(gatewayStore: gatewayStore) }
     #endif
-      .environment(\.challenges, challenges)
+    .environment(\.challenges, challenges)
 
     #if os(macOS)
       Settings {
         SettingsView()
       }
+      .windowToolbarStyle(.unifiedCompact)
     #endif
   }
 }

@@ -13,7 +13,7 @@ import SwiftUI
 
 
 extension EnvironmentValues {
-  @Entry var appState: PaicordAppState = .shared
+  @Entry var appState: PaicordAppState = .init()
   @Entry var gateway: GatewayStore = .shared
   
   @Entry var guildStore: GuildStore?
