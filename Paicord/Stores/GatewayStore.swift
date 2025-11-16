@@ -137,7 +137,6 @@ final class GatewayStore {
   let accounts = TokenStore()
   var user = CurrentUserStore()
   var settings = SettingsStore()
-  var messageDrain = MessageDrainStore()
 
   private var channels: [ChannelSnowflake: ChannelStore] = [:]
   func getChannelStore(for id: ChannelSnowflake, from guild: GuildStore? = nil)
@@ -154,6 +153,7 @@ final class GatewayStore {
     }
   }
 
+  private var subscribedGuilds: Set<GuildSnowflake> = []
   private var guilds: [GuildSnowflake: GuildStore] = [:]
   func getGuildStore(for id: GuildSnowflake) -> GuildStore {
     defer {
@@ -187,7 +187,18 @@ final class GatewayStore {
       return store
     }
   }
-  private var subscribedGuilds: Set<GuildSnowflake> = []
+
+  private var messageDrains: [ChannelSnowflake: MessageDrainStore] = [:]
+  func getMessageDrainStore(for channelId: ChannelSnowflake) -> MessageDrainStore {
+    if let store = messageDrains[channelId] {
+      return store
+    } else {
+      let store = MessageDrainStore()
+      store.setGateway(self)
+      messageDrains[channelId] = store
+      return store
+    }
+  }
 
   
   // MARK: - Handlers

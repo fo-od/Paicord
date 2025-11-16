@@ -110,19 +110,34 @@ struct ProfilePopoutView: View {
     .lineLimit(1)
     .minimumScaleFactor(0.5)
 
-    HStack(spacing: 2) {
-      Text("@\(user.username ?? "unknown")")
-      if let pronouns = profileMeta?.pronouns
-        ?? (showMainProfile
-          ? user.pronouns : member?.pronouns ?? user.pronouns),
-        !pronouns.isEmpty
-      {
-        Text("•")
-        Text(pronouns)
+    FlowLayout(spacing: 8) {
+      Group {
+        Text("@\(user.username ?? "unknown")")
+        if let pronouns = profileMeta?.pronouns
+          ?? (showMainProfile
+            ? user.pronouns : member?.pronouns ?? user.pronouns),
+          !pronouns.isEmpty
+        {
+          Text("•")
+          Text(pronouns)
+        }
       }
+      .font(.subheadline)
+      .foregroundStyle(.secondary)
+      
+      HStack(spacing: 4) {
+        let badges = profile?.badges ?? []
+        ForEach(badges) { badge in
+          Profile.Badge(badge: badge)
+        }
+      }
+      .maxHeight(16)
     }
-    .font(.subheadline)
-    .foregroundStyle(.secondary)
+    
+
+    if let bio = profileMeta?.bio ?? profile?.user_profile?.bio {
+      MarkdownText(content: bio)
+    }
   }
 
   @Sendable

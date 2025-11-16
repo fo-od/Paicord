@@ -30,7 +30,7 @@ enum Profile {
       .clipShape(Circle())
       .overlay {
         if showDecoration,
-          let decoration = user?.avatar_decoration_data
+          let decoration = member?.avatar_decoration_data ?? user?.avatar_decoration_data
         {
           AvatarDecorationView(
             decoration: decoration,
@@ -333,6 +333,33 @@ enum Profile {
           .scaledToFill()
           .clipped()
       }
+    }
+  }
+  
+  struct BannerView: View {
+    var body: some View {
+      EmptyView()
+    }
+  }
+  
+  struct Badge: View {
+    var badge: DiscordUser.Profile.Badge
+    @State private var isHovered: Bool = false
+    var body: some View {
+      WebImage(url: badgeURL())
+        .resizable()
+        .scaledToFit()
+        .frame(width: 16, height: 16)
+        .onHover { isHovered = $0 }
+        .popover(isPresented: $isHovered) {
+          Text(badge.description)
+            .padding(5)
+        }
+    }
+    func badgeURL() -> URL? {
+      URL(
+        string: CDNEndpoint.profileBadge(icon: badge.icon).url + ".png"
+      )
     }
   }
 }
