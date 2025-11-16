@@ -1,5 +1,5 @@
 {
-  "originHash" : "b408b4ff9b9bad3f55ae3478d9016091e28cb2bc15839bd25e64c54cd0a5badc",
+  "originHash" : "a43b36a50ef0b7f8a21ba825361f5d90c1714dba634c4a38f826de538de43b6f",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -89,15 +89,6 @@
       "state" : {
         "branch" : "master",
         "revision" : "e0c7eebc5a4465a3c4680764f26b7a61f567cdaf"
-      }
-    },
-    {
-      "identity" : "localconsole",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/circularsprojects/LocalConsole",
-      "state" : {
-        "branch" : "main",
-        "revision" : "f7b08c9784bc04483fda9ddc71971ec9e918c049"
       }
     },
     {
@@ -391,7 +382,7 @@
     {
       "identity" : "uint128",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Jitsusama/UInt128",
+      "location" : "https://github.com/Jitsusama/UInt128.git",
       "state" : {
         "branch" : "master",
         "revision" : "58bd8a247df0c2ece73b6c760f22c93ad6a47492"

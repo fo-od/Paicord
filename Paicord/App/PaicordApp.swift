@@ -9,19 +9,17 @@
 import PaicordLib
 @_spi(Advanced) import SwiftUIIntrospect
 import SwiftUIX
+import Logging
 
 #if canImport(Sparkle)
   import Sparkle
-#endif
-
-#if canImport(FLEX)
-  import FLEX
 #endif
 
 @main
 struct PaicordApp: App {
   let gatewayStore = GatewayStore.shared
   var challenges = Challenges()
+    let console = StdOutInterceptor.shared
 
   #if os(iOS)
     class AppDelegate: NSObject, UIApplicationDelegate {
@@ -48,6 +46,11 @@ struct PaicordApp: App {
   #endif
 
   init() {
+//    DiscordGlobalConfiguration.makeLogger = { label in
+//      let stdoutHandler = StreamLogHandler.standardOutput(label: label) // stdout
+//      return Logger(label: label, factory: { _ in stdoutHandler })
+//    }
+    console.startIntercepting()
     //     i foubnd out this rly cool thing if u avoid logging 40mb of data to console the client isnt slow !!!!
     //    #if DEBUG
     //      DiscordGlobalConfiguration.makeLogger = { loggerLabel in
@@ -72,15 +75,10 @@ struct PaicordApp: App {
       RootView(
         gatewayStore: gatewayStore
       )
-      .onAppear {
-        #if canImport(FLEX)
-          FLEXManager.shared.showExplorer()
-        #endif
-      }
       #if os(macOS)
-      .introspect(.window, on: .macOS(.v14...)) { window in
-        window.isRestorable = false
-      }
+        .introspect(.window, on: .macOS(.v14...)) { window in
+          window.isRestorable = false
+        }
       #endif
     }
     #if os(macOS)

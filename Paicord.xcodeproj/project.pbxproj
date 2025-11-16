@@ -35,7 +35,10 @@
 		57F5AF532E7CBDD000AD5674 /* AccountPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F5AF522E7CBDD000AD5674 /* AccountPicker.swift */; };
 		57F5AF552E7CBDF400AD5674 /* MFAView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F5AF542E7CBDF400AD5674 /* MFAView.swift */; };
 		8702A5382EAA6753008DD55A /* MemberRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8702A5372EAA6751008DD55A /* MemberRowView.swift */; };
-		AA0718942EB237F100D41529 /* LocalConsole in Frameworks */ = {isa = PBXBuildFile; platformFilters = (ios, xros, ); productRef = AA0718932EB237F100D41529 /* LocalConsole */; };
+		AA078FC22EC8091000EDFFA8 /* DebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA078FC12EC8090E00EDFFA8 /* DebugSection.swift */; };
+		AA078FC42EC809D600EDFFA8 /* AccountSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA078FC32EC809D200EDFFA8 /* AccountSection.swift */; };
+		AA078FC72EC80D3C00EDFFA8 /* LocalConsoleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA078FC62EC80D3A00EDFFA8 /* LocalConsoleManager.swift */; };
+		AA078FCA2EC8220E00EDFFA8 /* PaicordSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA078FC92EC8220900EDFFA8 /* PaicordSection.swift */; };
 		AA0C43D72E9F190B000FA834 /* AttributedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0C43D62E9F18AD000FA834 /* AttributedText.swift */; };
 		AA0C43D92E9F1D41000FA834 /* EmojiAttachmentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0C43D82E9F1D41000FA834 /* EmojiAttachmentCell.swift */; };
 		AA1097142E64C181005BC3D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA1097102E64C181005BC3D2 /* Assets.xcassets */; };
@@ -77,6 +80,7 @@
 		AA9C81832E6660BE0086B1DA /* GuildButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9C81822E6660BE0086B1DA /* GuildButton.swift */; };
 		AA9C81862E66670E0086B1DA /* CornerRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9C81852E66670E0086B1DA /* CornerRadius.swift */; };
 		AA9C818C2E6702930086B1DA /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = AA9C818B2E6702930086B1DA /* SwiftUIIntrospect */; };
+		AA9D26B12EC95EE4006071FE /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9D26B02EC95EE3006071FE /* FlowLayout.swift */; };
 		AAB22FD82EAD0A2400413310 /* SwiftPrettyPrint in Frameworks */ = {isa = PBXBuildFile; productRef = AAB22FD72EAD0A2400413310 /* SwiftPrettyPrint */; };
 		AAB22FDB2EAD86B700413310 /* ColorCube in Frameworks */ = {isa = PBXBuildFile; productRef = AAB22FDA2EAD86B700413310 /* ColorCube */; };
 		AAB50A502E9AA6800048E8B0 /* ChatInputCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAB50A4F2E9AA67C0048E8B0 /* ChatInputCommand.swift */; };
@@ -131,6 +135,10 @@
 		57F5AF522E7CBDD000AD5674 /* AccountPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountPicker.swift; sourceTree = "<group>"; };
 		57F5AF542E7CBDF400AD5674 /* MFAView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MFAView.swift; sourceTree = "<group>"; };
 		8702A5372EAA6751008DD55A /* MemberRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemberRowView.swift; sourceTree = "<group>"; };
+		AA078FC12EC8090E00EDFFA8 /* DebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSection.swift; sourceTree = "<group>"; };
+		AA078FC32EC809D200EDFFA8 /* AccountSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSection.swift; sourceTree = "<group>"; };
+		AA078FC62EC80D3A00EDFFA8 /* LocalConsoleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalConsoleManager.swift; sourceTree = "<group>"; };
+		AA078FC92EC8220900EDFFA8 /* PaicordSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaicordSection.swift; sourceTree = "<group>"; };
 		AA0C43D62E9F18AD000FA834 /* AttributedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedText.swift; sourceTree = "<group>"; };
 		AA0C43D82E9F1D41000FA834 /* EmojiAttachmentCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiAttachmentCell.swift; sourceTree = "<group>"; };
 		AA1096DB2E63BE84005BC3D2 /* Paicord.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Paicord.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -167,6 +175,7 @@
 		AA7B38F32EB50EFD00CA4A3C /* MessageDrainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageDrainStore.swift; sourceTree = "<group>"; };
 		AA9C81822E6660BE0086B1DA /* GuildButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildButton.swift; sourceTree = "<group>"; };
 		AA9C81852E66670E0086B1DA /* CornerRadius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerRadius.swift; sourceTree = "<group>"; };
+		AA9D26B02EC95EE3006071FE /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
 		AAB22FD52EABB04300413310 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AAB50A4F2E9AA67C0048E8B0 /* ChatInputCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInputCommand.swift; sourceTree = "<group>"; };
 		AAB50A512E9AC9CB0048E8B0 /* ChannelHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelHeader.swift; sourceTree = "<group>"; };
@@ -210,7 +219,6 @@
 				AA9C818C2E6702930086B1DA /* SwiftUIIntrospect in Frameworks */,
 				57CDD87F2E71CB6000022203 /* HCaptcha in Frameworks */,
 				AA13780B2E969D6100100969 /* DiscordMarkdownParser in Frameworks */,
-				AA0718942EB237F100D41529 /* LocalConsole in Frameworks */,
 				AAB22FDB2EAD86B700413310 /* ColorCube in Frameworks */,
 				AAB22FD82EAD0A2400413310 /* SwiftPrettyPrint in Frameworks */,
 				AAEEC7222E6515C400EB5FC9 /* KeychainAccess in Frameworks */,
@@ -252,6 +260,7 @@
 		57A4E7122E6B44B500470131 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				AA078FC52EC80D2100EDFFA8 /* LocalConsoleManager */,
 				AA409ABD2EC74F3100848045 /* Theming */,
 				AA7B38F12EB37F9500CA4A3C /* PermsHelper.swift */,
 				AABED5A72E7FF970005BDD63 /* PaicordLib++ */,
@@ -318,6 +327,9 @@
 			isa = PBXGroup;
 			children = (
 				57DA042E2E79DC4900DB4C7C /* SettingsView.swift */,
+				AA078FBF2EC808F900EDFFA8 /* Account */,
+				AA078FC82EC821FE00EDFFA8 /* Paicord */,
+				AA078FC02EC8090400EDFFA8 /* Debug */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -333,6 +345,38 @@
 				57F5AF4A2E7CB13F00AD5674 /* AccountCommands.swift */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		AA078FBF2EC808F900EDFFA8 /* Account */ = {
+			isa = PBXGroup;
+			children = (
+				AA078FC32EC809D200EDFFA8 /* AccountSection.swift */,
+			);
+			path = Account;
+			sourceTree = "<group>";
+		};
+		AA078FC02EC8090400EDFFA8 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				AA078FC12EC8090E00EDFFA8 /* DebugSection.swift */,
+			);
+			path = Debug;
+			sourceTree = "<group>";
+		};
+		AA078FC52EC80D2100EDFFA8 /* LocalConsoleManager */ = {
+			isa = PBXGroup;
+			children = (
+				AA078FC62EC80D3A00EDFFA8 /* LocalConsoleManager.swift */,
+			);
+			path = LocalConsoleManager;
+			sourceTree = "<group>";
+		};
+		AA078FC82EC821FE00EDFFA8 /* Paicord */ = {
+			isa = PBXGroup;
+			children = (
+				AA078FC92EC8220900EDFFA8 /* PaicordSection.swift */,
+			);
+			path = Paicord;
 			sourceTree = "<group>";
 		};
 		AA0C43D52E9EF91D000FA834 /* Markdown */ = {
@@ -558,6 +602,7 @@
 		AA9C81812E6660AB0086B1DA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				AA9D26B02EC95EE3006071FE /* FlowLayout.swift */,
 				AAFC9DD92EB7DAE200BB8028 /* VariableBlurView.swift */,
 				57DA042B2E79B25F00DB4C7C /* AsyncButton.swift */,
 				578E1CE02E67780B00C6DEA3 /* GradientText.swift */,
@@ -657,7 +702,6 @@
 				AA21D2822EAA557C00C75093 /* Sparkle */,
 				AAB22FD72EAD0A2400413310 /* SwiftPrettyPrint */,
 				AAB22FDA2EAD86B700413310 /* ColorCube */,
-				AA0718932EB237F100D41529 /* LocalConsole */,
 			);
 			productName = PaiCord;
 			productReference = AA1096DB2E63BE84005BC3D2 /* Paicord.app */;
@@ -701,7 +745,6 @@
 				AA21D2812EAA557C00C75093 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				AAB22FD62EAD0A2300413310 /* XCRemoteSwiftPackageReference "SwiftPrettyPrint" */,
 				AAB22FD92EAD86B600413310 /* XCRemoteSwiftPackageReference "ColorCube" */,
-				AA0718922EB237F100D41529 /* XCRemoteSwiftPackageReference "LocalConsole" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AA1096DC2E63BE84005BC3D2 /* Products */;
@@ -736,11 +779,13 @@
 				AA1097172E64C181005BC3D2 /* SmallBaseplate.swift in Sources */,
 				AAB50A5E2E9B21B30048E8B0 /* Thumbhash.swift in Sources */,
 				AAEEC71F2E65120000EB5FC9 /* TokenStore.swift in Sources */,
+				AA078FC22EC8091000EDFFA8 /* DebugSection.swift in Sources */,
 				AA1097182E64C181005BC3D2 /* HomeView.swift in Sources */,
 				AA7B38F42EB50F0100CA4A3C /* MessageDrainStore.swift in Sources */,
 				AA74E4392EBC411C0031B285 /* EntityContextMenu.swift in Sources */,
 				AA10971D2E64C18C005BC3D2 /* ChatView.swift in Sources */,
 				AA9C81862E66670E0086B1DA /* CornerRadius.swift in Sources */,
+				AA078FCA2EC8220E00EDFFA8 /* PaicordSection.swift in Sources */,
 				57CDD8812E71FF7600022203 /* CaptchaSheet.swift in Sources */,
 				AAB905362E8451B000EA171B /* ProfileBar.swift in Sources */,
 				57E05C5B2E6C745900B81AA7 /* String+LocalizedError.swift in Sources */,
@@ -757,6 +802,7 @@
 				57F5AF492E7CB13100AD5674 /* PaicordAppState.swift in Sources */,
 				AAB905382E845A7300EA171B /* ChannelButton.swift in Sources */,
 				5724CD6F2E733D0E00931FEF /* MFASheet.swift in Sources */,
+				AA078FC72EC80D3C00EDFFA8 /* LocalConsoleManager.swift in Sources */,
 				AAB50A542E9AD4470048E8B0 /* MessageBody.swift in Sources */,
 				57E05C592E6C6AE400B81AA7 /* Design Constants.swift in Sources */,
 				AAFC9DDA2EB7DAE300BB8028 /* VariableBlurView.swift in Sources */,
@@ -782,10 +828,12 @@
 				AABED5A92E7FF982005BDD63 /* Merging.swift in Sources */,
 				578E1CE12E67781700C6DEA3 /* GradientText.swift in Sources */,
 				AA409ABC2EC6909800848045 /* Theming.swift in Sources */,
+				AA078FC42EC809D600EDFFA8 /* AccountSection.swift in Sources */,
 				AA1097192E64C181005BC3D2 /* NotificationsView.swift in Sources */,
 				57F5AF472E7CAD2500AD5674 /* Challenges.swift in Sources */,
 				AA409ABF2EC74F5E00848045 /* Support.swift in Sources */,
 				AA13A1E32EA83766005A3613 /* TypingIndicatorBar.swift in Sources */,
+				AA9D26B12EC95EE4006071FE /* FlowLayout.swift in Sources */,
 				AA1878F32E81A30C009C7E40 /* GuildView.swift in Sources */,
 				AA63EB762EA712D900A5F21D /* ReactionsView.swift in Sources */,
 				AABED5A22E7F4950005BDD63 /* DiscordDataStoreProtocol.swift in Sources */,
@@ -943,6 +991,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Paicord/Paicord.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
@@ -969,6 +1018,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.llsc12.Paicord;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
@@ -987,6 +1037,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Paicord/Paicord.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
@@ -1013,6 +1064,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.llsc12.Paicord;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
@@ -1068,14 +1120,6 @@
 			repositoryURL = "https://github.com/llsc12/hcaptcha";
 			requirement = {
 				branch = master;
-				kind = branch;
-			};
-		};
-		AA0718922EB237F100D41529 /* XCRemoteSwiftPackageReference "LocalConsole" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/circularsprojects/LocalConsole";
-			requirement = {
-				branch = main;
 				kind = branch;
 			};
 		};
@@ -1177,11 +1221,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 57CDD87D2E71CB6000022203 /* XCRemoteSwiftPackageReference "hcaptcha" */;
 			productName = HCaptcha;
-		};
-		AA0718932EB237F100D41529 /* LocalConsole */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AA0718922EB237F100D41529 /* XCRemoteSwiftPackageReference "LocalConsole" */;
-			productName = LocalConsole;
 		};
 		AA1378082E969A9000100969 /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;

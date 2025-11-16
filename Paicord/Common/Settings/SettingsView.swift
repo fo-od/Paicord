@@ -7,11 +7,20 @@
 //
 
 import SwiftUIX
+import Collections
+
+enum SettingsPages {
+  static let settingsPages: [SettingsPage] =
+    AccountSection + PaicordSection + DebugSection
+}
 
 struct SettingsView: View {
   @Environment(\.gateway) var gw
   @Environment(\.appState) var appState
   @Environment(\.userInterfaceIdiom) var idiom
+
+  @State private var selectedPage: SettingsPage?  // <-- Add this state variable
+
   var body: some View {
     switch idiom {
     case .mac, .pad:
@@ -21,52 +30,147 @@ struct SettingsView: View {
     }
   }
 
-  // MARK: - macOS Layout
-  private var settingsSidebarStyle: some View {
-    NavigationSplitView {
-      List {
-        Section("General") {
-          NavigationLink("Appearance", value: "appearance")
-          NavigationLink("Notifications", value: "notifications")
+  @ViewBuilder
+  var settingsSidebarStyle: some View {
+    NavigationSplitView(columnVisibility: .constant(.all)) {
+      List(selection: $selectedPage) {  // <-- Bind selection here
+        let sections: OrderedDictionary<String, [SettingsPage]> = SettingsPages.settingsPages
+          .reduce(
+            into: [:]) { dict, page in
+              dict[page.section, default: []].append(page)
+            }
+
+        ForEach(sections.keys, id: \.self) { section in
+          Section(header: Text(section)) {
+            ForEach(sections[section] ?? [], id: \.title) { page in
+              if let action = page.action {
+                Button {
+                  action()
+                } label: {
+                  switch page.icon {
+                  case .system(let name):
+                    Label(page.title, systemImage: name)
+                  case .custom(let name):
+                    Label(page.title, image: name)
+                  }
+                }
+              } else {
+                NavigationLink(value: page) {
+                  switch page.icon {
+                  case .system(let name):
+                    Label(page.title, systemImage: name)
+                  case .custom(let name):
+                    Label(page.title, image: name)
+                  }
+                }
+              }
+            }
+          }
         }
       }
-      .navigationSplitViewColumnWidth(min: 150, ideal: 200)
+      .navigationTitle("Paicord Settings")
+      .toolbar(removing: .sidebarToggle)
+
     } detail: {
-      SettingsDetailView()
+      if let selectedPage = selectedPage {
+        selectedPage.view
+          .navigationTitle(selectedPage.title)
+          .toolbar(removing: .sidebarToggle)
+      } else {
+        Text("Paicord")
+          .font(.title2)
+          .fontWeight(.semibold)
+          .foregroundStyle(.secondary)
+          .toolbar(removing: .sidebarToggle)
+      }
     }
+    .toolbar(removing: .sidebarToggle)
   }
 
-  // MARK: - iOS / iPadOS Layout
-  private var settingsListStyle: some View {
-    NavigationStack {
-      Form {
-        Section("Profile") {
-          TextField("Username", text: .constant("gm"))
-        }
-
-        Section("Preferences") {
-          Picker("Theme", selection: .constant("System")) {
-            Text("Light").tag("Light")
-            Text("Dark").tag("Dark")
-            Text("System").tag("System")
+  @ViewBuilder
+  var settingsListStyle: some View {
+    List {
+      let sections: OrderedDictionary<String, [SettingsPage]> = SettingsPages.settingsPages
+        .reduce(
+          into: [:]) { dict, page in
+            dict[page.section, default: []].append(page)
           }
-          .pickerStyle(.segmented)
 
-          Toggle("Enable Notifications", isOn: .constant(true))
+      ForEach(sections.keys, id: \.self) { section in
+        Section(header: Text(section)) {
+          ForEach(sections[section] ?? [], id: \.title) { page in
+            if let action = page.action {
+              Button {
+                action()
+              } label: {
+                switch page.icon {
+                case .system(let name):
+                  Label(page.title, systemImage: name)
+                case .custom(let name):
+                  Label(page.title, image: name)
+                }
+              }
+            } else {
+              NavigationLink(destination: page.view) {
+                switch page.icon {
+                case .system(let name):
+                  Label(page.title, systemImage: name)
+                case .custom(let name):
+                  Label(page.title, image: name)
+                }
+              }
+            }
+          }
         }
       }
-      .navigationTitle("Settings")
     }
+    .navigationTitle("Settings")
   }
-  
-  struct SettingsDetailView: View {
-      var body: some View {
-          VStack(alignment: .leading, spacing: 12) {
-              Text("Appearance")
-                  .font(.title2)
-              Text("Customize how your app looks and feels.")
-          }
-          .padding()
-      }
+
+}
+
+struct SettingsPage: Hashable {
+  var title: String
+  var icon: Icon
+  var section: String
+
+  init(title: String, icon: Icon, section: String, view: () -> any View) {
+    self.title = title
+    self.icon = icon
+    self.section = section
+    self.view = view().eraseToAnyView()
   }
+
+  init(title: String, icon: Icon, section: String, action: @escaping @Sendable () -> Void)
+  {
+    self.title = title
+    self.icon = icon
+    self.section = section
+    self.view = EmptyView().eraseToAnyView()
+    self.action = action
+  }
+
+  enum Icon: Hashable {
+    case system(String)
+    case custom(String)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(title)
+    hasher.combine(icon)
+    hasher.combine(section)
+  }
+
+  static func == (lhs: SettingsPage, rhs: SettingsPage) -> Bool {
+    return lhs.hashValue == rhs.hashValue
+  }
+
+  var view: AnyView
+  var action:  (@Sendable () -> Void)? = nil
+}
+
+import Playgrounds
+
+#Playground {
+  SettingsPages.settingsPages
 }
