@@ -210,19 +210,19 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
       public var banner: String?
       public var accent_color: DiscordColor?  // Not respected on guild profiles
       public var theme_colors: [DiscordColor]?  // 2 values if present, as two gradient stops
-      public var popout_animation_particle_type: AnySnowflake?
-      public var emoji: Emoji?
+      
+//      public var popout_animation_particle_type: Int? // dolfies said these r unused
+//      public var emoji: Emoji?
+      
       public var profile_effect: Effect?
       
-      public init(guild_id: GuildSnowflake? = nil, pronouns: String? = nil, bio: String? = nil, banner: String? = nil, accent_color: DiscordColor? = nil, theme_colors: [DiscordColor]? = nil, popout_animation_particle_type: AnySnowflake? = nil, emoji: Emoji? = nil, profile_effect: Effect? = nil) {
+      public init(guild_id: GuildSnowflake? = nil, pronouns: String? = nil, bio: String? = nil, banner: String? = nil, accent_color: DiscordColor? = nil, theme_colors: [DiscordColor]? = nil, profile_effect: Effect? = nil) {
         self.guild_id = guild_id
         self.pronouns = pronouns
         self.bio = bio
         self.banner = banner
         self.accent_color = accent_color
         self.theme_colors = theme_colors
-        self.popout_animation_particle_type = popout_animation_particle_type
-        self.emoji = emoji
         self.profile_effect = profile_effect
       }
     }
@@ -239,7 +239,7 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
     }
 
     /// https://docs.discord.food/resources/user#profile-badge-structure
-    public struct Badge: Sendable, Codable, Equatable, Hashable {
+    public struct Badge: Sendable, Codable, Equatable, Hashable, Identifiable {
       public var id: AnySnowflake
       public var description: String
       public var icon: String

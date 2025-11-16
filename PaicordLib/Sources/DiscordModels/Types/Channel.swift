@@ -919,6 +919,13 @@ public struct Embed: Sendable, Codable, Equatable, Hashable, ValidatablePayload
 		public var name: String
 		public var value: String
 		public var inline: Bool?
+    
+    private enum CodingKeys: String, CodingKey {
+      case id
+      case name
+      case value
+      case inline
+    }
 
 		public init(name: String, value: String, inline: Bool? = nil) {
 			self.name = name

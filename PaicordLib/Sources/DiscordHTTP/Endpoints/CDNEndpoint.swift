@@ -19,6 +19,7 @@ public enum CDNEndpoint: Endpoint {
     userId: UserSnowflake,
     avatar: String
   )
+  case profileBadge(icon: String)
   case userAvatarDecoration(userId: UserSnowflake, avatarDecoration: String)
   case avatarDecoration(asset: String)
   case collectibleNameplate(asset: String, file: CollectibleFile)
@@ -90,6 +91,8 @@ public enum CDNEndpoint: Endpoint {
     case let .guildMemberAvatar(guildId, userId, avatar):
       suffix =
         "guilds/\(guildId.rawValue)/users/\(userId.rawValue)/avatars/\(avatar)"
+    case let .profileBadge(icon):
+      suffix = "badge-icons/\(icon)"
     case let .userAvatarDecoration(userId, avatarDecoration):
       suffix = "avatar-decorations/\(userId.rawValue)/\(avatarDecoration)"
     case let .avatarDecoration(asset):
@@ -198,6 +201,8 @@ public enum CDNEndpoint: Endpoint {
       return [userId.rawValue, avatar]
     case .guildMemberAvatar(let guildId, let userId, let avatar):
       return [guildId.rawValue, userId.rawValue, avatar]
+    case .profileBadge(let icon):
+      return [icon]
     case .userAvatarDecoration(let userId, let avatarDecoration):
       return [userId.rawValue, avatarDecoration]
     case .avatarDecoration(let asset):
@@ -262,6 +267,7 @@ public enum CDNEndpoint: Endpoint {
     case .collectibleNameplate: return 23
     case .guildTagBadge: return 24
     case .channelIcon: return 25
+    case .profileBadge: return 26
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
         "If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used"
@@ -292,6 +298,8 @@ public enum CDNEndpoint: Endpoint {
     case let .guildMemberAvatar(guildId, userId, avatar):
       return
         "guildMemberAvatar(guildId: \(guildId), userId: \(userId), avatar: \(avatar))"
+    case let .profileBadge(icon):
+      return "profileBadge(icon: \(icon))"
     case let .userAvatarDecoration(userId, avatarDecoration):
       return
         "userAvatarDecoration(userId: \(userId), avatarDecoration: \(avatarDecoration))"
@@ -352,6 +360,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable,
   case defaultUserAvatar
   case userAvatar
   case guildMemberAvatar
+  case profileBadge
   case userAvatarDecoration
   case avatarDecoration
   case collectibleNameplate
@@ -383,6 +392,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable,
     case .defaultUserAvatar: return "defaultUserAvatar"
     case .userAvatar: return "userAvatar"
     case .guildMemberAvatar: return "guildMemberAvatar"
+    case .profileBadge: return "profileBadge"
     case .userAvatarDecoration: return "userAvatarDecoration"
     case .avatarDecoration: return "avatarDecoration"
     case .collectibleNameplate: return "collectibleNameplate"
@@ -417,6 +427,7 @@ public enum CDNEndpointIdentity: Int, Sendable, Hashable,
     case .defaultUserAvatar: self = .defaultUserAvatar
     case .userAvatar: self = .userAvatar
     case .guildMemberAvatar: self = .guildMemberAvatar
+    case .profileBadge: self = .profileBadge
     case .userAvatarDecoration: self = .userAvatarDecoration
     case .avatarDecoration: self = .avatarDecoration
     case .collectibleNameplate: self = .collectibleNameplate

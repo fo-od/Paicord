@@ -690,7 +690,7 @@ extension Gateway {
   /// https://discord.com/developers/docs/topics/gateway-events#guild-member-remove-guild-member-remove-event-fields
   public struct GuildMemberRemove: Sendable, Codable {
     public var guild_id: GuildSnowflake
-    public var user: DiscordUser
+    public var user: PartialUser // contains only id
   }
 
   /// https://discord.com/developers/docs/topics/gateway-events#guild-members-chunk
