@@ -72,14 +72,21 @@ struct MemberSidebarView: View {
     @State private var profile: DiscordUser.Profile?
 
     var body: some View {
-      VStack(alignment: .leading) {
-        bannerView
-
-        profileBody
-          .padding()
+      ScrollView {
+        VStack(alignment: .leading) {
+          bannerView
+          
+          profileBody
+            .padding()
+        }
+        .task(id: user, grabColor)
+        .task(id: user) {
+          if user.id != profile?.user.id {
+            profile = nil
+            await fetchProfile()
+          }
+        }
       }
-      .task(fetchProfile)
-      .task(grabColor)
     }
 
     @ViewBuilder

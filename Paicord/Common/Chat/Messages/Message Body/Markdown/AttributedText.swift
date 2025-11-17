@@ -47,6 +47,7 @@ struct AttributedText: View {
       textView.isAutomaticLinkDetectionEnabled = false
       textView.linkTextAttributes = [:]  // use original attributes
       textView.delegate = context.coordinator
+      textView.textContainer?.widthTracksTextView = true
       return textView
     }
 
@@ -257,3 +258,4 @@ struct AttributedText: View {
   }
 
 #endif
+
