@@ -266,10 +266,6 @@ extension IntBitField where R == Permission {
   static let none: IntBitField<Permission> = []
 }
 
-#Playground {
-  let gm: IntBitField<Permission> = .init(rawValue: UInt.max)
-}
-
 extension DiscordChannel {
   fileprivate var memberPermissionOverwrites:
     [UserSnowflake: DiscordChannel.Overwrite]

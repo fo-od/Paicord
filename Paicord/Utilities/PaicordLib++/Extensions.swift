@@ -10,8 +10,12 @@ import PaicordLib
 import SwiftUI
 
 extension DiscordColor {
-  func asColor() -> Color? {
-    if self.value == 0 { return nil }  // no color?
+  
+  /// Converts the `DiscordColor` to a SwiftUI `Color`.
+  /// - Parameter ignoringZero: If `false`, a color value of zero will return `nil`.
+  /// - Returns: A `Color` representation of the `DiscordColor`, or `nil` if the value is zero and `ignoringZero` is `false`.
+  func asColor(ignoringZero: Bool = false) -> Color? {
+    if self.value == 0, ignoringZero == false { return nil }  // no color?
     let (red, green, blue) = self.asRGB()
     // values are between 0 and 255, divide by 255
     return Color(

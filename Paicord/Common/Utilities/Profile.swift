@@ -291,8 +291,8 @@ enum Profile {
     var colors: [DiscordColor]?
 
     var body: some View {
-      if let colors, let primaryColor = colors.first?.asColor(),
-        let secondaryColor = colors.last?.asColor()
+      if let colors, let primaryColor = colors.first?.asColor(ignoringZero: true),
+        let secondaryColor = colors.last?.asColor(ignoringZero: true)
       {
         LinearGradient(
           gradient: .init(colors: [primaryColor, secondaryColor]),

@@ -49,9 +49,7 @@ struct ProfilePopoutView: View {
     else {
       return nil
     }
-    let cs = firstColor.asColor()?.suggestedColorScheme()
-    print(cs)
-    return cs
+    return firstColor.asColor()?.suggestedColorScheme()
   }
 
   var body: some View {
@@ -65,7 +63,7 @@ struct ProfilePopoutView: View {
       .minWidth(idiom == .phone ? nil : 300)  // popover limits on larger devices
       .maxWidth(idiom == .phone ? nil : 300)  // popover limits on larger devices
       .task(fetchProfile)
-      .task(grabColor)
+      .task(grabColor) // way faster than profile fetch
     }
     .minHeight(idiom == .phone ? nil : 400)  // popover limits on larger devices
     .presentationDetents([.medium, .large])
@@ -78,10 +76,10 @@ struct ProfilePopoutView: View {
           : profile?.user_profile?.theme_colors
       )
     )
+    .environment(\.colorScheme, colorScheme ?? systemColorScheme)
     #if os(iOS)
       .presentationBackground(.ultraThinMaterial)
     #endif
-      .environment(\.colorScheme, colorScheme ?? systemColorScheme)
   }
 
   @ViewBuilder
