@@ -73,7 +73,7 @@ struct MemberSidebarView: View {
 
     var body: some View {
       ScrollView {
-        VStack(alignment: .leading) {
+        LazyVStack(alignment: .leading) {
           bannerView
           
           profileBody
