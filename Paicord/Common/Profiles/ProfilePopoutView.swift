@@ -22,6 +22,7 @@ struct ProfilePopoutView: View {
   let member: Guild.PartialMember?
   let user: PartialUser
 
+  @Environment(\.colorScheme) var systemColorScheme
   @State private var profile: DiscordUser.Profile?
   @State private var showMainProfile: Bool = false
 
@@ -35,6 +36,22 @@ struct ProfilePopoutView: View {
     self.member = member
     self.user = user
     self._profile = State(initialValue: profile)
+  }
+
+  var colorScheme: ColorScheme? {
+    // if there is a first theme color, get it
+    guard
+      let firstColor =
+        showMainProfile
+        ? profile?.guild_member_profile?.theme_colors?.first
+          ?? profile?.user_profile?.theme_colors?.first
+        : profile?.user_profile?.theme_colors?.first
+    else {
+      return nil
+    }
+    let cs = firstColor.asColor()?.suggestedColorScheme()
+    print(cs)
+    return cs
   }
 
   var body: some View {
@@ -60,11 +77,11 @@ struct ProfilePopoutView: View {
             ?? profile?.user_profile?.theme_colors
           : profile?.user_profile?.theme_colors
       )
-      .brightness(-0.5)
     )
     #if os(iOS)
       .presentationBackground(.ultraThinMaterial)
     #endif
+      .environment(\.colorScheme, colorScheme ?? systemColorScheme)
   }
 
   @ViewBuilder
