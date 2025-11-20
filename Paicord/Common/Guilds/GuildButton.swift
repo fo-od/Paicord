@@ -88,22 +88,30 @@ struct GuildButton: View {
         } label: {
           if isExpanded {
             Rectangle()
-              .fill(.primaryButtonBackground.opacity(0.5))
+              .fill(.clear)
               .aspectRatio(1, contentMode: .fit)
               .overlay {
-                Image(systemName: "folder.fill")
-                  .font(.title2)
-                  .foregroundStyle(.tertiaryButton)
+                if folder.hasColor,
+                   let color = DiscordColor(value: Int(folder.color.value))?.asColor()
+                {
+                  Image(systemName: "folder.fill")
+                    .font(.title2)
+                    .foregroundStyle(color)
+                } else {
+                  Image(systemName: "folder.fill")
+                    .font(.title2)
+                    .foregroundStyle(.primary)
+                }
               }
               .transition(.blurReplace)
           } else {
             // 2 x 2 grid of first 4 guilds. If less than 4, just show what we have with empty spaces. no animated icons here.
             Rectangle()
-              .fill(.primaryButtonBackground.opacity(0.5))
+              .fill(.clear)
               .aspectRatio(1, contentMode: .fit)
               .overlay {
-                VStack(spacing: 0) {
-                  HStack(spacing: 0) {
+                VStack(spacing: 2) {
+                  HStack(spacing: 2) {
                     if let guild = guilds[safe: 0] {
                       icon(for: guild)
                     } else {
@@ -115,7 +123,7 @@ struct GuildButton: View {
                       Color.clear
                     }
                   }
-                  HStack(spacing: 0) {
+                  HStack(spacing: 2) {
                     if let guild = guilds[safe: 2] {
                       icon(for: guild)
                     } else {
@@ -128,14 +136,14 @@ struct GuildButton: View {
                     }
                   }
                 }
-                .padding(5)
+                .padding(2)
               }
               .transition(.blurReplace)
           }
         }
         .buttonStyle(.borderless)
         .clipShape(
-          .rect(cornerRadius: isExpanded ? 10 : 32, style: .continuous)
+          .rect(cornerRadius: 10, style: .continuous)
         )
 
         if isExpanded {
@@ -148,7 +156,7 @@ struct GuildButton: View {
               .padding(.horizontal, 2)
               .padding(
                 .top,
-                guild.id == (guilds.first?.id ?? (try! .makeFake())) ? 2 : 0
+                guild.id == guilds.first?.id ? 2 : 0
               )
               .padding(
                 .bottom,
@@ -169,7 +177,7 @@ struct GuildButton: View {
             .fill(.tableBackground.secondary)
         }
       }
-      .clipShape(.rect(cornerRadius: isExpanded ? 10 : 32, style: .continuous))
+      .clipShape(.rect(cornerRadius: 10, style: .continuous))
     }
 
     @ViewBuilder
