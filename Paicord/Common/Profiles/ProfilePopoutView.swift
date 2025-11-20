@@ -64,10 +64,12 @@ struct ProfilePopoutView: View {
       .maxWidth(idiom == .phone ? nil : 300)  // popover limits on larger devices
       .task(fetchProfile)
       .task(grabColor) // way faster than profile fetch
+      .scenePadding(.bottom)
     }
     .minHeight(idiom == .phone ? nil : 400)  // popover limits on larger devices
     .presentationDetents([.medium, .large])
     .scrollClipDisabled()
+    .ignoresSafeArea(.container, edges: .bottom)
     .background(
       Profile.ThemeColorsBackground(
         colors: showMainProfile
@@ -239,14 +241,10 @@ struct ProfilePopoutView: View {
         flags: [.orderByBrightness, .avoidBlack, .avoidWhite]
       )
       if let firstColor = colors?.first {
-        print(
-          "[Profile] Extracted accent color: \(firstColor.debugDescription)"
-        )
         DispatchQueue.main.async {
           self.accentColor = Color(firstColor)
         }
       } else {
-        print("[Profile] No colors extracted from avatar.")
       }
     }
   }

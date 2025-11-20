@@ -158,7 +158,7 @@ final class GatewayStore {
   func getGuildStore(for id: GuildSnowflake) -> GuildStore {
     defer {
       if !subscribedGuilds.contains(id) {
-        print("[GatewayStore] Subscribing for guild store to \(id)")
+        print("[GatewayStore] Subscribing for guild store to \(id.rawValue)")
         subscribedGuilds.insert(id)
         Task {
           await gateway?.updateGuildSubscriptions(
@@ -173,7 +173,7 @@ final class GatewayStore {
                 )
               ])
           )
-          print("[GatewayStore] Subscribed to guild \(id)")
+          print("[GatewayStore] Subscribed to guild \(id.rawValue)")
         }
       }
     }
