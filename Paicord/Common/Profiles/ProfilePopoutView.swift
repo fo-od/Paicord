@@ -69,7 +69,6 @@ struct ProfilePopoutView: View {
     .minHeight(idiom == .phone ? nil : 400)  // popover limits on larger devices
     .presentationDetents([.medium, .large])
     .scrollClipDisabled()
-    .ignoresSafeArea(.container, edges: .bottom)
     .background(
       Profile.ThemeColorsBackground(
         colors: showMainProfile
@@ -78,6 +77,7 @@ struct ProfilePopoutView: View {
           : profile?.user_profile?.theme_colors
       )
     )
+    .ignoresSafeArea(.container, edges: .bottom)
     .environment(\.colorScheme, colorScheme ?? systemColorScheme)
     #if os(iOS)
       .presentationBackground(.ultraThinMaterial)

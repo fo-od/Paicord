@@ -131,12 +131,12 @@ struct MarkdownText: View {
             }
           }
         }
-        .padding(.leading, 8)
+        .padding(.leading, 12)
         .overlay(
           Rectangle()
             .frame(width: 3)
-            .foregroundStyle(.tertiary)
-            .cornerRadius(1),
+            .foregroundStyle(.quaternary)
+            .clipShape(.capsule),
           alignment: .leading
         )
 
@@ -244,6 +244,9 @@ struct BlockElement: Identifiable {
   let id = UUID()
   let nodeType: ASTNodeType
   let attributedContent: NSAttributedString?
+  // For lists
+  let isOrdered: Bool?
+  let startingNumber: Int?
   // For code blocks and other block-level metadata:
   let codeContent: String?
   let language: String?
@@ -353,6 +356,8 @@ class MarkdownRendererVM {
       return BlockElement(
         nodeType: .paragraph,
         attributedContent: attributed,
+        isOrdered: nil,
+        startingNumber: nil,
         codeContent: nil,
         language: nil,
         level: nil,
@@ -370,6 +375,8 @@ class MarkdownRendererVM {
         return BlockElement(
           nodeType: .heading,
           attributedContent: attributed,
+          isOrdered: nil,
+          startingNumber: nil,
           codeContent: nil,
           language: nil,
           level: heading.level,
@@ -386,6 +393,8 @@ class MarkdownRendererVM {
       return BlockElement(
         nodeType: .footnote,
         attributedContent: attributed,
+        isOrdered: nil,
+        startingNumber: nil,
         codeContent: nil,
         language: nil,
         level: nil,
@@ -397,6 +406,8 @@ class MarkdownRendererVM {
         return BlockElement(
           nodeType: .codeBlock,
           attributedContent: nil,
+          isOrdered: nil,
+          startingNumber: nil,
           codeContent: code.content,
           language: code.language,
           level: nil,
@@ -416,6 +427,8 @@ class MarkdownRendererVM {
       return BlockElement(
         nodeType: .blockQuote,
         attributedContent: nil,
+        isOrdered: nil,
+        startingNumber: nil,
         codeContent: nil,
         language: nil,
         level: nil,
@@ -438,6 +451,8 @@ class MarkdownRendererVM {
             let itemBlock = BlockElement(
               nodeType: .listItem,
               attributedContent: nil,
+              isOrdered: nil,
+              startingNumber: nil,
               codeContent: nil,
               language: nil,
               level: nil,
@@ -454,6 +469,8 @@ class MarkdownRendererVM {
             let itemBlock = BlockElement(
               nodeType: .listItem,
               attributedContent: attr,
+              isOrdered: nil,
+              startingNumber: nil,
               codeContent: nil,
               language: nil,
               level: nil,
@@ -466,6 +483,8 @@ class MarkdownRendererVM {
         return BlockElement(
           nodeType: .list,
           attributedContent: nil,
+          isOrdered: nil,
+          startingNumber: nil,
           codeContent: nil,
           language: nil,
           level: nil,
@@ -481,6 +500,8 @@ class MarkdownRendererVM {
       return BlockElement(
         nodeType: .thematicBreak,
         attributedContent: attr,
+        isOrdered: nil,
+        startingNumber: nil,
         codeContent: nil,
         language: nil,
         level: nil,
@@ -497,6 +518,8 @@ class MarkdownRendererVM {
       return BlockElement(
         nodeType: node.nodeType,
         attributedContent: attr,
+        isOrdered: nil,
+        startingNumber: nil,
         codeContent: nil,
         language: nil,
         level: nil,
