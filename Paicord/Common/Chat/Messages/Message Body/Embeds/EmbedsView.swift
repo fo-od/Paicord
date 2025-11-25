@@ -52,6 +52,8 @@ extension MessageCell {
           if let video = embed.video {
             GifvView(media: video, staticMedia: embed.image)
           }
+        case .link:
+          LinkEmbedView(embed: embed)
         default:
           Text("Unsupported embed type: \(embed.type)")
         }
@@ -155,7 +157,7 @@ extension MessageCell {
                   columns: inlineColumns,
                   alignment: .leading,
                   spacing: 8
-                ) { 
+                ) {
                   ForEach(inlineFields) { field in
                     VStack(alignment: .leading, spacing: 4) {
                       Text(field.name)
@@ -181,7 +183,7 @@ extension MessageCell {
           }
 
           if let image = embed.image,
-             let imageURL = image.proxy_url,
+            let imageURL = image.proxy_url,
             let url = URL(string: imageURL)
           {
             let aspectRatio: CGFloat? = {
@@ -299,31 +301,34 @@ extension MessageCell {
       }
 
       struct AVPlayerLayerContainer: AppKitOrUIKitViewRepresentable {
-          var player: AVPlayer
+        var player: AVPlayer
 
-          typealias AppKitOrUIKitViewType = AppKitOrUIKitView
+        typealias AppKitOrUIKitViewType = AppKitOrUIKitView
 
-          func makeAppKitOrUIKitView(context: Context) -> AppKitOrUIKitView {
-            #if os(iOS)
+        func makeAppKitOrUIKitView(context: Context) -> AppKitOrUIKitView {
+          #if os(iOS)
             let view = PlayerView_iOS()
             view.player = player
             return view
-            #elseif os(macOS)
+          #elseif os(macOS)
             let view = PlayerView_macOS()
             view.player = player
             return view
-            #endif
-          }
+          #endif
+        }
 
-          func updateAppKitOrUIKitView(_ view: AppKitOrUIKitViewType, context: Context) {
-            #if os(iOS)
-            (view as? PlayerView_iOS)?.player = player
-            #elseif os(macOS)
-            (view as? PlayerView_macOS)?.player = player
-            #endif
-          }
-
+        func updateAppKitOrUIKitView(
+          _ view: AppKitOrUIKitViewType,
+          context: Context
+        ) {
           #if os(iOS)
+            (view as? PlayerView_iOS)?.player = player
+          #elseif os(macOS)
+            (view as? PlayerView_macOS)?.player = player
+          #endif
+        }
+
+        #if os(iOS)
           /// On iOS, override layerClass so the view’s layer *is* an AVPlayerLayer.
           class PlayerView_iOS: AppKitOrUIKitView {
             override class var layerClass: AnyClass {
@@ -335,7 +340,7 @@ extension MessageCell {
               set { (layer as? AVPlayerLayer)?.player = newValue }
             }
           }
-          #elseif os(macOS)
+        #elseif os(macOS)
           /// On macOS, NSView’s `layer` is a general CALayer; so we add/remove an AVPlayerLayer sublayer manually.
           class PlayerView_macOS: AppKitOrUIKitView {
             override init(frame frameRect: CGRect) {
@@ -375,10 +380,195 @@ extension MessageCell {
               self.playerLayer = pl
             }
           }
-          #endif
-        }
-      
+        #endif
+      }
+
     }
+
+    struct LinkEmbedView: View {
+      var embed: Embed
+
+      var linkType: SpecialLinkType {
+        .init(embed: embed)
+      }
+
+      @Environment(\.colorScheme) var cs
+
+      var body: some View {
+        VStack {
+          switch linkType {
+          case .spotifyTrack:
+            spotifyTrack(linkType.embedURL(colorScheme: cs))
+          case .spotifyAlbum:
+            spotifyAlbum(linkType.embedURL(colorScheme: cs))
+          case .appleMusicTrack:
+            appleMusicTrack(linkType.embedURL(colorScheme: cs))
+          case .appleMusicAlbum:
+            appleMusicAlbum(linkType.embedURL(colorScheme: cs))
+
+          case .unknown: EmbedView(embed: embed)
+          }
+        }
+        .maxHeight(350)
+      }
+
+      @ViewBuilder
+      func spotifyTrack(_ url: URL) -> some View {
+        WebView(url: url) {
+          ProgressView()
+            .maxWidth(.infinity)
+            .maxHeight(.infinity)
+            .background(.ultraThinMaterial)
+        }
+        .aspectRatio(350 / 80, contentMode: .fit)
+        .maxWidth(350)
+        .clipShape(.rect(cornerRadius: 14))
+      }
+
+      @ViewBuilder
+      func spotifyAlbum(_ url: URL) -> some View {
+        WebView(url: url) {
+          ProgressView()
+            .maxWidth(.infinity)
+            .maxHeight(.infinity)
+            .background(.ultraThinMaterial)
+        }
+        .aspectRatio(1, contentMode: .fit)
+        .maxWidth(350)
+        .clipShape(.rect(cornerRadius: 14))
+      }
+
+      @ViewBuilder
+      func appleMusicTrack(_ url: URL) -> some View {
+        WebView(url: url) {
+          ProgressView()
+            .maxWidth(.infinity)
+            .maxHeight(.infinity)
+            .background(.ultraThinMaterial)
+        }
+        .aspectRatio(660 / 170, contentMode: .fit)
+        .maxWidth(550)
+        .clipShape(.rect(cornerRadius: 14))
+      }
+
+      @ViewBuilder
+      func appleMusicAlbum(_ url: URL) -> some View {
+        WebView(url: url) {
+          ProgressView()
+            .maxWidth(.infinity)
+            .maxHeight(.infinity)
+            .background(.ultraThinMaterial)
+        }
+        .aspectRatio(660 / 450, contentMode: .fit)
+        .maxWidth(550)
+        .clipShape(.rect(cornerRadius: 14))
+      }
+
+      enum SpecialLinkType {
+        case spotifyTrack(id: String)
+        case spotifyAlbum(id: String)
+
+        case appleMusicTrack(album: String, albumID: String, trackID: String)
+        case appleMusicAlbum(album: String, albumID: String)
+
+        case unknown
+
+        func embedURL(colorScheme: ColorScheme) -> URL {
+          switch self {
+          case .spotifyTrack(let id):
+            URL(string: "https://open.spotify.com/embed/track/\(id)")!
+          case .spotifyAlbum(let id):
+            URL(string: "https://open.spotify.com/embed/album/\(id)")!
+          case .appleMusicTrack(let album, let albumID, let trackID):
+            URL(
+              string:
+                "https://embed.music.apple.com/album/\(album)/\(albumID)?i=\(trackID)&theme=\(colorScheme == .dark ? "dark":"light")"
+            )!
+          case .appleMusicAlbum(let album, let albumID):
+            URL(
+              string: "https://embed.music.apple.com/album/\(album)/\(albumID)"
+            )!
+          case .unknown:
+            fatalError(
+              "No embed URL for unknown link type, try not to use this next time."
+            )
+          }
+        }
+
+        init(embed: Embed) {
+          guard let urlString = embed.url, let url = URL(string: urlString)
+          else {
+            self = .unknown
+            return
+          }
+
+          // Spotify link
+          if url.host?.contains("spotify.com") == true {
+            let pathComponents = url.pathComponents
+            if pathComponents.count >= 3 {
+              let type = pathComponents[1]
+              let id = pathComponents[2]
+              switch type {
+              case "track":
+                self = .spotifyTrack(id: id)
+                return
+              case "album":
+                self = .spotifyAlbum(id: id)
+                return
+              default:
+                break
+              }
+            }
+          }
+
+          // Apple Music link
+          if url.host?.contains("music.apple.com") == true {
+
+            var parts = Array(url.pathComponents.dropFirst())  // remove initial "/"
+
+            // Remove 2-letter country code if present
+            if let first = parts.first, first.count == 2 {
+              parts.removeFirst()
+            }
+
+            if let first = parts.first, first == "album" {
+              parts.removeFirst()
+            }
+
+            guard parts.count >= 2 else {
+              self = .unknown
+              return
+            }
+
+            let album = parts[0]
+            let albumID = parts[1]
+
+            let components = URLComponents(
+              url: url,
+              resolvingAgainstBaseURL: false
+            )
+            let trackID = components?.queryItems?
+              .first(where: { $0.name == "i" })?
+              .value
+
+            if let trackID {
+              self = .appleMusicTrack(
+                album: album,
+                albumID: albumID,
+                trackID: trackID
+              )
+            } else {
+              self = .appleMusicAlbum(album: album, albumID: albumID)
+            }
+            return
+          }
+
+          self = .unknown
+        }
+      }
+
+    }
+
   }
 }
 
