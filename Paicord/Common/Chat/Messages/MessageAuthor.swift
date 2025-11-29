@@ -30,8 +30,8 @@ extension MessageCell {
             member: guildstoremember ?? message.member,
             user: message.author?.toPartialUser()
           )
-          .animated(animated)
-          .showsAvatarDecoration()
+          .profileAnimated(animated)
+          .profileShowsAvatarDecoration()
           .frame(width: avatarSize, height: avatarSize)
         }
         .buttonStyle(.borderless)

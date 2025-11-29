@@ -116,8 +116,8 @@ struct MemberSidebarView: View {
         }
         .overlay(alignment: .bottomLeading) {
           Profile.AvatarWithPresence(user: user)
-            .animated(true)
-            .showsAvatarDecoration()
+            .profileAnimated()
+            .profileShowsAvatarDecoration()
             .frame(width: 80, height: 80)
             .padding(.leading, 16)
             .offset(y: 40)

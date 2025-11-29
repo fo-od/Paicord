@@ -50,14 +50,14 @@ extension ChatView {
                       member: nil,
                       user: firstUser.toPartialUser()
                     )
-                    .showsAvatarDecoration()
+                    .profileShowsAvatarDecoration()
                     .scaleEffect(0.75, anchor: .topLeading)
                     .overlay(
                       Profile.Avatar(
                         member: nil,
                         user: lastUser.toPartialUser()
                       )
-                      .showsAvatarDecoration()
+                      .profileShowsAvatarDecoration()
                       .scaleEffect(0.75, anchor: .bottomTrailing)
                     )
                   }
@@ -67,7 +67,7 @@ extension ChatView {
                     member: nil,
                     user: user.toPartialUser()
                   )
-                  .showsAvatarDecoration()
+                  .profileShowsAvatarDecoration()
                   .padding(2)
                 } else {
                   Circle()

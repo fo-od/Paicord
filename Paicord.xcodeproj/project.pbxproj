@@ -106,6 +106,8 @@
 		AABED5A92E7FF982005BDD63 /* Merging.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABED5A82E7FF979005BDD63 /* Merging.swift */; };
 		AAD4469D2ECFBC1A006CB07C /* UserGuildSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD4469C2ECFB915006CB07C /* UserGuildSettingsStore.swift */; };
 		AAD4469F2ECFD6D6006CB07C /* ReadStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD4469E2ECFD6D2006CB07C /* ReadStateStore.swift */; };
+		AAD446A22ED07916006CB07C /* SettingsKit in Frameworks */ = {isa = PBXBuildFile; productRef = AAD446A12ED07916006CB07C /* SettingsKit */; };
+		AAD446A42ED0B631006CB07C /* ShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD446A32ED0B631006CB07C /* ShellView.swift */; };
 		AAD73EB62E93E29E00470158 /* DMsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD73EB52E93E29E00470158 /* DMsView.swift */; };
 		AADD58652E82A95B00CBC8B6 /* GuildScrollBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AADD58642E82A95100CBC8B6 /* GuildScrollBar.swift */; };
 		AADD7F8D2E99EB0B0025B644 /* Attachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = AADD7F8C2E99EB060025B644 /* Attachments.swift */; };
@@ -206,6 +208,7 @@
 		AABED5A82E7FF979005BDD63 /* Merging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Merging.swift; sourceTree = "<group>"; };
 		AAD4469C2ECFB915006CB07C /* UserGuildSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserGuildSettingsStore.swift; sourceTree = "<group>"; };
 		AAD4469E2ECFD6D2006CB07C /* ReadStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadStateStore.swift; sourceTree = "<group>"; };
+		AAD446A32ED0B631006CB07C /* ShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellView.swift; sourceTree = "<group>"; };
 		AAD73EB52E93E29E00470158 /* DMsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DMsView.swift; sourceTree = "<group>"; };
 		AADD58642E82A95100CBC8B6 /* GuildScrollBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuildScrollBar.swift; sourceTree = "<group>"; };
 		AADD7F8C2E99EB060025B644 /* Attachments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Attachments.swift; sourceTree = "<group>"; };
@@ -225,6 +228,7 @@
 				5783AA902E6B8F6500F73F6D /* MeshGradient in Frameworks */,
 				AA5CA6582E9D2CBA00C7C82A /* HighlightSwift in Frameworks */,
 				AA1878F92E81FC1A009C7E40 /* FLEX in Frameworks */,
+				AAD446A22ED07916006CB07C /* SettingsKit in Frameworks */,
 				579DF34B2E6D9B9800BD8B97 /* SwiftUIX in Frameworks */,
 				AA21D2832EAA557C00C75093 /* Sparkle in Frameworks */,
 				572B694C2E7079FB00BCED00 /* PaicordLib in Frameworks */,
@@ -372,6 +376,7 @@
 			isa = PBXGroup;
 			children = (
 				AA078FC12EC8090E00EDFFA8 /* DebugSection.swift */,
+				AAD446A32ED0B631006CB07C /* ShellView.swift */,
 			);
 			path = Debug;
 			sourceTree = "<group>";
@@ -720,6 +725,7 @@
 				AA21D2822EAA557C00C75093 /* Sparkle */,
 				AAB22FD72EAD0A2400413310 /* SwiftPrettyPrint */,
 				AAB22FDA2EAD86B700413310 /* ColorCube */,
+				AAD446A12ED07916006CB07C /* SettingsKit */,
 			);
 			productName = PaiCord;
 			productReference = AA1096DB2E63BE84005BC3D2 /* Paicord.app */;
@@ -763,6 +769,7 @@
 				AA21D2812EAA557C00C75093 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				AAB22FD62EAD0A2300413310 /* XCRemoteSwiftPackageReference "SwiftPrettyPrint" */,
 				AAB22FD92EAD86B600413310 /* XCRemoteSwiftPackageReference "ColorCube" */,
+				AAD446A02ED07916006CB07C /* XCRemoteSwiftPackageReference "SettingsKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AA1096DC2E63BE84005BC3D2 /* Products */;
@@ -875,6 +882,7 @@
 				AADD7F8D2E99EB0B0025B644 /* Attachments.swift in Sources */,
 				57AA8A032E7875D100B4CA9C /* Sidebar.swift in Sources */,
 				AA0C43D72E9F190B000FA834 /* AttributedText.swift in Sources */,
+				AAD446A42ED0B631006CB07C /* ShellView.swift in Sources */,
 				AA74E43F2EBE26E30031B285 /* PlaceholderMessageCell.swift in Sources */,
 				AA74E43B2EBCA9010031B285 /* Environment.swift in Sources */,
 				AA10971A2E64C181005BC3D2 /* ProfileView.swift in Sources */,
@@ -1211,6 +1219,14 @@
 				kind = branch;
 			};
 		};
+		AAD446A02ED07916006CB07C /* XCRemoteSwiftPackageReference "SettingsKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Aeastr/SettingsKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.1;
+			};
+		};
 		AAEEC7202E6515C400EB5FC9 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kishikawakatsumi/KeychainAccess";
@@ -1289,6 +1305,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AAB22FD92EAD86B600413310 /* XCRemoteSwiftPackageReference "ColorCube" */;
 			productName = ColorCube;
+		};
+		AAD446A12ED07916006CB07C /* SettingsKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AAD446A02ED07916006CB07C /* XCRemoteSwiftPackageReference "SettingsKit" */;
+			productName = SettingsKit;
 		};
 		AAEEC7212E6515C400EB5FC9 /* KeychainAccess */ = {
 			isa = XCSwiftPackageProductDependency;

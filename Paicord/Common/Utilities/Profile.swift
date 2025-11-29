@@ -10,18 +10,43 @@ import PaicordLib
 import SDWebImageSwiftUI
 import SwiftUIX
 
+extension EnvironmentValues {
+  @Entry var profileAnimated: Bool = false
+  @Entry var profileShowAvatarDecoration: Bool = false
+  @Entry var profileHideOfflinePresence: Bool = false
+}
+
+extension View {
+  /// Whether to show animated avatars and decorations
+  func profileAnimated(_ animated: Bool = true) -> some View {
+    environment(\.profileAnimated, animated)
+  }
+
+  /// Whether to show avatar decorations
+  func profileShowsAvatarDecoration(_ shown: Bool = true ) -> some View {
+    environment(\.profileShowAvatarDecoration, shown)
+  }
+  
+  /// Whether to hide offline presence indicator
+  func profileHidesOfflinePresence(_ hide: Bool) -> some View {
+    environment(\.profileHideOfflinePresence, hide)
+  }
+}
+
 /// Collection of ui components for profiles
 enum Profile {
   struct Avatar: View {
     @Environment(\.guildStore) var guildStore
     let member: Guild.PartialMember?
     let user: PartialUser?
-    var animated: Bool = false
-    var showDecoration: Bool = false
+//    var animated: Bool = false
+//    var showDecoration: Bool = false
+    @Environment(\.profileAnimated) var animated
+    @Environment(\.profileShowAvatarDecoration) var showDecoration
 
     var body: some View {
       Group {
-        Utils.UserAvatarURL(member: member, user: user, animated: animated) {
+        Utils.UserAvatarURL(member: member, user: user, animated: false) {
           url in
           WebImage(url: url) { phase in
             switch phase {
@@ -32,6 +57,23 @@ enum Profile {
             default:
               Circle()
                 .foregroundStyle(.gray.opacity(0.3))
+            }
+          }
+          .overlay {
+            if animated {
+              Utils.UserAvatarURL(member: member, user: user, animated: true) {
+                animatedURL in
+                WebImage(url: animatedURL) { phase in
+                  switch phase {
+                  case .success(let image):
+                    image
+                      .resizable()
+                      .scaledToFit()
+                  default:
+                    EmptyView()
+                  }
+                }
+              }
             }
           }
         }
@@ -52,19 +94,6 @@ enum Profile {
       .padding(10)
       .padding(-10)
     }
-
-    func showsAvatarDecoration(_ shown: Bool = true) -> Self {
-      var copy = self
-      copy.showDecoration = shown
-      return copy
-    }
-
-    func animated(_ animated: Bool) -> Self {
-      var copy = self
-      copy.animated = animated
-      return copy
-    }
-
   }
 
   // Helper shape that draws a rect with a circular hole (uses even-odd fill)
@@ -91,9 +120,7 @@ enum Profile {
     @Environment(\.gateway) var gw
     let member: Guild.PartialMember?
     let user: PartialUser?
-    var hideOffline: Bool = false
-    var animated: Bool = false
-    var showDecoration: Bool = false
+    @Environment(\.profileHideOfflinePresence) var hideOffline: Bool
 
     init(member: Guild.PartialMember? = nil, user: DiscordUser?) {
       self.member = member
@@ -142,8 +169,6 @@ enum Profile {
 
           ZStack(alignment: .bottomTrailing) {
             Avatar(member: member, user: user)
-              .animated(animated)
-              .showsAvatarDecoration(showDecoration)
               .scaleEffect(scaleDown)
               .mask(
                 RectWithCircleHole(
@@ -198,24 +223,6 @@ enum Profile {
         }
         .aspectRatio(1, contentMode: .fit)
       }
-    }
-
-    func hideOffline(_ hide: Bool) -> Self {
-      var copy = self
-      copy.hideOffline = hide
-      return copy
-    }
-
-    func animated(_ animated: Bool) -> Self {
-      var copy = self
-      copy.animated = animated
-      return copy
-    }
-
-    func showsAvatarDecoration(_ shown: Bool = true) -> Self {
-      var copy = self
-      copy.showDecoration = shown
-      return copy
     }
   }
 
@@ -461,10 +468,9 @@ struct AvatarDecorationView: View {
       member: nil,
       user: llsc12
     )
-    .animated(true)
-    .showsAvatarDecoration()
+    .profileAnimated()
+    .profileShowsAvatarDecoration()
     .frame(width: 100, height: 100)
-
   }
   //  .padding()
 }

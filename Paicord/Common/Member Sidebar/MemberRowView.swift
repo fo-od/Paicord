@@ -26,7 +26,7 @@ extension MemberSidebarView {
             member: member,
             user: member?.user ?? user,
           )
-          .showsAvatarDecoration()
+          .profileShowsAvatarDecoration()
           .padding(2)
           Text(member?.nick ?? user.global_name ?? user.username)
         }

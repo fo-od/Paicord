@@ -28,8 +28,8 @@ struct ChannelButton: View {
               member: nil,
               user: user
             )
-            .animated(hovered)
-            .showsAvatarDecoration()
+            .profileAnimated(hovered)
+            .profileShowsAvatarDecoration()
             .padding(2)
           }
           Text(
@@ -76,14 +76,14 @@ struct ChannelButton: View {
                       member: nil,
                       user: firstUser.toPartialUser()
                     )
-                    .showsAvatarDecoration()
+                    .profileShowsAvatarDecoration()
                     .scaleEffect(0.75, anchor: .topLeading)
                     .overlay(
                       Profile.Avatar(
                         member: nil,
                         user: lastUser.toPartialUser()
                       )
-                      .showsAvatarDecoration()
+                      .profileShowsAvatarDecoration()
                       .scaleEffect(0.75, anchor: .bottomTrailing)
                     )
                   }
@@ -93,7 +93,7 @@ struct ChannelButton: View {
                   member: nil,
                   user: user.toPartialUser()
                 )
-                .showsAvatarDecoration()
+                .profileShowsAvatarDecoration()
                 .padding(2)
               } else {
                   Circle()
@@ -330,6 +330,7 @@ struct ChannelButton: View {
               if let channel = channels[channelId] {
                 ChannelButton(channels: channels, channel: channel)
                   .frame(maxWidth: .infinity, alignment: .leading)
+                  .padding(.horizontal, -4)
               }
             }
           }

@@ -38,10 +38,13 @@ struct MessageCell: View {
     guard let currentUserID = gw.user.currentUser?.id else {
       return false
     }
-    let mentionedUser: Bool = message.mentions.contains(where: { $0.id == currentUserID })
+    let mentionedUser: Bool = message.mentions.contains(where: {
+      $0.id == currentUserID
+    })
     let mentionedEveryone: Bool = message.mention_everyone
     let mentionedUserByRole: Bool = {
-      let usersRoles = channelStore.guildStore?.members[currentUserID]?.roles ?? []
+      let usersRoles =
+        channelStore.guildStore?.members[currentUserID]?.roles ?? []
       for roleID in message.mention_roles {
         if usersRoles.contains(roleID) {
           return true
@@ -91,12 +94,17 @@ struct MessageCell: View {
       }
     }
     .background(Color.almostClear)
+    .padding(.horizontal, 10)
+    .padding(.vertical, 2)
+    .background(Color(hexadecimal6: 0xcc8735).opacity(userMentioned ? 0.05 : 0))
+    .background(alignment: .leading) {
+      Color(hexadecimal6: 0xce9c5c).opacity(userMentioned ? 1 : 0)
+        .maxWidth(2)
+    }
     .equatable(by: cellHash)
     /// stop updates to messages unless messages change.
     /// prevent updates to messages unless they change
     /// avoid re-render on message cell highlight
-    .padding(.horizontal, 10)
-    .padding(.vertical, 2)
     #if os(macOS)
       .onHover { self.cellHighlighted = $0 }
       .background(
@@ -104,11 +112,6 @@ struct MessageCell: View {
           ? Color(NSColor.secondaryLabelColor).opacity(0.1) : .clear
       )
     #endif
-    .background(Color(hexadecimal6: 0xcc8735).opacity(userMentioned ? 0.05 : 0))
-    .background(alignment: .leading) {
-      Color(hexadecimal6: 0xce9c5c).opacity(userMentioned ? 1 : 0)
-        .maxWidth(2)
-    }
     .entityContextMenu(for: message)
     .padding(.top, inline ? 0 : 15)  // adds space between message groups
 

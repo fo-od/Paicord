@@ -6,10 +6,10 @@
 // Copyright © 2025 Lakhan Lothiyi.
 //
 
+import Collections
 import PaicordLib
 @_spi(Advanced) import SwiftUIIntrospect
 import SwiftUIX
-import Collections
 
 struct ChatView: View {
   var vm: ChannelStore
@@ -24,59 +24,94 @@ struct ChatView: View {
   init(vm: ChannelStore) { self.vm = vm }
 
   var body: some View {
-    let orderedMessages = vm.messages.values
+    #if os(macOS)
+      let orderedMessages = vm.messages.values.reversed()  // prep for flipping scrollview and then each message
+    #else
+      let orderedMessages = vm.messages.values
+    #endif
     VStack(spacing: 0) {
       ScrollViewReader { proxy in
         ScrollView {
           LazyVStack(alignment: .leading, spacing: 0) {
-            ForEach(orderedMessages) { msg in
-              let prior = vm.getMessage(before: msg)
-              if messageAllowed(msg) {
-                MessageCell(for: msg, prior: prior, channel: vm)
-                  .onAppear {
-                    guard msg == vm.messages.values.last else { return }
-                    self.isNearBottom = true
-                  }
-                  .onDisappear {
-                    guard msg == vm.messages.values.last else { return }
-                    self.isNearBottom = false
-                  }
+            // if on ios or macos, you put certain elements first and last due to 180º rotation.
+            #if os(iOS)
+              PlaceholderMessageSet()
+
+              ForEach(orderedMessages) { msg in
+                let prior = vm.getMessage(before: msg)
+                if messageAllowed(msg) {
+                  MessageCell(for: msg, prior: prior, channel: vm)
+                    .onAppear {
+                      guard msg == vm.messages.values.last else { return }
+                      self.isNearBottom = true
+                    }
+                    .onDisappear {
+                      guard msg == vm.messages.values.last else { return }
+                      self.isNearBottom = false
+                    }
+                }
               }
-            }
+
+            // message drain here
+            #endif
+
+            #if os(macOS)
+              ForEach(orderedMessages) { msg in
+                let prior = vm.getMessage(before: msg)
+                if messageAllowed(msg) {
+                  MessageCell(for: msg, prior: prior, channel: vm)
+                    .rotationEffect(.degrees(-180))
+                }
+              }
+
+              PlaceholderMessageSet()
+                .rotationEffect(.degrees(-180))
+            #endif
           }
+//#if os(macOS)
+//  .safeAreaPadding(.top, 22)
+//#endif
           .scrollTargetLayout()
         }
         .maxHeight(.infinity)
-        .safeAreaPadding(.bottom, 22)
-        .bottomAnchored()
+        #if os(iOS)
+          .bottomAnchored()
+          .safeAreaPadding(.bottom, 22)
+        #else
+          .safeAreaPadding(.top, 22)
+          .rotationEffect(.degrees(180))
+          .scrollIndicators(.hidden)
+        #endif
         .scrollDismissesKeyboard(.interactively)
-        .onAppear {
-          NotificationCenter.default.post(
-            name: .chatViewShouldScrollToBottom,
-            object: ["channelId": self.vm.channelId]
-          )
-        }
-        .onChange(of: vm.channelId) {
-          NotificationCenter.default.post(
-            name: .chatViewShouldScrollToBottom,
-            object: ["channelId": vm.channelId]
-          )
-        }
-        .onReceive(
-          NotificationCenter.default.publisher(
-            for: .chatViewShouldScrollToBottom
-          )
-        ) { object in
-          guard let info = object.object as? [String: Any],
-            let channelId = info["channelId"] as? ChannelSnowflake,
-            channelId == vm.channelId
-          else { return }
-          guard isNearBottom else { return }
-          scheduleScrollToBottom(
-            proxy: proxy,
-            messages: orderedMessages
-          )
-        }
+        #if os(iOS)
+          .onAppear {
+            NotificationCenter.default.post(
+              name: .chatViewShouldScrollToBottom,
+              object: ["channelId": self.vm.channelId]
+            )
+          }
+          .onChange(of: vm.channelId) {
+            NotificationCenter.default.post(
+              name: .chatViewShouldScrollToBottom,
+              object: ["channelId": vm.channelId]
+            )
+          }
+          .onReceive(
+            NotificationCenter.default.publisher(
+              for: .chatViewShouldScrollToBottom
+            )
+          ) { object in
+            guard let info = object.object as? [String: Any],
+              let channelId = info["channelId"] as? ChannelSnowflake,
+              channelId == vm.channelId
+            else { return }
+            guard isNearBottom else { return }
+            scheduleScrollToBottom(
+              proxy: proxy,
+              lastID: vm.messages.values.last?.id
+            )
+          }
+        #endif
       }
     }
     .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -115,14 +150,14 @@ struct ChatView: View {
 
   private func scheduleScrollToBottom(
     proxy: ScrollViewProxy,
-    messages: OrderedDictionary<MessageSnowflake, DiscordChannel.Message>.Values?
+    lastID: DiscordChannel.Message.ID? = nil,
   ) {
     pendingScrollWorkItem?.cancel()
-    guard let lastID = messages?.last?.id else { return }
+    guard let lastID else { return }
 
     let workItem = DispatchWorkItem { [proxy] in
       // Use main queue to ensure layout is ready; small delay coalesces bursts
-      DispatchQueue.main.async {
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
         withAnimation(accessibilityReduceMotion ? .none : .default) {
           proxy.scrollTo(lastID, anchor: .top)
         }
@@ -162,5 +197,7 @@ extension View {
 
 // add a new notification that channelstore can notify to scroll down in chat
 extension Notification.Name {
-  static let chatViewShouldScrollToBottom = Notification.Name("chatViewShouldScrollToBottom")
+  static let chatViewShouldScrollToBottom = Notification.Name(
+    "chatViewShouldScrollToBottom"
+  )
 }

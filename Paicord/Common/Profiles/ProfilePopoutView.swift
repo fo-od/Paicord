@@ -125,8 +125,8 @@ struct ProfilePopoutView: View {
           member: member,
           user: user
         )
-        .animated(true)
-        .showsAvatarDecoration()
+        .profileAnimated()
+        .profileShowsAvatarDecoration()
         .frame(width: 80, height: 80)
         .padding(.leading, 16)
         .offset(y: 40)
