@@ -337,9 +337,11 @@ class ChannelStore: DiscordDataStore {
 
     Task { [weak self] in
       try? await Task.sleep(nanoseconds: 10_000_000_000)
-
-      if self?.typingTimeoutTokens[userId] == token {
-        self?.typingTimeoutTokens.removeValue(forKey: userId)
+      guard let self else { return }
+      await MainActor.run {
+        if self.typingTimeoutTokens[userId] == token {
+          self.typingTimeoutTokens.removeValue(forKey: userId)
+        }
       }
     }
   }
@@ -391,7 +393,7 @@ class ChannelStore: DiscordDataStore {
     around: MessageSnowflake? = nil,
     before: MessageSnowflake? = nil,
     after: MessageSnowflake? = nil,
-    limit: Int? = nil
+    limit: Int? = nil,
   ) async throws {
     #warning("make this handle pagination etc maybe?")
     guard let gateway = gateway?.gateway else { return }
@@ -402,10 +404,27 @@ class ChannelStore: DiscordDataStore {
       // ensure request was successful
       try res.guardSuccess()
       let messages = try res.decode()
+      // theres a chance new messages exist already because the gateway already started delivering them
+      // add the new messages to the store, before the current ones
+//      for message in messages.reversed() {
+//        self.messages[message.id] = message
+//        self.messages.updateValue(
+//          message,
+//          forKey: message.id,
+//          insertingAt: 0
+//        )
+//      }
+      
       for message in messages.reversed() {
-        self.messages[message.id] = message
+//        self.messages[message.id] = message // new additions are frontmost in the ordered dict
+        self.messages.updateValue(
+          message,
+          forKey: message.id,
+          insertingAt: self.messages.count
+        )
       }
       
+      #warning("handle reactions better")
       // populate buffreactions etc
 //      for message in messages {
 //        if let reactionList = message.reactions {

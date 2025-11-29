@@ -4,10 +4,57 @@
 //
 //  Created by Lakhan Lothiyi on 07/11/2025.
 //  Copyright © 2025 Lakhan Lothiyi.
-//  
+//
 
 import PaicordLib
 import SwiftUIX
+
+struct PlaceholderMessageSet: View {
+  var body: some View {
+    LazyVStack(alignment: .leading, spacing: 0) {
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .long)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .long)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .long)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .long)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .long)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .long)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .long)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .medium)
+      PlaceholderMessageCell(length: .short)
+      PlaceholderMessageCell(length: .long)
+      PlaceholderMessageCell(length: .medium)
+    }
+  }
+}
 
 struct PlaceholderMessageCell: View {
 
@@ -20,9 +67,15 @@ struct PlaceholderMessageCell: View {
 
   @State var cellHighlighted = false
 
+  var length: DefaultMessage.PlaceholderLength = .medium
+
+  init(length: DefaultMessage.PlaceholderLength = .medium) {
+    self.length = length
+  }
+
   var body: some View {
     Group {
-      DefaultMessage()
+      DefaultMessage(length: length)
     }
     .background(Color.almostClear)
     .padding(.horizontal, 10)
@@ -34,6 +87,7 @@ struct PlaceholderMessageCell: View {
           ? Color(NSColor.secondaryLabelColor).opacity(0.1) : .clear
       )
     #endif
+    .padding(.top, 15)  // adds space between message groups
   }
 }
 
@@ -48,9 +102,13 @@ extension PlaceholderMessageCell {
       case medium
       case long
     }
-    
+
     var length: PlaceholderLength = .medium
-    
+
+    init(length: PlaceholderLength) {
+      self.length = length
+    }
+
     var body: some View {
       VStack {
         HStack(alignment: .bottom) {
@@ -62,15 +120,15 @@ extension PlaceholderMessageCell {
           }
           .buttonStyle(.borderless)
           .frame(maxHeight: .infinity, alignment: .top)  // align pfp to top of cell
-#if os(macOS)
-          .padding(.trailing, 4)  // balancing
-#endif
+          #if os(macOS)
+            .padding(.trailing, 4)  // balancing
+          #endif
           userAndMessage
         }
         .fixedSize(horizontal: false, vertical: true)
       }
     }
-    
+
     @ViewBuilder
     var userAndMessage: some View {
       VStack(spacing: 2) {
@@ -86,8 +144,8 @@ extension PlaceholderMessageCell {
           alignment: .bottomLeading
         )
         .fixedSize(horizontal: false, vertical: true)
-        
-        FlowLayout {
+
+        FlowLayout(alignment: .leading) {
           switch length {
           case .short:
             Rectangle()
@@ -110,51 +168,67 @@ extension PlaceholderMessageCell {
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 200, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 150, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 20, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 180, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 130, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 160, height: 14)
+              .clipShape(.rounded)
           case .long:
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 250, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 200, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 150, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 220, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 180, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 30, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 240, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 170, height: 14)
+              .clipShape(.rounded)
             Rectangle()
               .fill(Color.gray.opacity(0.3))
               .frame(width: 190, height: 14)
+              .clipShape(.rounded)
           }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .frame(maxHeight: .infinity, alignment: .bottom)  // align text to bottom of cell
       }
     }
