@@ -487,13 +487,9 @@ extension GatewayEventHandler {
 		}
 
 		switch event.data {
-		case .none, .resume, .identify, .updateGuildSubscriptions:
+    case .none, .resume, .identify, .updateGuildSubscriptions, .qosHeartbeat, .heartbeat:
 			/// Only sent, never received.
 			break
-		case let .heartbeat(lastSequenceNumber):
-			await withLogging(for: "onHeartbeat") {
-				try await onHeartbeat(lastSequenceNumber: lastSequenceNumber)
-			}
 		case let .hello(hello):
 			await withLogging(for: "onHello") {
 				try await onHello(hello)

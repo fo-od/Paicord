@@ -62,6 +62,7 @@ public enum CDNEndpoint: Endpoint {
   public enum CollectibleFile: String, Sendable {
     case webm = "asset.webm"
     case `static` = "static.png"
+    case apng = "img.png"
   }
 
   var urlSuffix: String {

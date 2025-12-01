@@ -9,6 +9,33 @@
 import Foundation
 
 extension Gateway {
+  /// https://docs.discord.food/topics/gateway-events#qos-heartbeat-structure
+  public struct QoSHeartbeat: Sendable, Codable {
+    public var seq: Int?
+    public var qos: QoSPayload
+    
+    public init(seq: Int?, qos: QoSPayload) {
+      self.seq = seq
+      self.qos = qos
+    }
+    
+    public struct QoSPayload: Sendable, Codable {
+      public var ver = DiscordGlobalConfiguration.qosVersion
+      public var active: Bool
+      public var reasons: [ReasonForService] = [.foregrounded]
+      
+      public init(ver: Int = DiscordGlobalConfiguration.qosVersion, active: Bool = true, reasons: [ReasonForService] = [.foregrounded]) {
+        self.ver = ver
+        self.active = active
+        self.reasons = reasons
+      }
+      
+      public enum ReasonForService: String, Sendable, Codable {
+        case foregrounded
+        case rtcConnected = "rtc_connected"
+      }
+    }
+  }
 
   /// https://discord.com/developers/docs/topics/gateway-events#identify
   public struct Identify: Sendable, Codable {
@@ -373,11 +400,11 @@ extension Gateway {
     public var user: DiscordUser
     public var session_id: String
     public var resume_gateway_url: String?
-    public var shard: IntPair?
 
     // bot only
     //		public var application: PartialApplication?
     //		public var guilds: [UnavailableGuild]
+    //    public var shard: IntPair?
 
     // user only
     public var sessions: [Session]
@@ -388,7 +415,7 @@ extension Gateway {
     //		public var guild_join_requests
     //		public var broadcaster_user_ids
     //		public var session_type: String? // maybe this can become an unstable enum
-    		public var read_state: [ReadState]?
+    public var read_state: [ReadState]?
     public var presences: [Gateway.PresenceUpdate]
     //		public var notification_settings
     public var relationships: [DiscordRelationship]
@@ -1516,8 +1543,9 @@ extension Gateway {
   //					"activities": true, // get activity events
   //					"threads": true, // get thread events
   //					"channels": { // channels to get member list chunks for
-  //						"1223399680101191792": [ // channel id
-  //							// arrays below contain 2 ints, for lower and upper bound chunks of member data from the channel
+  //            "1223399680101191792": [ // channel id for member list chunks
+  //							// arrays below are int pairs, for lower and upper bound chunks of member data from the channel
+  //              // each pair max 100 members, and you can only specify up to 5 pairs per channel
   //							[
   //								0,
   //								99
@@ -1528,6 +1556,9 @@ extension Gateway {
   //							], // etc
   //						]
   //					},
+  //          "members": [ // members to get guild member events for
+  //            "1295541912010362932",
+  //          ],
   //	      	"thread_member_lists": [ // member list chunks for threads?
   //						"1295541912010362932"
   //					]
@@ -1537,6 +1568,9 @@ extension Gateway {
   //	}
   /// Sadly there is no documentation for this payload, but I have made it as user friendly as I could
   /// According to dolfies this is a very annoying and complex gateway op :c
+  ///
+  /// dpy-self actually has docs by dolfie on this: https://github.com/dolfies/discord.py-self/blob/600fd36dbf9175477a19cea8d394baf9fe7ef291/discord/state.py#L499-L543
+  ///
   public struct UpdateGuildSubscriptions: Sendable, Codable {
     public var subscriptions: [GuildSnowflake: GuildSubscription]
 
@@ -1545,10 +1579,11 @@ extension Gateway {
     }
 
     public struct GuildSubscription: Sendable, Codable {
-      // events you can choose to receive
+      // features you can choose to subscribe to
       public var typing: Bool
       public var activities: Bool
       public var threads: Bool
+      public var member_updates: Bool
 
       public var channels: [ChannelSnowflake: [IntPair]]
       public var thread_member_lists: [ChannelSnowflake]?
@@ -1557,6 +1592,7 @@ extension Gateway {
         typing: Bool,
         activities: Bool,
         threads: Bool,
+        member_updates: Bool,
         channels: [ChannelSnowflake: [IntPair]],
         thread_member_lists: [ChannelSnowflake]? = nil
       ) {
@@ -1564,6 +1600,7 @@ extension Gateway {
         self.activities = activities
         self.threads = threads
         self.channels = channels
+        self.member_updates = member_updates
         self.thread_member_lists = thread_member_lists
       }
     }
@@ -1931,16 +1968,17 @@ extension Gateway {
       case isGuildChannel  // 0
       case isThread  // 1
       case isMentionLowImportance  // 2
-      
+
       case __undocumented(UInt)
     }
   }
 
+  /// https://docs.discord.food/topics/read-state#acknowledge-message
   public struct MessageAcknowledge: Sendable, Codable {
-    public var version: Int
-    public var message_id: MessageSnowflake
-    public var last_viewed: Int
-    public var flags: Int
-    public var channel_id: ChannelSnowflake
+    public var token: String?
+    public var manual: Bool?
+    public var mention_count: Int?
+    public var flags: IntBitField<ReadState.Flags>?
+    public var last_viewed: Int?
   }
 }

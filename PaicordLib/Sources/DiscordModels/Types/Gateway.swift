@@ -95,6 +95,7 @@ public struct Gateway: Sendable, Codable {
 		{
 			/// https://discord.com/developers/docs/topics/gateway-events#heartbeat
 			case heartbeat(lastSequenceNumber: Int?)
+      case qosHeartbeat(QoSHeartbeat)
 			case identify(Identify)
 			case hello(Hello)
 			case ready(Ready)
@@ -771,6 +772,8 @@ public struct Gateway: Sendable, Codable {
 				try container.encodeNil(forKey: .data)
 			case let .heartbeat(lastSequenceNumber):
 				try container.encode(lastSequenceNumber, forKey: .data)
+      case let .qosHeartbeat(payload):
+        try container.encode(payload, forKey: .data)
 			case let .identify(payload):
 				try container.encode(payload, forKey: .data)
 			case let .resume(payload):

@@ -866,9 +866,7 @@ extension BotGatewayManager {
 			}
 			Task {
 				let opcode: WebSocketOpcode =
-					message.opcode ?? .init(
-						encodedWebSocketOpcode: message.payload.opcode.rawValue
-					)!
+        message.opcode ?? .text
 
 				let data: Data
 				do {
