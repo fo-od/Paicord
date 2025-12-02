@@ -567,7 +567,7 @@ public actor DiscordCache {
 			/// Append the new threads
 			guild?.threads.append(contentsOf: syncList.threads)
 			/// Refresh thread members
-			for member in syncList.members {
+			for member in syncList.members ?? [] {
 				if let idx = guild?.threads.firstIndex(where: { $0.id == member.id }) {
 					guild?.threads[idx].member = member
 				}

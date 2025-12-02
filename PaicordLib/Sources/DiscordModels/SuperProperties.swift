@@ -48,6 +48,7 @@ extension Gateway.Identify.ConnectionProperties {
     self.device_vendor_id = SuperProperties.device_vendor_id()
     self.client_app_state = SuperProperties.client_app_state()
     self.design_id = SuperProperties.design_id()
+    self.client_heartbeat_session_id = SuperProperties.client_heartbeat_session_id()
     self.client_event_source = nil
   }
 
@@ -87,8 +88,23 @@ extension Gateway.Identify.ConnectionProperties {
 }
 
 public enum SuperProperties {
+  static let _initialisation_date = Date.now
   static let _client_launch_id = UUID()
   static let _launch_signature = UUID.generateLaunchSignature()
+  
+  // this needs to be regenerated every 30 minutes
+  nonisolated(unsafe) private static var _client_heartbeat_session_id_last_generated: Date = Date.distantPast
+  nonisolated(unsafe) private static var _client_heartbeat_session_id_cached: UUID? = nil
+  static var _client_heartbeat_session_id: UUID {
+    get {
+      let now = Date.now
+      if now.timeIntervalSince(_client_heartbeat_session_id_last_generated) > Double(Duration.minutes(30).components.seconds) {
+        _client_heartbeat_session_id_last_generated = now
+        _client_heartbeat_session_id_cached = UUID()
+      }
+      return _client_heartbeat_session_id_cached!
+    }
+  }
 
   public static func GenerateSuperPropertiesHeader() -> String {
     #if os(Android)
@@ -331,8 +347,14 @@ public enum SuperProperties {
       return nil
     #endif
   }
+  
+  public static func client_heartbeat_session_id() -> String {
+    return _client_heartbeat_session_id.uuidString.lowercased()
+  }
 }
 
+// code to generate a valid launch signature uuid
+// https://docs.discord.food/reference#launch-signature
 extension UUID {
   func toUInt128() -> UInt128 {
     let bytes = withUnsafeBytes(of: uuid) { Array($0) }  // 16 bytes, in order
@@ -355,4 +377,19 @@ extension UUID {
 
     return UUID.init(finalUInt)
   }
+}
+
+import Playgrounds
+import SwiftUI
+
+#Playground {
+  let number: UInt = 1734653
+  let parsed = IntBitField<Gateway.Capability>.init(rawValue: number)
+  var capabilities: [Gateway.Capability] = []
+  for cap in Gateway.Capability.allCases {
+    if parsed.contains(cap) {
+      capabilities.append(cap)
+    }
+  }
+  print(capabilities)
 }

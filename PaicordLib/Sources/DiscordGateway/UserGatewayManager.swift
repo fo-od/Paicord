@@ -503,6 +503,9 @@ extension UserGatewayManager {
         forConnectionWithId: self.connectionId.load(ordering: .relaxed),
         every: .milliseconds(Int64(hello.heartbeat_interval))
       )
+      /// Sends the update time spent session id payload every 30 minutes, but also on connect too.
+      self.sendUpdateTimeSpentSessionID(forConnectionWithId: self.connectionId.load(ordering: .relaxed))
+      self.setupUpdateTimeSpentSessionID(forConnectionWithId: self.connectionId.load(ordering: .relaxed), every: .minutes(30))
       logger.trace("Will resume or identify")
       await self.sendResumeOrIdentify()
     case .ready(let payload):
@@ -784,6 +787,33 @@ extension UserGatewayManager {
       self.setupPingTask(forConnectionWithId: connectionId, every: duration)
     }
   }
+  
+  private func setupUpdateTimeSpentSessionID(
+    forConnectionWithId connectionId: UInt,
+    every duration: Duration
+  ) {
+    Task {
+      try? await Task.sleep(for: duration)
+      guard self.connectionId.load(ordering: .relaxed) == connectionId else {
+        self.logger.trace(
+          "Canceled a session time spent update task",
+          metadata: [
+            "connectionId": .stringConvertible(connectionId)
+          ]
+        )
+        return/// cancel
+      }
+      self.logger.debug(
+        "Will send automatic session time spent update",
+        metadata: [
+          "connectionId": .stringConvertible(connectionId)
+        ]
+      )
+      self.sendPing(forConnectionWithId: connectionId)
+      self.sendUpdateTimeSpentSessionID(forConnectionWithId: connectionId)
+      self.setupUpdateTimeSpentSessionID(forConnectionWithId: connectionId, every: duration)
+    }
+  }
 
   private func sendPing(forConnectionWithId connectionId: UInt) {
     logger.trace(
@@ -840,6 +870,23 @@ extension UserGatewayManager {
     }
   }
 
+  private func sendUpdateTimeSpentSessionID(forConnectionWithId connectionId: UInt) {
+    logger.trace(
+      "Will send session time spent update",
+      metadata: [
+        "connectionId": .stringConvertible(connectionId)
+      ]
+    )
+    self.send(
+      message: .init(
+        payload: .init(
+          opcode: .updateTimeSpentSessionId,
+          data: .updateTimeSpentSessionId(Gateway.UpdateTimeSpentSessionID())
+        )
+      )
+    )
+  }
+  
   private nonisolated func send(message: Message) {
     self.sendQueue.perform { [weak self] in
       guard let self = self else { return }

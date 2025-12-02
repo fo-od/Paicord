@@ -109,6 +109,8 @@ public struct Gateway: Sendable, Codable {
 			case invalidSession(canResume: Bool)
 			case authSessionChange(AuthSessionChange)
 			case sessionReplace(SessionReplace)
+        
+        case updateTimeSpentSessionId(UpdateTimeSpentSessionID)
 
 			//      case authenticatorCreate // TODO
 			//      case authenticatorUpdate // TODO
@@ -786,6 +788,8 @@ public struct Gateway: Sendable, Codable {
 				try container.encode(payload, forKey: .data)
 			case let .updateGuildSubscriptions(payload):
 				try container.encode(payload, forKey: .data)
+      case let .updateTimeSpentSessionId(payload):
+        try container.encode(payload, forKey: .data)
 			default:
 				throw EncodingError.notSupposedToBeSent(
 					message: "'\(self)' data is supposed to never be sent."

@@ -487,7 +487,7 @@ extension GatewayEventHandler {
 		}
 
 		switch event.data {
-    case .none, .resume, .identify, .updateGuildSubscriptions, .qosHeartbeat, .heartbeat:
+    case .none, .resume, .identify, .updateGuildSubscriptions, .qosHeartbeat, .heartbeat, .updateTimeSpentSessionId:
 			/// Only sent, never received.
 			break
 		case let .hello(hello):

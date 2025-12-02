@@ -13,23 +13,27 @@ extension Gateway {
   public struct QoSHeartbeat: Sendable, Codable {
     public var seq: Int?
     public var qos: QoSPayload
-    
+
     public init(seq: Int?, qos: QoSPayload) {
       self.seq = seq
       self.qos = qos
     }
-    
+
     public struct QoSPayload: Sendable, Codable {
       public var ver = DiscordGlobalConfiguration.qosVersion
       public var active: Bool
       public var reasons: [ReasonForService] = [.foregrounded]
-      
-      public init(ver: Int = DiscordGlobalConfiguration.qosVersion, active: Bool = true, reasons: [ReasonForService] = [.foregrounded]) {
+
+      public init(
+        ver: Int = DiscordGlobalConfiguration.qosVersion,
+        active: Bool = true,
+        reasons: [ReasonForService] = [.foregrounded]
+      ) {
         self.ver = ver
         self.active = active
         self.reasons = reasons
       }
-      
+
       public enum ReasonForService: String, Sendable, Codable {
         case foregrounded
         case rtcConnected = "rtc_connected"
@@ -67,6 +71,7 @@ extension Gateway {
       public var client_app_state: String?
       public var native_build_number: Int?
       public var design_id: Int?  // ui on mobile
+      public var client_heartbeat_session_id: String?
 
       public var client_event_source: String? = nil
 
@@ -393,6 +398,20 @@ extension Gateway {
     public var heartbeat_interval: Int
   }
 
+  /// https://docs.discord.food/topics/gateway-events#update-time-spent-session-id
+  public struct UpdateTimeSpentSessionID: Sendable, Codable {
+    // Unix timestamp (in milliseconds) of when the session ID was generated
+    public var initialization_timestamp: Int = Int(
+      SuperProperties._initialisation_date.timeIntervalSince1970 * 1000
+    )
+    // A client-generated UUID, same as client_heartbeat_session_id in client properties
+    public var session_id: UUID = SuperProperties._client_heartbeat_session_id
+    // A client-generated UUID, same as client_launch_id in client properties
+    public var client_launch_id: UUID = SuperProperties._client_launch_id
+
+    public init() {}
+  }
+
   /// https://docs.discord.food/topics/gateway-events#ready
   public struct Ready: Sendable, Codable {
     // shared fields
@@ -445,11 +464,16 @@ extension Gateway {
   }
 
   /// https://discord.com/developers/docs/topics/gateway-events#thread-list-sync-thread-list-sync-event-fields
+  /// keyNotFound(CodingKeys(
+  /// stringValue: "members", intValue: nil),
+  /// Swift.DecodingError.Context(codingPath: [
+  /// CodingKeys(stringValue: "d", intValue: nil)]
+  /// , debugDescription: "No value associated with key CodingKeys(stringValue: \"members\", intValue: nil) (\"members\").", underlyingError: nil))
   public struct ThreadListSync: Sendable, Codable {
     public var guild_id: GuildSnowflake
     public var channel_ids: [ChannelSnowflake]?
     public var threads: [DiscordChannel]
-    public var members: [ThreadMember]
+    public var members: [ThreadMember]?
   }
 
   /// A ``ThreadMember`` with a `guild_id` field.
