@@ -6,17 +6,19 @@
 //  Copyright © 2025 Lakhan Lothiyi.
 //
 
-import SwiftUIX
+import SettingsKit
 
-extension SettingsPages {
-  static let AccountSection: [SettingsPage] = [
-    .init(
-      title: "My Account",
-      icon: .system("person.crop.circle"),
-      section: "Account"
-    ) {
-      Text("wip, but account details will be shown here and probably also managing multiple accounts ")
+extension SettingsView {
+  var accountSection: some SettingsContent {
+    SettingsGroup("My Account", systemImage: "person.crop.circle") {
+      SettingsItem("Log Out") {
+        AsyncButton("") {
+          guard let currentAccount = gw.accounts.currentAccount else { return }
+          gw.accounts.removeAccount(currentAccount)
+          await gw.logOut()
+        } catch: { _ in }
+
+      }
     }
-  ]
+  }
 }
-

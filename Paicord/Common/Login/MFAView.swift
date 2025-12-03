@@ -85,7 +85,8 @@ struct MFAView: View {
         }
       } label: {
         Image(systemName: chosenMethod != nil ? "chevron.left" : "xmark")
-          .padding(5)
+          .imageScale(.large)
+          .padding(8)
           .background(Color.theme.common.primaryButtonBackground)
           .clipShape(.circle)
           .contentTransition(.symbolEffect(.replace))

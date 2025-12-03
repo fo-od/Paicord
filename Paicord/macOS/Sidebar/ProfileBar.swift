@@ -14,7 +14,7 @@ import SwiftUIX
 struct ProfileBar: View {
   @Environment(\.gateway) var gw
   #if os(macOS)
-    @Environment(\.openSettings) var openSettings
+    @Environment(\.openWindow) var openWindow
   #endif
 
   @State var showingUsername = false
@@ -106,7 +106,7 @@ struct ProfileBar: View {
 
       #if os(macOS)
         Button {
-          openSettings()
+          openWindow(id: "settings")
         } label: {
           Image(systemName: "gearshape.fill")
             .font(.title2)

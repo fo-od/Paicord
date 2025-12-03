@@ -6,10 +6,11 @@
 //  Copyright © 2025 Lakhan Lothiyi. All rights reserved.
 //
 
+import Conditionals
+import Logging
 import PaicordLib
 @_spi(Advanced) import SwiftUIIntrospect
 import SwiftUIX
-import Logging
 
 #if canImport(Sparkle)
   import Sparkle
@@ -19,7 +20,7 @@ import Logging
 struct PaicordApp: App {
   let gatewayStore = GatewayStore.shared
   var challenges = Challenges()
-    let console = StdOutInterceptor.shared
+  let console = StdOutInterceptor.shared
 
   #if os(iOS)
     class AppDelegate: NSObject, UIApplicationDelegate {
@@ -46,10 +47,10 @@ struct PaicordApp: App {
   #endif
 
   init() {
-//    DiscordGlobalConfiguration.makeLogger = { label in
-//      let stdoutHandler = StreamLogHandler.standardOutput(label: label) // stdout
-//      return Logger(label: label, factory: { _ in stdoutHandler })
-//    }
+    //    DiscordGlobalConfiguration.makeLogger = { label in
+    //      let stdoutHandler = StreamLogHandler.standardOutput(label: label) // stdout
+    //      return Logger(label: label, factory: { _ in stdoutHandler })
+    //    }
     console.startIntercepting()
     //     i foubnd out this rly cool thing if u avoid logging 40mb of data to console the client isnt slow !!!!
     //    #if DEBUG
@@ -70,6 +71,8 @@ struct PaicordApp: App {
 
   //  private let updaterController: SPUStandardUpdaterController
 
+  @Environment(\.openWindow) var openWindow
+
   var body: some Scene {
     WindowGroup {
       RootView(
@@ -89,16 +92,26 @@ struct PaicordApp: App {
       //          CheckForUpdatesView(updater: updaterController.updater)
       //        }
       //      }
-      .commands { AccountCommands(gatewayStore: gatewayStore) }
+      .commands {
+        Commands()
+        CommandGroup(replacing: .appSettings) {
+          Button("Settings") {
+            openWindow(id: "settings")
+          }
+          .keyboardShortcut(",", modifiers: .command)
+        }
+      }
     #endif
     .environment(\.challenges, challenges)
 
     #if os(macOS)
-      Settings {
+      // use a normal window instead of Settings
+      Window("Settings", id: "settings") {
         SettingsView()
-          .toolbar(removing: .sidebarToggle)
+          .introspect(.window, on: .macOS(.v14...)) { window in
+            window.isRestorable = false
+          }
       }
-      .windowToolbarStyle(.unifiedCompact)
     #endif
   }
 }

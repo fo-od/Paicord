@@ -44,7 +44,7 @@ final class GatewayStore {
   // MARK: - Gateway Management
   
   /// Disconnects current gateway and cancels event task if needed
-  private func disconnectIfNeeded() async {
+  func disconnectIfNeeded() async {
     guard !([.stopped, .noConnection].contains(state)) else { return }
     await gateway?.disconnect()
     eventTask?.cancel()

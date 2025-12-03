@@ -21,6 +21,17 @@ struct LoginView: View {
   // used for form background animation
   @State var chosenMFAMethod: Payloads.MFASubmitData.MFAKind?
 
+  init() {
+    setup()
+  }
+  func setup() {
+    Task {
+      try? await Task.sleep(for: .seconds(0.5))  // edge case problem when logging out ???
+      viewModel.gw = gw
+      viewModel.appState = appState
+      await viewModel.fingerprintSetup()
+    }
+  }
   var body: some View {
     ZStack {
       MeshGradientBackground()
@@ -48,6 +59,22 @@ struct LoginView: View {
                 loginFocused: $loginFocused,
                 passwordFocused: $passwordFocused
               )
+              .overlay(alignment: .topLeading) {
+                if !viewModel.gw.accounts.accounts.isEmpty {
+                  Button {
+                    withAnimation {
+                      viewModel.addingNewAccount = false
+                    }
+                  } label: {
+                    Image(systemName: "chevron.left")
+                      .imageScale(.large)
+                      .padding(8)
+                      .background(Color.theme.common.primaryButtonBackground)
+                      .clipShape(.circle)
+                  }
+                  .buttonStyle(.borderless)
+                }
+              }
             }
           } else {
             AccountPicker(
@@ -66,12 +93,6 @@ struct LoginView: View {
         .transition(.scale(scale: 0.8).combined(with: .opacity))
       } else {
         ProgressView()
-          .task {
-            try? await Task.sleep(for: .seconds(0.5))  // edge case problem when logging out ???
-            viewModel.gw = gw
-            viewModel.appState = appState
-            await viewModel.fingerprintSetup()
-          }
       }
     }
     .animation(.default, value: viewModel.gw == nil)

@@ -1,5 +1,5 @@
 //
-//  AccountCommands.swift
+//  PaicordCommands.swift
 //  Paicord
 //
 //  Created by Lakhan Lothiyi on 18/09/2025.
@@ -10,8 +10,8 @@ import SwiftUI
 
 // TODO: Make more account related commands etc
 
-struct AccountCommands: Commands {
-  let gatewayStore: GatewayStore
+struct PaicordCommands: Commands {
+  @Environment(\.gateway) var gatewayStore
 
   var body: some Commands {
     CommandMenu("Account") {

@@ -1,5 +1,5 @@
 {
-  "originHash" : "2ff14e83155c9c9f2601dff3e4a6906c8dd03441c88e123911b7e37bd7c87892",
+  "originHash" : "eb475516c6d734d4a41af61218dfee99c278af1c8d30e4981162ecc099b5b735",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -35,6 +35,15 @@
       "state" : {
         "revision" : "e1caa19077dda4b00441142ef57da3db02acd466",
         "version" : "1.4.2"
+      }
+    },
+    {
+      "identity" : "conditionals",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Aeastr/Conditionals",
+      "state" : {
+        "revision" : "82e1eb00b0c888d1e9d3ca8ddcf5bf6c913177e9",
+        "version" : "1.2.0"
       }
     },
     {
