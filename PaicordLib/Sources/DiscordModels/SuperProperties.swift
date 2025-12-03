@@ -277,8 +277,10 @@ public enum SuperProperties {
     #if os(macOS)
     return _launch_signature.uuidString.lowercased()
     #elseif os(iOS)
-    // ios follows a different format, using an integer. not sure how this is generated yet.
-    return nil
+    // TODO: ios follows a different format, using an integer. not sure how this is generated yet.
+    // for now, i was told its safe to use macos one instead.
+//    return nil
+    return _launch_signature.uuidString.lowercased()
     #endif
   }
 
