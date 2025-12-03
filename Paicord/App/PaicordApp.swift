@@ -93,7 +93,7 @@ struct PaicordApp: App {
       //        }
       //      }
       .commands {
-        Commands()
+        PaicordCommands()
         CommandGroup(replacing: .appSettings) {
           Button("Settings") {
             openWindow(id: "settings")

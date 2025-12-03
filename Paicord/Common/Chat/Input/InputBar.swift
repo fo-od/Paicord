@@ -7,6 +7,7 @@
 //
 
 import PaicordLib
+import PhotosUI
 import SwiftUIX
 
 extension ChatView {
@@ -21,6 +22,9 @@ extension ChatView {
 
     @FocusState private var isFocused: Bool
     @State var text: String = ""
+
+    @State var showingPhotoPicker: Bool = false
+    @State var photoPickerItems: [PhotosPickerItem] = []
 
     var body: some View {
       ZStack(alignment: .top) {
@@ -66,19 +70,33 @@ extension ChatView {
           #endif
       }
       .ignoresSafeArea(.container, edges: .horizontal)
+      .sheet(isPresented: $showingPhotoPicker) {
+        PhotosPicker(
+          "Upload Photos",
+          selection: $photoPickerItems,
+          maxSelectionCount: 10,
+          selectionBehavior: .continuous,
+          preferredItemEncoding: .compatible
+        )
+        .photosPickerStyle(.inline)
+        .presentationDetents([.medium, .large])
+      }
     }
 
     @ViewBuilder
     var inputBarButton: some View {
       Menu {
         Menu {
-          
+          Button {
+          } label: {
+            Text("1")
+          }
         } label: {
           Label("Apps", systemImage: "puzzle.fill")
         }
-        
+
         Button {
-          
+          showingPhotoPicker = true
         } label: {
           Label("Upload Photos", systemImage: "photo.on.rectangle")
         }
@@ -90,10 +108,10 @@ extension ChatView {
           .clipShape(.circle)
       }
       #if os(macOS)
-      .menuStyle(.button)
-      .buttonStyle(.plain)
+        .menuStyle(.button)
+        .buttonStyle(.plain)
       #else
-      .buttonStyle(.borderless)
+        .buttonStyle(.borderless)
       #endif
       .tint(.primary)
     }

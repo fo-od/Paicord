@@ -14,7 +14,7 @@ extension EnvironmentValues {
   @Entry var profileAnimated: Bool = false
   @Entry var profileShowAvatarDecoration: Bool = false
   @Entry var profileHideOfflinePresence: Bool = false
-  
+
   @Entry var nameplateAnimated: Bool = false
 }
 
@@ -25,15 +25,15 @@ extension View {
   }
 
   /// Whether to show avatar decorations
-  func profileShowsAvatarDecoration(_ shown: Bool = true ) -> some View {
+  func profileShowsAvatarDecoration(_ shown: Bool = true) -> some View {
     environment(\.profileShowAvatarDecoration, shown)
   }
-  
+
   /// Whether to hide offline presence indicator
   func profileHidesOfflinePresence(_ hide: Bool) -> some View {
     environment(\.profileHideOfflinePresence, hide)
   }
-  
+
   /// Whether to show animated nameplates
   func nameplateAnimated(_ animated: Bool = true) -> some View {
     environment(\.nameplateAnimated, animated)
@@ -46,8 +46,8 @@ enum Profile {
     @Environment(\.guildStore) var guildStore
     let member: Guild.PartialMember?
     let user: PartialUser?
-//    var animated: Bool = false
-//    var showDecoration: Bool = false
+    //    var animated: Bool = false
+    //    var showDecoration: Bool = false
     @Environment(\.profileAnimated) var animated
     @Environment(\.profileShowAvatarDecoration) var showDecoration
 
@@ -55,31 +55,30 @@ enum Profile {
       Group {
         Utils.UserAvatarURL(member: member, user: user, animated: false) {
           url in
-          WebImage(url: url) { phase in
-            switch phase {
-            case .success(let image):
-              image
-                .resizable()
-                .scaledToFit()
-            default:
-              Circle()
-                .foregroundStyle(.gray.opacity(0.3))
-            }
-          }
-          .overlay {
-            if animated {
-              Utils.UserAvatarURL(member: member, user: user, animated: true) {
-                animatedURL in
-                WebImage(url: animatedURL) { phase in
-                  switch phase {
-                  case .success(let image):
-                    image
-                      .resizable()
-                      .scaledToFit()
-                  default:
-                    EmptyView()
-                  }
+          if animated {
+            Utils.UserAvatarURL(member: member, user: user, animated: true) {
+              animatedURL in
+              WebImage(url: animatedURL) { phase in
+                switch phase {
+                case .success(let image):
+                  image
+                    .resizable()
+                    .scaledToFit()
+                default:
+                  EmptyView()
                 }
+              }
+            }
+          } else {
+            WebImage(url: url) { phase in
+              switch phase {
+              case .success(let image):
+                image
+                  .resizable()
+                  .scaledToFit()
+              default:
+                Circle()
+                  .foregroundStyle(.gray.opacity(0.3))
               }
             }
           }
@@ -257,7 +256,7 @@ enum Profile {
         ).url
       )
     }
-    
+
     var animatedURL: URL? {
       URL(
         string: CDNEndpoint.collectibleNameplate(
@@ -365,7 +364,8 @@ enum Profile {
 
     var body: some View {
       let badges =
-      gw.externalBadges.badges(for: user?.id) + (profile?.guild_badges ?? []) + (profile?.badges ?? [])
+        gw.externalBadges.badges(for: user?.id) + (profile?.guild_badges ?? [])
+        + (profile?.badges ?? [])
       LazyHStack(spacing: 2) {
         ForEach(badges) { badge in
           Badge(badge: badge)
