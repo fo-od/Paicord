@@ -10,10 +10,13 @@ import PaicordLib
 import PhotosUI
 import SwiftUIX
 
+
+
 extension ChatView {
   struct InputBar: View {
     @Environment(\.appState) var appState
     @Environment(\.gateway) var gw
+    @Environment(\.theme) var theme
     var vm: ChannelStore
 
     #if os(iOS)
@@ -27,93 +30,118 @@ extension ChatView {
     @State var photoPickerItems: [PhotosPickerItem] = []
 
     var body: some View {
-      ZStack(alignment: .top) {
-        HStack(alignment: .bottom, spacing: 8) {
-          inputBarButton
-
-          inputBarField
-
-          #if os(iOS)
+      VStack {
+        ZStack(alignment: .top) {
+          HStack(alignment: .bottom, spacing: 8) {
+            inputBarButton
+            
+            inputBarField
+            
+#if os(iOS)
             if text.isEmpty == false {
               Button(action: sendMessage) {
                 Image(systemName: "paperplane.fill")
                   .imageScale(.large)
                   .padding(5)
                   .foregroundStyle(.white)
-                  .background(Color.theme.common.primaryButton)
+                  .background(theme.common.primaryButton)
                   .clipShape(.circle)
               }
               .buttonStyle(.borderless)
-              .foregroundStyle(Color.theme.common.primaryButton)
+              .foregroundStyle(theme.common.primaryButton)
               .transition(.move(edge: .trailing).combined(with: .opacity))
             }
-          #endif
-        }
-        .padding([.horizontal, .bottom], 8)
-        .padding(.top, 4)
-        #if os(iOS)
+#endif
+          }
+          .padding([.horizontal, .bottom], 8)
+          .padding(.top, 4)
+#if os(iOS)
           .animation(.default, value: text.isEmpty)
-        #endif
-
-        TypingIndicatorBar(vm: vm)
-          .shadow(color: .black, radius: 10)
-          .padding(.top, -18)  // away from bar
-      }
-      .background {
-        VariableBlurView()
-          .rotationEffect(.degrees(180))
+#endif
+          
+          TypingIndicatorBar(vm: vm)
+            .shadow(color: .black, radius: 10)
+            .padding(.top, -18)  // away from bar
+        }
+        .background {
+          VariableBlurView()
+            .rotationEffect(.degrees(180))
           // extend upwards slightly
-          .padding(.top, -8 + (vm.typingTimeoutTokens.isEmpty ? 0 : -10))
-          #if os(iOS)
+            .padding(.top, -8 + (vm.typingTimeoutTokens.isEmpty ? 0 : -10))
+#if os(iOS)
             .padding(.bottom, isFocused ? 0 : (safeAreaInsets.bottom * -1))
             .animation(.default, value: isFocused)
-          #endif
-      }
-      .ignoresSafeArea(.container, edges: .horizontal)
-      .sheet(isPresented: $showingPhotoPicker) {
-        PhotosPicker(
-          "Upload Photos",
-          selection: $photoPickerItems,
-          maxSelectionCount: 10,
-          selectionBehavior: .continuous,
-          preferredItemEncoding: .compatible
-        )
-        .photosPickerStyle(.inline)
-        .presentationDetents([.medium, .large])
+#endif
+        }
+        .ignoresSafeArea(.container, edges: .horizontal)
+        if showingPhotoPicker, isFocused == false {
+          
+          PhotosPicker(
+            "Upload Photos",
+            selection: $photoPickerItems,
+            maxSelectionCount: 10,
+            selectionBehavior: .continuous,
+            preferredItemEncoding: .compatible
+          )
+          .photosPickerStyle(.inline)
+          // height is keyboard height, get safe area insets of keyboard
+          .ignoresSafeArea(.container, edges: .bottom)
+          .height(300)
+        }
       }
     }
 
     @ViewBuilder
     var inputBarButton: some View {
-      Menu {
-        Menu {
-          Button {
-          } label: {
-            Text("1")
-          }
-        } label: {
-          Label("Apps", systemImage: "puzzle.fill")
-        }
-
+      if showingPhotoPicker {
         Button {
-          showingPhotoPicker = true
+          showingPhotoPicker = false
         } label: {
-          Label("Upload Photos", systemImage: "photo.on.rectangle")
+          Image(systemName: "plus")
+            .imageScale(.large)
+            .padding(7.5)
+            .background(.regularMaterial)
+            .clipShape(.circle)
+            .rotationEffect(.degrees(45))
         }
-      } label: {
-        Image(systemName: "plus")
-          .imageScale(.large)
-          .padding(7.5)
-          .background(.regularMaterial)
-          .clipShape(.circle)
-      }
-      #if os(macOS)
+#if os(macOS)
         .menuStyle(.button)
         .buttonStyle(.plain)
-      #else
+#else
         .buttonStyle(.borderless)
-      #endif
-      .tint(.primary)
+#endif
+        .tint(.primary)
+      } else {
+        Menu {
+          Menu {
+            Button {
+            } label: {
+              Text("1")
+            }
+          } label: {
+            Label("Apps", systemImage: "puzzle.fill")
+          }
+          
+          Button {
+            showingPhotoPicker = true
+          } label: {
+            Label("Upload Photos", systemImage: "photo.on.rectangle")
+          }
+        } label: {
+          Image(systemName: "plus")
+            .imageScale(.large)
+            .padding(7.5)
+            .background(.regularMaterial)
+            .clipShape(.circle)
+        }
+#if os(macOS)
+        .menuStyle(.button)
+        .buttonStyle(.plain)
+#else
+        .buttonStyle(.borderless)
+#endif
+        .tint(.primary)
+      }
     }
 
     @ViewBuilder

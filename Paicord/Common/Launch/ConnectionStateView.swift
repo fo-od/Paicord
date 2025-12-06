@@ -12,6 +12,7 @@ import SwiftUI
 struct ConnectionStateView: View {
   var state: GatewayState
   @Environment(\.gateway) var gw
+  @Environment(\.theme) var theme
   var body: some View {
     ZStack(alignment: .bottom) {
       VStack {
@@ -38,7 +39,7 @@ struct ConnectionStateView: View {
           .padding(5)
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .background(Color.theme.common.primaryBackground)
+      .background(theme.common.primaryBackground)
 
       VStack {
         Text(state.description.capitalized)

@@ -21,6 +21,7 @@ struct DMsView: View {
   @Environment(\.gateway) var gw
   @Environment(\.appState) var appState
   @Environment(\.userInterfaceIdiom) var idiom
+  @Environment(\.theme) var theme
   var body: some View {
     ScrollView {
       if idiom == .phone {
@@ -46,7 +47,7 @@ struct DMsView: View {
       .padding(.vertical, 4)
     }
     .frame(maxWidth: .infinity)
-    .background(Color.theme.common.secondaryBackground.opacity(0.5))
+    .background(theme.common.secondaryBackground.opacity(0.5))
     .roundedCorners(radius: 10, corners: .topLeft)
   }
 }

@@ -13,6 +13,7 @@ import SwiftUIX
 struct HomeView: View {
   @Environment(\.gateway) var gw
   @Environment(\.appState) var appState
+  @Environment(\.theme) var theme
 
   var guild: GuildStore?
 
@@ -31,7 +32,7 @@ struct HomeView: View {
           DMsView()
         }
       }
-      .background(Color.theme.common.secondaryBackground)
+      .background(theme.common.secondaryBackground)
       .roundedCorners(radius: 25, corners: .topLeft)
     }
     .padding(.top, 4)

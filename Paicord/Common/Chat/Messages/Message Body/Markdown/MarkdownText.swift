@@ -16,6 +16,7 @@ struct MarkdownText: View {
   @Environment(\.gateway) var gw
   var channelStore: ChannelStore?
   @Environment(\.dynamicTypeSize) var dynamicType
+  @Environment(\.theme) var theme
 
   var renderer: MarkdownRendererVM
 
@@ -49,6 +50,7 @@ struct MarkdownText: View {
     .task(id: content, render)
     .task(id: channelStore?.guildStore?.members.count, render)
     .task(id: dynamicType, render)
+    .task(id: theme, render)
     .environment(
       \.openURL,
       OpenURLAction { url in
@@ -74,6 +76,7 @@ struct MarkdownText: View {
       hasher.combine(memberCount)
     }
     hasher.combine(dynamicType)
+    hasher.combine(theme)
     return hasher.finalize()
   }
 
@@ -187,6 +190,7 @@ struct MarkdownText: View {
     var code: String
     var language: String?
     @State private var isHovered: Bool = false
+    @Environment(\.theme) var theme
     var body: some View {
       HStack {
         Group {
@@ -194,7 +198,7 @@ struct MarkdownText: View {
             CodeText(code)
               .highlightMode(.languageAlias(language))
               .codeTextColors(
-                Color.theme.markdown.codeBlockSyntaxTheme.highlightTheme
+                theme.markdown.codeBlockSyntaxTheme.highlightTheme
               )
               .font(.footnote.monospaced())
           } else {
@@ -205,11 +209,11 @@ struct MarkdownText: View {
         .environment(\.font, nil)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)
-        .background(Color.theme.markdown.codeBlockBackground)
+        .background(theme.markdown.codeBlockBackground)
         .clipShape(.rounded)
         .overlay(
           RoundedRectangle(cornerSize: .init(10), style: .continuous)
-            .stroke(Color.theme.markdown.codeBlockBorder, lineWidth: 1)
+            .stroke(theme.markdown.codeBlockBorder, lineWidth: 1)
         )
         .overlay(alignment: .topTrailing) {
           if isHovered {
@@ -275,6 +279,8 @@ class MarkdownRendererVM {
   // document cache is redundant if we have block cache
   //  static let documentCache: NSCache<NSString, CachedDocument> = .init()
   static let blockCache: NSCache<NSString, CachedDocumentBlocks> = .init()
+  
+  let theme = Theming.shared.currentTheme
 
   //  class CachedDocument: NSObject {
   //    let document: AST.DocumentNode
@@ -557,10 +563,10 @@ class MarkdownRendererVM {
     switch baseStyle {
     case .body:
       baseFont = FontHelpers.preferredBodyFont()
-      baseColor = AppKitOrUIKitColor(Color.theme.markdown.text)
+      baseColor = AppKitOrUIKitColor(theme.markdown.text)
     case .footnote:
       baseFont = FontHelpers.preferredFootnoteFont()
-      baseColor = AppKitOrUIKitColor(Color.theme.markdown.secondaryText)
+      baseColor = AppKitOrUIKitColor(theme.markdown.secondaryText)
     }
     let baseAttributes: [NSAttributedString.Key: Any] = [
       .foregroundColor: baseColor,
@@ -653,9 +659,9 @@ class MarkdownRendererVM {
         let attrs: [NSAttributedString.Key: Any] = [
           .font: FontHelpers.preferredMonospaceFont(),
           .backgroundColor: AppKitOrUIKitColor(
-            Color.theme.markdown.codeSpanBackground
+            theme.markdown.codeSpanBackground
           ),
-          .foregroundColor: AppKitOrUIKitColor(Color.theme.markdown.text),
+          .foregroundColor: AppKitOrUIKitColor(theme.markdown.text),
         ]
         let s = NSAttributedString(string: code.content, attributes: attrs)
         container.append(s)
@@ -678,7 +684,7 @@ class MarkdownRendererVM {
           newAttrs[.link] = url
         } else {
           newAttrs[.foregroundColor] = AppKitOrUIKitColor(
-            Color.theme.common.hyperlink
+            theme.common.hyperlink
           )
         }
         inner.addAttributes(
@@ -699,7 +705,7 @@ class MarkdownRendererVM {
       if let a = node as? AST.AutolinkNode {
         var attrs = baseAttributes
         attrs[.foregroundColor] = AppKitOrUIKitColor(
-          Color.theme.common.hyperlink
+          theme.common.hyperlink
         )
         attrs[.link] = URL(string: a.url)
         let s = NSAttributedString(string: a.text, attributes: attrs)
@@ -728,7 +734,7 @@ class MarkdownRendererVM {
       }
       var newAttrs = baseAttributes
       newAttrs[.foregroundColor] = AppKitOrUIKitColor(
-        Color.theme.markdown.secondaryText
+        theme.markdown.secondaryText
       )
       inner.addAttributes(
         newAttrs,
@@ -774,10 +780,10 @@ class MarkdownRendererVM {
         }
         attrs[.rawContent] = "<@\(m.id.rawValue)>"
         attrs[.backgroundColor] = AppKitOrUIKitColor(
-          Color.theme.markdown.mentionBackground
+          theme.markdown.mentionBackground
         )
         attrs[.foregroundColor] = AppKitOrUIKitColor(
-          Color.theme.markdown.mentionText
+          theme.markdown.mentionText
         )
         attrs[.underlineStyle] = .none
 
@@ -803,10 +809,10 @@ class MarkdownRendererVM {
             attrs[.foregroundColor] = AppKitOrUIKitColor(color)
           } else {
             attrs[.backgroundColor] = AppKitOrUIKitColor(
-              Color.theme.markdown.mentionBackground
+              theme.markdown.mentionBackground
             )
             attrs[.foregroundColor] = AppKitOrUIKitColor(
-              Color.theme.markdown.mentionText
+              theme.markdown.mentionText
             )
 
           }
@@ -844,10 +850,10 @@ class MarkdownRendererVM {
             attrs[.link] = url
           }
           attrs[.backgroundColor] = AppKitOrUIKitColor(
-            Color.theme.markdown.mentionBackground
+            theme.markdown.mentionBackground
           )
           attrs[.foregroundColor] = AppKitOrUIKitColor(
-            Color.theme.markdown.mentionText
+            theme.markdown.mentionText
           )
           let name = channel.name ?? c.id.rawValue
           let s = NSAttributedString(
@@ -876,10 +882,10 @@ class MarkdownRendererVM {
         attrs[.font] = FontHelpers.makeFontBold(font)
       }
       attrs[.backgroundColor] = AppKitOrUIKitColor(
-        Color.theme.markdown.mentionBackground
+        theme.markdown.mentionBackground
       )
       attrs[.foregroundColor] = AppKitOrUIKitColor(
-        Color.theme.markdown.mentionText
+        theme.markdown.mentionText
       )
       if let url = URL(string: "paicord://mention/everyone") {
         attrs[.link] = url
@@ -897,10 +903,10 @@ class MarkdownRendererVM {
         attrs[.link] = url
       }
       attrs[.backgroundColor] = AppKitOrUIKitColor(
-        Color.theme.markdown.mentionBackground
+        theme.markdown.mentionBackground
       )
       attrs[.foregroundColor] = AppKitOrUIKitColor(
-        Color.theme.markdown.mentionText
+        theme.markdown.mentionText
       )
       container.append(
         NSAttributedString(string: "@here", attributes: attrs)
@@ -949,7 +955,7 @@ class MarkdownRendererVM {
 
         var attrs = baseAttributes
         attrs[.backgroundColor] = AppKitOrUIKitColor(
-          Color.theme.markdown.codeSpanBackground
+          theme.markdown.codeSpanBackground
         )
 
         let s = NSAttributedString(

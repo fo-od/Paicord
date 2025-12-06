@@ -72,13 +72,14 @@ struct PaicordApp: App {
   //  private let updaterController: SPUStandardUpdaterController
 
   @Environment(\.openWindow) var openWindow
-
+  @Environment(\.theme) var theme
+  
   var body: some Scene {
     WindowGroup {
       RootView(
         gatewayStore: gatewayStore
       )
-      .preferredColorScheme(Color.theme.common.colorScheme)
+      .preferredColorScheme(theme.common.colorScheme)
       #if os(macOS)
         .introspect(.window, on: .macOS(.v14...)) { window in
           window.isRestorable = false

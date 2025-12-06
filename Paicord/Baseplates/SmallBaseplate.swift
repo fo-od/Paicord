@@ -13,6 +13,7 @@ import SwiftUIX
 struct SmallBaseplate: View {
   @Bindable var appState: PaicordAppState
   @Environment(\.gateway) var gw
+  @Environment(\.theme) var theme
 
   @State var currentGuildStore: GuildStore? = nil
   @State var currentChannelStore: ChannelStore? = nil
@@ -28,29 +29,29 @@ struct SmallBaseplate: View {
         TabView(selection: $currentTab) {
           HomeView(guild: currentGuildStore)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.theme.common.primaryBackground)
-            .toolbarBackground(Color.theme.common.tertiaryBackground, for: .tabBar)
+            .background(theme.common.primaryBackground)
+            .toolbarBackground(theme.common.tertiaryBackground, for: .tabBar)
             .toolbarBackground(.visible, for: .tabBar)
             .tabItem { Label("Home", systemImage: "house") }
             .tag(CurrentTab.home)
           NotificationsView()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.theme.common.primaryBackground)
-            .toolbarBackground(Color.theme.common.tertiaryBackground, for: .tabBar)
+            .background(theme.common.primaryBackground)
+            .toolbarBackground(theme.common.tertiaryBackground, for: .tabBar)
             .toolbarBackground(.visible, for: .tabBar)
             .tabItem { Label("Notifications", systemImage: "bell") }
             .tag(CurrentTab.notifications)
             .tint(nil)
           ProfileView()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.theme.common.primaryBackground)
-            .toolbarBackground(Color.theme.common.tertiaryBackground, for: .tabBar)
+            .background(theme.common.primaryBackground)
+            .toolbarBackground(theme.common.tertiaryBackground, for: .tabBar)
             .toolbarBackground(.visible, for: .tabBar)
             .tabItem { Label("Profile", systemImage: "person.circle") }
             .tag(CurrentTab.profile)
             .tint(nil)
         }
-        .tint(Color.theme.common.tertiaryButton)
+        .tint(theme.common.tertiaryButton)
       }
       .environment(\.guildStore, currentGuildStore)
       .environment(\.channelStore, currentChannelStore)
@@ -70,7 +71,7 @@ struct SmallBaseplate: View {
                   } label: {
                     Image(systemName: "arrow.left")
                   }
-                  .tint(Color.theme.common.tertiaryButton)
+                  .tint(theme.common.tertiaryButton)
                 }
               }
             #endif

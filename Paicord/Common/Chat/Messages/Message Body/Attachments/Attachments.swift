@@ -215,6 +215,7 @@ extension MessageCell {
     }
 
     struct FileAttachmentView: View {
+      @Environment(\.theme) var theme
       var attachment: DiscordChannel.Message.Attachment
       var body: some View {
         HStack {
@@ -247,14 +248,14 @@ extension MessageCell {
         }
         .padding()
         .background(
-          Color.theme.common.primaryButtonBackground.brightness(0.2)
+          theme.common.primaryButtonBackground.brightness(0.2)
             .mask {
               RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .stroke(.white, lineWidth: 1)
                 .foregroundStyle(.clear)
             }
         )
-        .background(.theme.common.primaryButtonBackground)
+        .background(theme.common.primaryButtonBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
       }
     }

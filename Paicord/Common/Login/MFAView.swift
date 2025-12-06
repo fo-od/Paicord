@@ -24,6 +24,7 @@ struct MFAView: View {
 
   @Binding var chosenMethod: Payloads.MFASubmitData.MFAKind?
   @State var input: String = ""
+  @Environment(\.theme) var theme
 
   init(
     authentication: UserAuthentication,
@@ -56,7 +57,7 @@ struct MFAView: View {
                 userFriendlyName(for: method)
                   .frame(maxWidth: .infinity)
                   .padding(10)
-                  .background(Color.theme.common.primaryButton)
+                  .background(theme.common.primaryButton)
                   .clipShape(.rounded)
                   .font(.title3)
               }
@@ -87,7 +88,7 @@ struct MFAView: View {
         Image(systemName: chosenMethod != nil ? "chevron.left" : "xmark")
           .imageScale(.large)
           .padding(8)
-          .background(Color.theme.common.primaryButtonBackground)
+          .background(theme.common.primaryButtonBackground)
           .clipShape(.circle)
           .contentTransition(.symbolEffect(.replace))
       }

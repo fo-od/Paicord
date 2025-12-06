@@ -13,6 +13,7 @@ import SwiftUIX
 struct GuildView: View {
   var guild: GuildStore
   @Environment(\.userInterfaceIdiom) var idiom
+  @Environment(\.theme) var theme
   var body: some View {
     ScrollView {
       VStack(spacing: 0) {
@@ -67,7 +68,7 @@ struct GuildView: View {
       }
     }
     .frame(maxWidth: .infinity)
-    .background(Color.theme.common.secondaryBackground.opacity(0.5))
+    .background(theme.common.secondaryBackground.opacity(0.5))
     .roundedCorners(radius: 10, corners: .topLeft)
   }
 }

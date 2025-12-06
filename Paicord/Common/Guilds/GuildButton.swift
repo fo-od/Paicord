@@ -19,7 +19,8 @@ struct GuildButton: View {
   @Environment(\.appState) var appState
   @Environment(\.gateway) var gw
   @Environment(\.colorScheme) var colorScheme
-
+  @Environment(\.theme) var theme
+  
   init(guild: Guild?) {
     self.guild = guild
     self.guilds = nil
@@ -49,6 +50,7 @@ struct GuildButton: View {
   struct FolderButtons: View {
     @Environment(\.gateway) var gw
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.theme) var theme
 
     var id: Int64
     var folder: DiscordProtos_DiscordUsers_V1_PreloadedUserSettings.GuildFolder
@@ -175,7 +177,7 @@ struct GuildButton: View {
             .fill(color.secondary.opacity(0.35))
         } else {
           Rectangle()
-            .fill(Color.theme.common.secondaryBackground.secondary)
+            .fill(theme.common.secondaryBackground.secondary)
         }
       }
       .clipShape(.rect(cornerRadius: 10, style: .continuous))
@@ -289,7 +291,7 @@ struct GuildButton: View {
                   colorScheme == .dark ? .white : isSelected ? .white : .black
                 )
             }
-            .background(isSelected ? Color.theme.common.accent : Color.theme.common.primaryButtonBackground.opacity(0.5))
+            .background(isSelected ? theme.common.accent : theme.common.primaryButtonBackground.opacity(0.5))
         }
       }
       .clipShape(.rect(cornerRadius: isSelected ? 10 : 32, style: .continuous))

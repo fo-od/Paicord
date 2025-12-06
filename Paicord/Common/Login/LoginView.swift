@@ -13,6 +13,7 @@ struct LoginView: View {
   @Environment(\.gateway) var gw
   @Environment(\.appState) var appState
   var viewModel: LoginViewModel = .init()
+  @Environment(\.theme) var theme
 
   // Focus states must be here (cannot live in viewmodel)
   @FocusState var loginFocused: Bool
@@ -69,7 +70,7 @@ struct LoginView: View {
                     Image(systemName: "chevron.left")
                       .imageScale(.large)
                       .padding(8)
-                      .background(Color.theme.common.primaryButtonBackground)
+                      .background(theme.common.primaryButtonBackground)
                       .clipShape(.circle)
                   }
                   .buttonStyle(.borderless)
@@ -86,7 +87,7 @@ struct LoginView: View {
         }
         .padding(20)
         .frame(maxWidth: 400)
-        .background(Color.theme.common.tertiaryBackground.opacity(0.75))
+        .background(theme.common.tertiaryBackground.opacity(0.75))
         .clipShape(.rounded)
         .shadow(radius: 10)
         .padding(5)
@@ -106,6 +107,7 @@ struct LoginView: View {
 // MARK: - LoginForm
 
 struct LoginForm: View {
+  @Environment(\.theme) var theme
   @Bindable var viewModel: LoginViewModel
   @FocusState.Binding var loginFocused: Bool
   @FocusState.Binding var passwordFocused: Bool
@@ -125,12 +127,12 @@ struct LoginForm: View {
           .padding(10)
           .frame(maxWidth: .infinity)
           .focused($loginFocused)
-          .background(Color.theme.common.primaryBackground.opacity(0.75))
+          .background(theme.common.primaryBackground.opacity(0.75))
           .clipShape(.rounded)
           .overlay {
             RoundedRectangle()
               .stroke(
-                loginFocused ? Color.theme.common.primaryButton : Color.clear,
+                loginFocused ? theme.common.primaryButton : Color.clear,
                 lineWidth: 1
               )
               .fill(.clear)
@@ -143,13 +145,13 @@ struct LoginForm: View {
           .padding(10)
           .frame(maxWidth: .infinity)
           .focused($passwordFocused)
-          .background(Color.theme.common.primaryBackground.opacity(0.75))
+          .background(theme.common.primaryBackground.opacity(0.75))
           .clipShape(.rect(cornerSize: .init(10)))
           .overlay {
             RoundedRectangle()
               .stroke(
                 passwordFocused
-                  ? Color.theme.common.primaryButton : Color.clear,
+                  ? theme.common.primaryButton : Color.clear,
                 lineWidth: 1
               )
               .fill(.clear)
@@ -165,6 +167,7 @@ struct LoginForm: View {
 }
 
 private struct ForgotPasswordButton: View {
+  @Environment(\.theme) var theme
   @Bindable var viewModel: LoginViewModel
 
   var body: some View {
@@ -176,7 +179,7 @@ private struct ForgotPasswordButton: View {
       Text("Forgot your password?")
     }
     .buttonStyle(.borderless)
-    .foregroundStyle(Color.theme.common.hyperlink)
+    .foregroundStyle(theme.common.hyperlink)
     .disabled(viewModel.login.isEmpty)
     .onHover {
       viewModel.forgotPasswordPopover = viewModel.login.isEmpty ? $0 : false
@@ -194,6 +197,7 @@ private struct ForgotPasswordButton: View {
 }
 
 private struct LoginButton: View {
+  @Environment(\.theme) var theme
   @Bindable var viewModel: LoginViewModel
 
   var body: some View {
@@ -205,7 +209,7 @@ private struct LoginButton: View {
       Text("Log In")
         .frame(maxWidth: .infinity)
         .padding(10)
-        .background(Color.theme.common.primaryButton)
+        .background(theme.common.primaryButton)
         .clipShape(.rounded)
         .font(.title3)
     }

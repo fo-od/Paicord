@@ -10,6 +10,7 @@ import PaicordLib
 import SwiftUI
 
 struct MFASheet: View {
+  @Environment(\.theme) var theme
   let verificationData: MFAVerificationData
   let onToken: (MFAResponse) -> Void
 
@@ -35,7 +36,7 @@ struct MFASheet: View {
                 userFriendlyName(for: method.type)
                   .frame(maxWidth: .infinity)
                   .padding(10)
-                  .background(Color.theme.common.primaryButton)
+                  .background(theme.common.primaryButton)
                   .clipShape(.rounded)
                   .font(.title3)
               }
@@ -62,7 +63,7 @@ struct MFASheet: View {
     }
     .padding(.top, 15)
     .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .background(Color.theme.common.primaryBackground)
+    .background(theme.common.primaryBackground)
     .overlay(alignment: .topLeading) {
       if chosenMethod != nil {
         Button {
@@ -72,7 +73,7 @@ struct MFASheet: View {
           // chevron left
           Image(systemName: "chevron.left")
             .padding(5)
-            .background(Color.theme.common.primaryButtonBackground)
+            .background(theme.common.primaryButtonBackground)
             .clipShape(.circle)
         }
         .buttonStyle(.borderless)
@@ -149,6 +150,7 @@ struct MFASheet: View {
 }
 
 struct SixDigitInput: View {
+  @Environment(\.theme) var theme
   // check if view was disabled with environment values
   @Environment(\.isEnabled) var enabled
 
@@ -166,7 +168,7 @@ struct SixDigitInput: View {
             .stroke(
               (textfield && enabled)
                 ? (character.isEmpty && !prevCharacter.isEmpty
-                  ? Color.theme.common.hyperlink : .gray) : .gray,
+                  ? theme.common.hyperlink : .gray) : .gray,
               lineWidth: 1
             )
             .frame(width: 40, height: 50)
@@ -186,7 +188,7 @@ struct SixDigitInput: View {
     .onAppear {
       textfield = true
     }
-    .background(Color.theme.common.primaryBackground.opacity(0.001))
+    .background(theme.common.primaryBackground.opacity(0.001))
     .overlay(
       TextField("", text: $input)
         .textFieldStyle(.plain)

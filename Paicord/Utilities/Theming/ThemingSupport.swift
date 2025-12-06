@@ -16,8 +16,8 @@ import SwiftUIX
   import UIKit
 #endif
 
-extension Color {
-  static let theme = Theming.shared.currentTheme
+extension EnvironmentValues {
+  @Entry var theme: Theming.Theme = Theming.shared.currentTheme
 }
 
 // A representation of an image that can be encoded and decoded across platforms.
@@ -81,7 +81,7 @@ struct PlatformImageRepresentation: Codable, Hashable, Equatable, Sendable {
         )
       }
       try container.encode(imageDataLight, forKey: .light)
-      guard let uiImageDark = self.light as? UIImage,
+      guard let uiImageDark = self.dark as? UIImage,
         let imageDataDark = uiImageDark.pngData()
       else {
         throw EncodingError.invalidValue(
@@ -238,7 +238,10 @@ extension Color: @retroactive Codable {
 extension AppKitOrUIKitColor {
   func resolvedColor(with colorScheme: ColorScheme) -> AppKitOrUIKitColor {
     #if os(iOS) || os(tvOS) || os(watchOS)
-    .init(cgColor: self.resolvedColor(with: .init(userInterfaceStyle: .init(colorScheme))).cgColor)
+      let uiStyle: UIUserInterfaceStyle =
+        (colorScheme == .dark) ? .dark : .light
+      let traits = UITraitCollection(userInterfaceStyle: uiStyle)
+      return self.resolvedColor(with: traits)
     #elseif os(macOS)
       let appearanceName: NSAppearance.Name = {
         switch colorScheme {
@@ -338,7 +341,7 @@ extension ColorScheme: @retroactive Codable {
       self = .light
     }
   }
-  
+
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     switch self {

@@ -24,9 +24,18 @@ class Theming {
     }
   }
 
-  @ObservationIgnored
-  @AppStorage("Paicord.Theming.CurrentThemeID")
-  var currentThemeID: String = "Paicord.Auto"
+  // defaults to Paicord.Auto
+  var currentThemeID: String = UserDefaults.standard.string(forKey: "Paicord.Theming.CurrentThemeID") ?? "Paicord.Auto" {
+    didSet {
+      UserDefaults.standard.set(
+        currentThemeID,
+        forKey: "Paicord.Theming.CurrentThemeID"
+      )
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        self.setupAppearance()
+      }
+    }
+  }
 
   var currentTheme: Theme {
     themes.first(where: { $0.id == currentThemeID }) ?? Theming.defaultThemes[0]
@@ -35,11 +44,12 @@ class Theming {
   private init() {
     self.loadedThemes = []
     load()
-    setupAppearance()
+    setupAppearance(observation: true)
   }
 
-  func setupAppearance() {
+  func setupAppearance(observation: Bool = false) {
     #if canImport(UIKit)
+    if observation {
       NotificationCenter.default.addObserver(
         forName: UIApplication.didBecomeActiveNotification,
         object: nil,
@@ -53,6 +63,15 @@ class Theming {
           )
         }
       }
+    } else {
+      // update appearance
+      UIApplication.shared.windows.forEach { window in
+        // set accent color
+        window.tintColor = AppKitOrUIKitColor(
+          self.currentTheme.common.accent
+        )
+      }
+    }
     #endif
   }
 

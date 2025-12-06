@@ -114,6 +114,7 @@ extension View {
 
 #Preview {
   struct PreviewWrapper: View {
+    @Environment(\.theme) var theme
     @State var current: Bool = true
     var body: some View {
       SlideoverDoubleView(swap: $current) {
@@ -121,7 +122,7 @@ extension View {
           .font(.largeTitle)
           .foregroundColor(.white)
           .frame(maxWidth: .infinity, maxHeight: .infinity)
-          .background(Color.theme.common.primaryBackground)
+          .background(theme.common.primaryBackground)
       } secondary: {
         Text("im 2")
           .font(.largeTitle)

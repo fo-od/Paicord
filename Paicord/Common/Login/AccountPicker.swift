@@ -10,6 +10,7 @@ import PaicordLib
 import SwiftUI
 
 struct AccountPicker: View {
+  @Environment(\.theme) var theme
   let accounts: [TokenStore.AccountData]
   let onSelect: (UserSnowflake) -> Void
   let onAdd: () -> Void
@@ -36,7 +37,7 @@ struct AccountPicker: View {
                 }
                 .padding(10)
                 .frame(maxWidth: .infinity)
-                .background(.theme.common.primaryButtonBackground)
+                .background(theme.common.primaryButtonBackground)
                 .clipShape(.rounded)
               }
               .buttonStyle(.borderless)
@@ -53,7 +54,7 @@ struct AccountPicker: View {
           }
           .frame(maxWidth: .infinity)
           .padding(10)
-          .background(Color.theme.common.primaryButton)
+          .background(theme.common.primaryButton)
           .clipShape(.rounded)
         }
         .buttonStyle(.borderless)

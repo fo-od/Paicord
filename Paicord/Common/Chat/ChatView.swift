@@ -17,6 +17,7 @@ struct ChatView: View {
   @Environment(\.appState) var appState
   @Environment(\.accessibilityReduceMotion) var accessibilityReduceMotion
   @Environment(\.userInterfaceIdiom) var idiom
+  @Environment(\.theme) var theme
 
   @ViewStorage private var isNearBottom = true  // used to track if we are near the bottom, if so scroll.
   @ViewStorage private var pendingScrollWorkItem: DispatchWorkItem?
@@ -119,7 +120,7 @@ struct ChatView: View {
         InputBar(vm: vm)
       }
     }
-    .background(Color.theme.common.secondaryBackground)
+    .background(theme.common.secondaryBackground)
     .toolbar {
       ToolbarItem(placement: .navigation) {
         ChannelHeader(vm: vm)

@@ -15,6 +15,7 @@ struct LargeBaseplate: View {
   @Environment(\.gateway) var gw
   @Environment(\.appState) var appState
   @AppStorage("Paicord.ShowingMembersSidebar") var showingInspector = true
+  @Environment(\.theme) var theme
 
   @State var currentGuildStore: GuildStore? = nil
   @State var currentChannelStore: ChannelStore? = nil
@@ -78,7 +79,7 @@ struct LargeBaseplate: View {
           } label: {
             Label("Toggle Sidebar", systemImage: "sidebar.left")
           }
-          .tint(Color.theme.common.tertiaryButton)
+          .tint(theme.common.tertiaryButton)
         }
       }
     }
