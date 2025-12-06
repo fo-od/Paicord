@@ -24,5 +24,17 @@ struct PaicordCommands: Commands {
         }
       }
     }
+    // add reload button to the system's View menu
+    CommandGroup(after: .toolbar) {
+      Button("Reload") {
+        Task {
+          await gatewayStore.disconnectIfNeeded()
+          gatewayStore.resetStores()
+          await gatewayStore.connectIfNeeded()
+        }
+      }
+      .keyboardShortcut("r", modifiers: [.command, .shift])
+      .disabled(gatewayStore.state != .connected)
+    }
   }
 }

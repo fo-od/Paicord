@@ -9,6 +9,7 @@
 import Foundation
 import KeychainAccess
 import PaicordLib
+import Algorithms
 
 @Observable
 final class TokenStore {
@@ -114,14 +115,16 @@ final class TokenStore {
   private static func load() -> [AccountData] {
     let data = (try? keychain.getData(accountDataKey)) ?? Data()
     return
-      (try? DiscordGlobalConfiguration.decoder.decode(
+      Array(((try? DiscordGlobalConfiguration.decoder.decode(
         [AccountData].self,
         from: data
-      )) ?? []
+      )) ?? []).uniqued(on: \.user.id))
   }
 
   private static func save(_ data: [AccountData]) {
-    guard let encoded = try? DiscordGlobalConfiguration.encoder.encode(data)
+    // dedupe via id
+    let dedupedData = Array(data.uniqued(on: \.user.id))
+    guard let encoded = try? DiscordGlobalConfiguration.encoder.encode(dedupedData)
     else { return }
     try? keychain.set(encoded, key: accountDataKey)
   }

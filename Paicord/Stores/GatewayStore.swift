@@ -236,6 +236,7 @@ final class GatewayStore {
     }
     print("[GatewayStore] Reconnected, guild subscriptions invalidated.")
     self.subscribedGuilds = []
+    // get all active window states, and get their selected guilds to resubscribe to guilds that are open
     PaicordAppState.instances.compactMap(\.value.selectedGuild).forEach { guildId in
       _ = getGuildStore(for: guildId)
     }
