@@ -25,16 +25,9 @@ class ChannelStore: DiscordDataStore {
   var channel: DiscordChannel?
   var messages: OrderedDictionary<MessageSnowflake, DiscordChannel.Message> =
     [:]
-  var reactions: [MessageSnowflake: Reactions] = [:]
-  var burstReactions: [MessageSnowflake: Reactions] = [:]
-  // number of reactions per emoji per message, since message fetch wont return users
-  // as there could be thousands.
-  var buffReactions: [MessageSnowflake: BuffReactions] = [:]
-  var buffBurstReactions: [MessageSnowflake: BuffReactions] = [:]
-  
-  typealias Reactions = OrderedDictionary<Emoji, Set<UserSnowflake>>
-  typealias BuffReactions = OrderedDictionary<Emoji, Int>
-  
+
+  var reactions: [MessageSnowflake: OrderedDictionary<Emoji, Reaction>] = [:]
+
   var typingTimeoutTokens: [UserSnowflake: UUID] = [:]
 
   // MARK: - State Properties
@@ -65,7 +58,7 @@ class ChannelStore: DiscordDataStore {
           object: ["channelId": channelId]
         )
       }
-      
+
       do {
         try await self.fetchMessages()
       } catch {
@@ -159,7 +152,7 @@ class ChannelStore: DiscordDataStore {
         object: ["channelId": channelId]
       )
     }
-    
+
     let message = messageData.toMessage()
     // Insert the new message at the end of the ordered dictionary
     messages.updateValue(
@@ -172,7 +165,7 @@ class ChannelStore: DiscordDataStore {
     if let userId = message.author?.id {
       typingTimeoutTokens.removeValue(forKey: userId)
     }
-    
+
     // store user data in user cache
     for mention in messageData.mentions {
       let user = mention.toPartialUser()
@@ -190,7 +183,7 @@ class ChannelStore: DiscordDataStore {
     {
       guildStore.members[authorId, default: member].update(with: member)
     }
-    
+
     // Get unknown member data from mentions if we have a guild store
     if let guildStore {
       var unknownMemberIds: Set<UserSnowflake> = []
@@ -219,17 +212,17 @@ class ChannelStore: DiscordDataStore {
         object: ["channelId": channelId]
       )
     }
-    
+
     guard var msg = messages[partialMessage.id] else { return }
     msg.update(with: partialMessage)
     messages.updateValue(msg, forKey: msg.id)
-    
+
     // store user data in user cache
     for mention in partialMessage.mentions ?? [] {
       let user = mention.toPartialUser()
       gateway?.user.users[user.id, default: user].update(with: user)
     }
-    
+
     // check for unknown member data from mentions if we have a guild store
     if let guildStore {
       var unknownMemberIds: Set<UserSnowflake> = []
@@ -269,62 +262,87 @@ class ChannelStore: DiscordDataStore {
         object: ["channelId": channelId]
       )
     }
-    
+
     if let member = reactionAdd.member?.toPartialMember(), let guildStore,
       let userId = member.user?.id
     {
       // Update guild member info
       guildStore.members[userId, default: member].update(with: member)
     }
-    func addToReactionsList(
-      reactions: inout [MessageSnowflake: Reactions]
-    ) {
-      // reactions for message id, creating dict if needed, then set of users for emoji, creating set if needed, inserting user id.
-      reactions[reactionAdd.message_id, default: [:]][
-        reactionAdd.emoji,
-        default: []
-      ].insert(reactionAdd.user_id)
+    if let user = reactionAdd.member?.user?.toPartialUser(), let gateway {
+      // Update user info
+      gateway.user.users[user.id, default: user].update(with: user)
     }
-    if reactionAdd.burst == true {
-      addToReactionsList(reactions: &burstReactions)
+
+    // get the reaction struct for this message and emoji, or create a new one
+    guard let message = messages[reactionAdd.message_id] else { return }
+    if reactions[reactionAdd.message_id, default: [:]][reactionAdd.emoji] == nil
+    {
+      // make new object
+      let reaction = Reaction(
+        message: message,
+        messageReactionData: nil,
+        gatewayReactionAdd: reactionAdd
+      )
+      reactions[reactionAdd.message_id, default: [:]][reactionAdd.emoji] =
+        reaction
     } else {
-      addToReactionsList(reactions: &reactions)
+      // add data to existing object
+      reactions[reactionAdd.message_id, default: [:]][reactionAdd.emoji]?
+        .addReactionData(event: reactionAdd)
     }
   }
+
   private func handleMessageReactionAddMany(
     _ reactionAddMany: Gateway.MessageReactionAddMany
   ) {
-    // reactions for message id, creating dict if needed, then set of users for emoji, creating set if needed, inserting user ids.
-    for reaction in reactionAddMany.reactions {
-      for user in reaction.users {
-        reactions[reactionAddMany.message_id, default: [:]][
-          reaction.emoji,
-          default: []
-        ].insert(user)
+    // we may have to discard this if no matching reactions exist. we can't init new reactions with this data
+    reactions[reactionAddMany.message_id, default: [:]].keys.forEach { emoji in
+      if var reaction = reactions[reactionAddMany.message_id, default: [:]][
+        emoji
+      ] {
+        reaction.addReactionData(
+          event: reactionAddMany,
+          reactions: reactionAddMany.reactions
+        )
+        reactions[reactionAddMany.message_id, default: [:]][emoji] = reaction
       }
     }
   }
   private func handleMessageReactionRemove(
     _ reactionRemove: Gateway.MessageReactionRemove
   ) {
-    reactions[reactionRemove.message_id]?[reactionRemove.emoji]?.remove(
-      reactionRemove.user_id
-    )
-    pruneReactions()
+    // get the reaction struct for this message and emoji, if it exists
+    // also if the count is 0, and selfReacted is false, we can remove the reaction entirely
+    if var reaction = reactions[reactionRemove.message_id, default: [:]][
+      reactionRemove.emoji
+    ] {
+      reaction.removeReactionData(event: reactionRemove)
+      // check if we should remove the reaction entirely
+      if reaction.count == 0 && !reaction.selfReacted {
+        reactions[reactionRemove.message_id, default: [:]].removeValue(
+          forKey: reactionRemove.emoji
+        )
+      } else {
+        reactions[reactionRemove.message_id, default: [:]][
+          reactionRemove.emoji
+        ] = reaction
+      }
+    }
   }
   private func handleMessageReactionRemoveEmoji(
     _ reactionRemoveEmoji: Gateway.MessageReactionRemoveEmoji
   ) {
-    reactions[reactionRemoveEmoji.message_id]?.removeValue(
+    // remove the reaction entry for this emoji on this message
+    reactions[reactionRemoveEmoji.message_id, default: [:]].removeValue(
       forKey: reactionRemoveEmoji.emoji
     )
-    pruneReactions()
   }
   private func handleMessageReactionRemoveAll(
     _ removeAll: Gateway.MessageReactionRemoveAll
   ) {
+    // remove all reactions for this message
     reactions.removeValue(forKey: removeAll.message_id)
-    pruneReactions()
   }
 
   private func handleTypingStart(_ typing: Gateway.TypingStart) {
@@ -355,7 +373,7 @@ class ChannelStore: DiscordDataStore {
   }
 
   // MARK: - Helpers
-  
+
   func checkUserBlocked(_ userId: UserSnowflake) -> Bool {
     if let relationship = gateway?.user.relationships[userId] {
       if relationship.type == .blocked || relationship.user_ignored {
@@ -363,28 +381,6 @@ class ChannelStore: DiscordDataStore {
       }
     }
     return false
-  }
-  
-  /// Look at reactions and remove any with zero users.
-  func pruneReactions() {
-    func prune(reactions: inout [MessageSnowflake: Reactions]) {
-      for (messageId, emojiDict) in reactions {
-        var prunedEmojiDict = emojiDict
-        for (emoji, userSet) in emojiDict {
-          if userSet.isEmpty {
-            prunedEmojiDict.removeValue(forKey: emoji)
-          }
-        }
-        if prunedEmojiDict.isEmpty {
-          reactions.removeValue(forKey: messageId)
-        } else {
-          reactions[messageId] = prunedEmojiDict
-        }
-      }
-    }
-    
-    prune(reactions: &reactions)
-    prune(reactions: &burstReactions)
   }
 
   /// Fetches messages.
@@ -404,39 +400,29 @@ class ChannelStore: DiscordDataStore {
       // ensure request was successful
       try res.guardSuccess()
       let messages = try res.decode()
-      // theres a chance new messages exist already because the gateway already started delivering them
-      // add the new messages to the store, before the current ones
-//      for message in messages.reversed() {
-//        self.messages[message.id] = message
-//        self.messages.updateValue(
-//          message,
-//          forKey: message.id,
-//          insertingAt: 0
-//        )
-//      }
-      
+
       for message in messages.reversed() {
-//        self.messages[message.id] = message // new additions are frontmost in the ordered dict
         self.messages.updateValue(
           message,
           forKey: message.id,
           insertingAt: self.messages.count
         )
       }
-      
-      #warning("handle reactions better")
-      // populate buffreactions etc
-//      for message in messages {
-//        if let reactionList = message.reactions {
-//          for reaction in reactionList {
-//            if reaction
-//            self.buffReactions[message.id, default: [:]][
-//              reaction.emoji
-//            ] = reaction.count
-//          }
-//        }
-//      }
-      
+
+      // populate reactions data
+      for message in messages {
+        guard let messageReactions = message.reactions else { continue }
+        for messageReaction in messageReactions {
+          let reaction = Reaction(
+            message: message,
+            messageReactionData: messageReaction,
+            gatewayReactionAdd: nil
+          )
+          self.reactions[message.id, default: [:]][messageReaction.emoji] =
+            reaction
+        }
+      }
+
       // cache user data from mentions in user cache
       for message in messages {
         for mention in message.mentions {
@@ -444,14 +430,18 @@ class ChannelStore: DiscordDataStore {
           self.gateway?.user.users[user.id, default: user].update(with: user)
         }
       }
-      
+
       // lastly request members if member data for any author is missing, also mentions
       if let guildStore {
-        let unknownMembers = Set(messages.map { message in
-          ([message.author?.id] + message.mentions.map(\.id)).compactMap({ $0 })
-        }.flatMap({ $0 }).filter({
-          guildStore.members[$0] == nil
-        }))
+        let unknownMembers = Set(
+          messages.map { message in
+            ([message.author?.id] + message.mentions.map(\.id)).compactMap({
+              $0
+            })
+          }.flatMap({ $0 }).filter({
+            guildStore.members[$0] == nil
+          })
+        )
         if !unknownMembers.isEmpty {
           print(
             "[ChannelStore] Requesting \(unknownMembers.count) unknown members in guild \(guildStore.guildId.rawValue)"
@@ -476,5 +466,216 @@ class ChannelStore: DiscordDataStore {
       return nil
     }
     return messages.elements[safe: index - 1]?.value
+  }
+}
+
+extension ChannelStore {
+  /// This struct represents a reaction on a message, combining data from various sources.
+  struct Reaction: Identifiable, Hashable {
+    var id: String {
+      emoji.id?.rawValue ?? emoji.name ?? "idk man"
+    }
+
+    // the data of the message this reaction is for
+    private var message: DiscordChannel.Message
+    // oneshot data from rest api message fetch, contains only counts and emoji data
+    private var messageReactionData: DiscordChannel.Message.Reaction?
+    // oneshot data from gateway reaction add event, contains only emoji and user id data for one person
+    private var gatewayReactionAddData: Gateway.MessageReactionAdd?
+    // array of known user ids to have reacted with this reaction by listing users via api or gateway events
+    private var userIds: Set<UserSnowflake> = []
+
+    /// The initialiser for when a new reaction was made on a message, or when constructing from rest api data.
+    /// Note that either messageReactionData or gatewayReactionAdd must be provided and are mutually exclusive.
+    /// - Parameters:
+    ///   - message: Underlying message data for validating incoming reaction data.
+    ///   - messageReactionData: Message reaction data if initialising from rest api data.
+    ///   - gatewayReactionAdd: Gateway reaction add data if initialising from a gateway event.
+    init(
+      message: DiscordChannel.Message,
+      messageReactionData: DiscordChannel.Message.Reaction?,
+      gatewayReactionAdd: Gateway.MessageReactionAdd?
+    ) {
+      self.message = message
+      self.messageReactionData = messageReactionData
+      self.gatewayReactionAddData = gatewayReactionAdd
+      if let messageReactionData {
+        // set up internal state
+        self.emoji = messageReactionData.emoji
+        if messageReactionData.count_details.burst != 0 {
+          self.isBurst = true
+        } else {
+          self.isBurst = false
+        }
+        if messageReactionData.me == true
+          || messageReactionData.me_burst == true
+        {
+          if let id = GatewayStore.shared.user.currentUser?.id {
+            self.userIds.insert(id)
+          }
+          self.selfReacted = true
+        } else {
+          if let id = GatewayStore.shared.user.currentUser?.id {
+            self.userIds.insert(id)
+          }
+          self.selfReacted = false
+        }
+        return
+      } else if let gatewayReactionAddData {
+        // set up internal state
+        self.emoji = gatewayReactionAddData.emoji
+        self.isBurst = gatewayReactionAddData.type == .burst
+        self.selfReacted =
+          gatewayReactionAddData.user_id
+          == GatewayStore.shared.user.currentUser?.id
+        // add the user id to known user ids
+        self.userIds.insert(gatewayReactionAddData.user_id)
+        return
+      }
+      fatalError(
+        "[ChannelStore.Reaction] Must init with either messageReactionData or gatewayReactionAdd data. Neither was provided."
+      )
+    }
+
+    /// The emoji associated with this reaction, note that you can only use one emoji per reaction, either burst or normal.
+    /// You can't use the same emoji for burst and then react with normal as well. Discord won't allow it.
+    var emoji: Emoji
+    /// If this is a burst reaction
+    var isBurst: Bool
+    var burstColors: [DiscordColor] {
+      messageReactionData?.burst_colors ?? gatewayReactionAddData?.burst_colors
+        ?? []
+    }
+    /// If the current user has reacted
+    var selfReacted: Bool
+
+    /// This computes the total count of users who have reacted with this reaction, merging data from rest api and known user ids.
+    var count: Int {
+      var total = 0
+      // count from rest api message list data needs to be merged with new counts appropriately.
+      // if we fetch user ids via pagination, the count is the messagesReactionData count - userIds.count + userIds.count kinda,
+      // basically we're merging the two sources of truth here. i separate own reacts to be added by ui later based on selfReacted.
+      // if we get gateway data for reaction adding, its always additive.
+      // if we get gateway data for reaction removing, its always subtractive.
+
+      // we consider either burst counts or counts depending on the reaction type.
+
+      if isBurst {
+        total += messageReactionData?.count_details.burst ?? 0
+        if messageReactionData?.me_burst == true {
+          total -= 1
+        }
+      } else {
+        total += messageReactionData?.count_details.normal ?? 0
+        if messageReactionData?.me == true {
+          total -= 1
+        }
+      }
+
+      if selfReacted, !userIds.contains(GatewayStore.shared.user.currentUser?.id ?? .init("0")) {
+        total -= 1  // let our ui handle showing self reacted separately
+      }
+
+      if let selfId = GatewayStore.shared.user.currentUser?.id, userIds.contains(selfId) {
+        total += userIds.count - 1
+      } else {
+        total += userIds.count
+      }
+
+      return total
+    }
+
+    // the user to fetch after while paginating
+    private var afterPoint: UserSnowflake?
+    private var hasMoreUsers = true
+    mutating func addReactionData(
+      client: DefaultDiscordClient,
+      after: UserSnowflake?,
+      limit: Int = 50
+    ) async -> [DiscordUser]? {
+      let res = try? await client.listMessageReactionsByEmoji(
+        channelId: message.channel_id,
+        messageId: message.id,
+        emoji: try! DiscordModels.Reaction.init(emoji: emoji),  // unlikely to crash when converting gateway data
+        type: isBurst ? .burst : .normal,
+        after: afterPoint,
+        limit: limit
+      )
+      guard let reactors = try? res?.decode() else { return nil }
+      self.userIds.formUnion(reactors.map(\.id))
+      afterPoint = reactors.last?.id
+      if reactors.count < limit {
+        hasMoreUsers = false
+      }
+
+      return reactors
+    }
+    mutating func addReactionData(
+      event: Gateway.MessageReactionAddMany,
+      reactions: [Gateway.MessageReactionAddMany.DebouncedReactions]
+    ) {
+      // ensure the reaction data does belong to this reaction structure
+      guard event.channel_id == message.channel_id,
+        event.message_id == message.id
+      else { return }
+
+      for react in reactions {
+        guard react.emoji == self.emoji else { continue }  // safety check, but shouldn't be needed as calling code will filter appropriately
+        for userId in react.users {
+          self.userIds.insert(userId)
+        }
+        if react.users.contains(
+          GatewayStore.shared.user.currentUser?.id ?? UserSnowflake("0")
+        ) {
+          self.selfReacted = true
+        }
+      }
+    }
+    mutating func addReactionData(event: Gateway.MessageReactionAdd) {
+      // ensure the reaction data does belong to this reaction structure
+      guard event.channel_id == message.channel_id,
+        event.message_id == message.id,
+        event.emoji == self.emoji
+      else { return }
+
+      self.userIds.insert(event.user_id)
+      if event.user_id
+        == GatewayStore.shared.user.currentUser?.id
+      {
+        self.selfReacted = true
+      }
+    }
+    mutating func removeReactionData(event: Gateway.MessageReactionRemove) {
+      // ensure the reaction data does belong to this reaction structure
+      guard event.channel_id == message.channel_id,
+        event.message_id == message.id,
+        event.emoji == self.emoji
+      else { return }
+      // check if we have this user id already, else just remove a count from rest api data as we have no record of this user reacting
+      if self.userIds.contains(event.user_id) {
+        self.userIds.remove(event.user_id)
+      } else {
+        // we have no record of this user reacting, so we just reduce the count from rest api data
+        if isBurst {
+          if let currentCount = messageReactionData?.count_details.burst,
+            currentCount > 0
+          {
+            messageReactionData?.count_details.burst = currentCount - 1
+          }
+        } else {
+          if let currentCount = messageReactionData?.count_details.normal,
+            currentCount > 0
+          {
+            messageReactionData?.count_details.normal = currentCount - 1
+          }
+        }
+      }
+      
+      if event.user_id
+        == GatewayStore.shared.user.currentUser?.id
+      {
+        self.selfReacted = false
+      }
+    }
   }
 }

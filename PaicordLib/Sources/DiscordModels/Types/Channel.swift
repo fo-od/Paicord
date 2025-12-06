@@ -445,7 +445,7 @@ extension DiscordChannel {
 			public var me: Bool
 			public var me_burst: Bool
 			public var emoji: Emoji
-			public var burst_colors: [DiscordColor]
+			public var burst_colors: [DiscordColor]?
 
 			enum CodingKeys: String, CodingKey {
 				case count
@@ -496,10 +496,10 @@ extension DiscordChannel {
 				self.me = try container.decode(Bool.self, forKey: .me)
 				self.me_burst = try container.decode(Bool.self, forKey: .me_burst)
 				self.emoji = try container.decode(Emoji.self, forKey: .emoji)
-				self.burst_colors = try container.decode(
+				self.burst_colors = try container.decodeIfPresent(
 					[String].self,
 					forKey: .burst_colors
-				).compactMap {
+				)?.compactMap {
 					DiscordColor(hex: $0)
 				}
 			}
@@ -512,7 +512,7 @@ extension DiscordChannel {
 				try container.encode(self.me_burst, forKey: .me_burst)
 				try container.encode(self.emoji, forKey: .emoji)
 				try container.encode(
-					self.burst_colors.map { $0.asHex() },
+					self.burst_colors?.map { $0.asHex() },
 					forKey: .burst_colors
 				)
 			}

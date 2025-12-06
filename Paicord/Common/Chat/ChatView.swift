@@ -69,9 +69,9 @@ struct ChatView: View {
                 .rotationEffect(.degrees(-180))
             #endif
           }
-//#if os(macOS)
-//  .safeAreaPadding(.top, 22)
-//#endif
+          //#if os(macOS)
+          //  .safeAreaPadding(.top, 22)
+          //#endif
           .scrollTargetLayout()
         }
         .maxHeight(.infinity)
@@ -88,14 +88,23 @@ struct ChatView: View {
           .onAppear {
             NotificationCenter.default.post(
               name: .chatViewShouldScrollToBottom,
-              object: ["channelId": self.vm.channelId]
+              object: ["channelId": self.vm.channelId, "immediate": true]
             )
           }
           .onChange(of: vm.channelId) {
             NotificationCenter.default.post(
               name: .chatViewShouldScrollToBottom,
-              object: ["channelId": vm.channelId]
+              object: ["channelId": vm.channelId, "immediate": true]
             )
+          }
+          .onChange(of: vm.messages.count) { oldValue, newValue in
+            if oldValue == 0 && newValue > 0 {
+              // first load?
+              NotificationCenter.default.post(
+                name: .chatViewShouldScrollToBottom,
+                object: ["channelId": vm.channelId, "immediate": true]
+              )
+            }
           }
           .onReceive(
             NotificationCenter.default.publisher(
@@ -106,7 +115,9 @@ struct ChatView: View {
               let channelId = info["channelId"] as? ChannelSnowflake,
               channelId == vm.channelId
             else { return }
-            guard isNearBottom else { return }
+            guard (!isNearBottom) || (info["immediate"] as? Bool == true) else {
+              return
+            }
             scheduleScrollToBottom(
               proxy: proxy,
               lastID: vm.messages.values.last?.id
@@ -157,15 +168,12 @@ struct ChatView: View {
     guard let lastID else { return }
 
     let workItem = DispatchWorkItem { [proxy] in
-      // Use main queue to ensure layout is ready; small delay coalesces bursts
-      DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-        withAnimation(accessibilityReduceMotion ? .none : .default) {
-          proxy.scrollTo(lastID, anchor: .top)
-        }
-      }
+      //      withAnimation(accessibilityReduceMotion ? .none : .default) {
+      proxy.scrollTo(lastID, anchor: .top)
+      //      }
     }
     pendingScrollWorkItem = workItem
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.06, execute: workItem)
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: workItem)
   }
 
   @State var ackTask: Task<Void, Error>? = nil

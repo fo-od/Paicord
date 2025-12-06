@@ -1006,7 +1006,7 @@ extension Gateway {
   }
 
   /// https://discord.com/developers/docs/topics/gateway-events#message-reaction-add-message-reaction-add-event-fields
-  public struct MessageReactionAdd: Sendable, Codable {
+  public struct MessageReactionAdd: Sendable, Codable, Equatable, Hashable {
     public var type: ReactionKind
     public var user_id: UserSnowflake
     public var channel_id: ChannelSnowflake

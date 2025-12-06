@@ -9,44 +9,43 @@
 import PaicordLib
 import SDWebImageSwiftUI
 import SwiftUIX
+import Collections
 
 struct ReactionsView: View {
-  let reactions: ChannelStore.Reactions
-  let burstReactions: ChannelStore.Reactions
-  let buffReactions: ChannelStore.BuffReactions
-  let buffBurstReactions: ChannelStore.BuffReactions
+  let reactions: OrderedDictionary<Emoji, ChannelStore.Reaction>
 
   var body: some View {
     FlowLayout(spacing: 4) {
-      let emojiReactions = Array(reactions.keys)
-      let emojiBurstReactions = Array(burstReactions.keys)
-
-      ForEach(emojiReactions, id: \.id) { emoji in
-        Reaction(
-          emoji: emoji,
-          users: reactions[emoji] ?? [],
-          countBuff: buffReactions[emoji]
-        )
-      }
-      ForEach(emojiBurstReactions, id: \.id) { emoji in
-        Reaction(
-          emoji: emoji,
-          users: burstReactions[emoji] ?? [],
-          countBuff: buffBurstReactions[emoji]
-        )
+      ForEach(reactions.values.elements) { reaction in
+        Reaction(reaction: reaction)
       }
     }
   }
 
   struct Reaction: View {
-    let emoji: Emoji
-    let users: Set<UserSnowflake>
-    let countBuff: Int?
+    let reaction: ChannelStore.Reaction
     @Environment(\.gateway) var gw
+    @Environment(\.theme) var theme
 
     var body: some View {
-      let currentUser = gw.user.currentUser?.id
-      let currentUserReacted = users.contains(currentUser ?? UserSnowflake("0"))
+      let emoji = reaction.emoji
+      let currentUserReacted = reaction.selfReacted
+      let burstColorStroke = {
+        let burstcolor = reaction.burstColors.first?.asColor(ignoringZero: false)
+        if currentUserReacted {
+          return burstcolor?.opacity(0.4) ?? .primary.opacity(0.08)
+        } else {
+          return burstcolor?.opacity(0.15) ?? .primary.opacity(0.08)
+        }
+      }()
+      let burstColorBody = {
+        let burstcolor = reaction.burstColors.first?.asColor(ignoringZero: false)
+        if currentUserReacted {
+          return burstcolor ?? theme.common.primaryButton.opacity(0.2)
+        } else {
+          return burstcolor?.opacity(0.35) ?? .primary.opacity(0.08)
+        }
+      }()
       HStack {
         if let emojiURL = emojiURL(emoji: emoji.id, animated: emoji.animated) {
           WebImage(url: emojiURL) { phase in
@@ -64,19 +63,24 @@ struct ReactionsView: View {
           .padding(2)
         } else {
           Text(emoji.name ?? " ")
-            .font(.system(size: 36))
-            .minimumScaleFactor(0.001)
-            .frame(width: 18, height: 18)
+            .font(.title2)
+            .minimumScaleFactor(0.1)
+            .maxWidth(22)
+            .maxHeight(18)
             .padding(2)
+            .padding(.horizontal, -2)
         }
 
-        Text("\(users.count + (countBuff ?? 0))")
+        Text("\(reaction.count + (currentUserReacted ? 1 : 0))")
       }
       .padding(.horizontal, 5)
       .padding(.vertical, 2)
-      .background(.primary.opacity(0.08))
-      .background(.theme.common.primaryButton.opacity(currentUserReacted ? 0.35 : 0))
+      .background(burstColorBody)
+      .background(
+        theme.common.primaryButton.opacity(currentUserReacted ? 0.35 : 0)
+      )
       .clipShape(.rounded)
+      .border(.rounded, stroke: .init(burstColorStroke, lineWidth: 1.5))
     }
 
     func emojiURL(emoji id: EmojiSnowflake?, animated: Bool?) -> URL? {
@@ -89,4 +93,12 @@ struct ReactionsView: View {
       return nil
     }
   }
+}
+
+import Playgrounds
+#Playground {
+  let color1 = DiscordColor.init(value: 5009487)!
+  let color2 = DiscordColor.init(value: 11542584)!
+  
+  print(color1.asColor(ignoringZero: false), color2.asColor(ignoringZero: false))
 }

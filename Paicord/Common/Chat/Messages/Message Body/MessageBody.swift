@@ -66,25 +66,9 @@ extension MessageCell {
 
         // Reactions
         let reactions = channelStore.reactions[message.id, default: [:]]
-        let burstReactions = channelStore.burstReactions[
-          message.id,
-          default: [:]
-        ]
-        let buffReactions = channelStore.buffReactions[message.id, default: [:]]
-        let buffBurstReactions = channelStore.buffBurstReactions[
-          message.id,
-          default: [:]
-        ]
 
-        if !reactions.isEmpty || !burstReactions.isEmpty
-          || !buffReactions.isEmpty || !buffBurstReactions.isEmpty
-        {
-          ReactionsView(
-            reactions: reactions,
-            burstReactions: burstReactions,
-            buffReactions: buffReactions,
-            buffBurstReactions: buffBurstReactions
-          )
+        if !reactions.isEmpty {
+          ReactionsView(reactions: reactions)
         }
 
         if let msgSnapshot = message.partialMessageForSnapshot() {
