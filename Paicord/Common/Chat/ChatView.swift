@@ -37,12 +37,20 @@ struct ChatView: View {
               if messageAllowed(msg) {
                 MessageCell(for: msg, prior: prior, channel: vm)
                   .onAppear {
-                    guard msg == vm.messages.values.last else { return }
-                    self.isNearBottom = true
+                    // if the message is among the last 15 messages in the list, consider us near the bottom
+                    if let index = vm.messages.index(forKey: msg.id) {
+                      if index >= vm.messages.count - 15 {
+                        self.isNearBottom = true
+                      }
+                    }
                   }
                   .onDisappear {
-                    guard msg == vm.messages.values.last else { return }
-                    self.isNearBottom = false
+                    // if the message is among the last 15 messages in the list, consider us not near the bottom
+                    if let index = vm.messages.index(forKey: msg.id) {
+                      if index >= vm.messages.count - 15 {
+                        self.isNearBottom = false
+                      }
+                    }
                   }
               }
             }
@@ -70,10 +78,13 @@ struct ChatView: View {
         .onChange(of: vm.messages.count) { oldValue, newValue in
           if oldValue == 0 && newValue > 0 {
             // first load?
-            NotificationCenter.default.post(
-              name: .chatViewShouldScrollToBottom,
-              object: ["channelId": vm.channelId, "immediate": true]
-            )
+            // delay is to let messages render to full size properly before scrolling to bottom
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+              NotificationCenter.default.post(
+                name: .chatViewShouldScrollToBottom,
+                object: ["channelId": vm.channelId, "immediate": true]
+              )
+            }
           }
         }
         #if os(macOS)
