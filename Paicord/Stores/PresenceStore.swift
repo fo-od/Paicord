@@ -118,6 +118,7 @@ class PresenceStore: DiscordDataStore {
         .filter { $0.id != "all" }
         .filter { $0.id != currentSessionID }
 
+      
       if let session = otherSessions.first {
         self.currentClientStatus = session.status
         if let existingActivity = session.activities.first(where: {

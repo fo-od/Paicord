@@ -25,105 +25,83 @@ struct ChatView: View {
   init(vm: ChannelStore) { self.vm = vm }
 
   var body: some View {
-    #if os(macOS)
-      let orderedMessages = vm.messages.values.reversed()  // prep for flipping scrollview and then each message
-    #else
-      let orderedMessages = vm.messages.values
-    #endif
+    let orderedMessages = vm.messages.values
     VStack(spacing: 0) {
       ScrollViewReader { proxy in
         ScrollView {
           LazyVStack(alignment: .leading, spacing: 0) {
-            // if on ios or macos, you put certain elements first and last due to 180º rotation.
-            #if os(iOS)
-              PlaceholderMessageSet()
+            PlaceholderMessageSet()
 
-              ForEach(orderedMessages) { msg in
-                let prior = vm.getMessage(before: msg)
-                if messageAllowed(msg) {
-                  MessageCell(for: msg, prior: prior, channel: vm)
-                    .onAppear {
-                      guard msg == vm.messages.values.last else { return }
-                      self.isNearBottom = true
-                    }
-                    .onDisappear {
-                      guard msg == vm.messages.values.last else { return }
-                      self.isNearBottom = false
-                    }
-                }
+            ForEach(orderedMessages) { msg in
+              let prior = vm.getMessage(before: msg)
+              if messageAllowed(msg) {
+                MessageCell(for: msg, prior: prior, channel: vm)
+                  .onAppear {
+                    guard msg == vm.messages.values.last else { return }
+                    self.isNearBottom = true
+                  }
+                  .onDisappear {
+                    guard msg == vm.messages.values.last else { return }
+                    self.isNearBottom = false
+                  }
               }
+            }
 
             // message drain here
-            #endif
-
-            #if os(macOS)
-              ForEach(orderedMessages) { msg in
-                let prior = vm.getMessage(before: msg)
-                if messageAllowed(msg) {
-                  MessageCell(for: msg, prior: prior, channel: vm)
-                    .rotationEffect(.degrees(-180))
-                }
-              }
-
-              PlaceholderMessageSet()
-                .rotationEffect(.degrees(-180))
-            #endif
           }
-          //#if os(macOS)
-          //  .safeAreaPadding(.top, 22)
-          //#endif
           .scrollTargetLayout()
         }
         .maxHeight(.infinity)
-        #if os(iOS)
-          .bottomAnchored()
-          .safeAreaPadding(.bottom, 22)
-        #else
-          .safeAreaPadding(.top, 22)
-          .rotationEffect(.degrees(180))
-          .scrollIndicators(.hidden)
-        #endif
+        .safeAreaPadding(.bottom, 22)
+        .bottomAnchored()
         .scrollDismissesKeyboard(.interactively)
-        #if os(iOS)
-          .onAppear {
-            NotificationCenter.default.post(
-              name: .chatViewShouldScrollToBottom,
-              object: ["channelId": self.vm.channelId, "immediate": true]
-            )
-          }
-          .onChange(of: vm.channelId) {
+        .onAppear {
+          NotificationCenter.default.post(
+            name: .chatViewShouldScrollToBottom,
+            object: ["channelId": self.vm.channelId, "immediate": true]
+          )
+        }
+        .onChange(of: vm.channelId) {
+          NotificationCenter.default.post(
+            name: .chatViewShouldScrollToBottom,
+            object: ["channelId": vm.channelId, "immediate": true]
+          )
+        }
+        .onChange(of: vm.messages.count) { oldValue, newValue in
+          if oldValue == 0 && newValue > 0 {
+            // first load?
             NotificationCenter.default.post(
               name: .chatViewShouldScrollToBottom,
               object: ["channelId": vm.channelId, "immediate": true]
             )
           }
-          .onChange(of: vm.messages.count) { oldValue, newValue in
-            if oldValue == 0 && newValue > 0 {
-              // first load?
-              NotificationCenter.default.post(
-                name: .chatViewShouldScrollToBottom,
-                object: ["channelId": vm.channelId, "immediate": true]
-              )
-            }
-          }
-          .onReceive(
-            NotificationCenter.default.publisher(
-              for: .chatViewShouldScrollToBottom
-            )
-          ) { object in
-            guard let info = object.object as? [String: Any],
-              let channelId = info["channelId"] as? ChannelSnowflake,
-              channelId == vm.channelId
-            else { return }
-            guard (!isNearBottom) || (info["immediate"] as? Bool == true) else {
-              return
-            }
-            scheduleScrollToBottom(
-              proxy: proxy,
-              lastID: vm.messages.values.last?.id
-            )
-          }
+        }
+        #if os(macOS)
+        // when new messages come in, try scroll to bottom
+        .onChange(of: vm.messages) {
+          NotificationCenter.default.post(
+            name: .chatViewShouldScrollToBottom,
+            object: ["channelId": vm.channelId]
+          )
+        }
         #endif
+        .onReceive(
+          NotificationCenter.default.publisher(
+            for: .chatViewShouldScrollToBottom
+          )
+        ) { object in
+          guard let info = object.object as? [String: Any],
+            let channelId = info["channelId"] as? ChannelSnowflake,
+            channelId == vm.channelId
+          else { return }
+          guard isNearBottom || (info["immediate"] as? Bool == true) else {
+            return
+          }
+          scheduleScrollToBottom(
+            proxy: proxy,
+            lastID: vm.messages.values.last?.id
+          )
+        }
       }
     }
     .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -173,7 +151,7 @@ struct ChatView: View {
       //      }
     }
     pendingScrollWorkItem = workItem
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: workItem)
+    DispatchQueue.main.asyncAfter(deadline: .now(), execute: workItem)
   }
 
   @State var ackTask: Task<Void, Error>? = nil

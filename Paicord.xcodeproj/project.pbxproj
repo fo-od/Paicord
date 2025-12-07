@@ -319,9 +319,9 @@
 				AA2F51C22EE4ABCA00F18DB7 /* Storage.swift */,
 				AA078FC52EC80D2100EDFFA8 /* LocalConsoleManager */,
 				AA409ABD2EC74F3100848045 /* Theming */,
-				AA7B38F12EB37F9500CA4A3C /* PermsHelper.swift */,
 				AABED5A72E7FF970005BDD63 /* PaicordLib++ */,
 				57A4E7132E6B44BC00470131 /* Extensions */,
+				AA7B38F12EB37F9500CA4A3C /* PermsHelper.swift */,
 				AAB50A5D2E9B21AE0048E8B0 /* Thumbhash.swift */,
 			);
 			path = Utilities;
