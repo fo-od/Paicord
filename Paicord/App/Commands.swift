@@ -12,6 +12,7 @@ import SwiftUI
 
 struct PaicordCommands: Commands {
   @Environment(\.gateway) var gatewayStore
+  @Environment(\.appState) var appState
 
   var body: some Commands {
     CommandMenu("Account") {
@@ -30,6 +31,7 @@ struct PaicordCommands: Commands {
         Task {
           await gatewayStore.disconnectIfNeeded()
           gatewayStore.resetStores()
+          PaicordAppState.instances.values.forEach { $0.resetStore() }
           await gatewayStore.connectIfNeeded()
         }
       }

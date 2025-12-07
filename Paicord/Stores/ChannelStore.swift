@@ -31,8 +31,16 @@ class ChannelStore: DiscordDataStore {
   var typingTimeoutTokens: [UserSnowflake: UUID] = [:]
 
   // MARK: - State Properties
-  var isLoadingMessages = false
+  /// Ensures further pagination is possible unless we're at the start of the channel.
   var hasMoreHistory = true
+
+  /// The task that is currently loading messages, if any.
+  var loadingMessagesTask: Task<Void, Error>?
+
+  /// Whether the latest messages are in memory. If we're scrolling far back into history, this will be false.
+  /// Scrolling back to the latest messages will require a fetch, setting this to true and unloading older messages.
+  var hasLatestMessages = true
+
   var lastReadMessageId: MessageSnowflake?
 
   init(
@@ -45,12 +53,16 @@ class ChannelStore: DiscordDataStore {
     self.guildStore = guildStore
   }
 
+  static let LoadedMessageLimit = 200
+
   // MARK: - Protocol Methods
 
   func setupEventHandling() {
     guard let gateway = gateway?.gateway else { return }
-    Task { @MainActor in
+    // not needed anymore, handled by ui
+    self.loadingMessagesTask = Task { @MainActor in
       // ig also fetch latest messages too
+      guard hasPermission(.readMessageHistory) else { return }
 
       defer {
         NotificationCenter.default.post(
@@ -64,6 +76,8 @@ class ChannelStore: DiscordDataStore {
       } catch {
         PaicordAppState.instances.first?.value.error = error
       }
+      self.hasLatestMessages = true
+      self.loadingMessagesTask = nil
     }
     eventTask = Task { @MainActor in
       for await event in await gateway.events {
@@ -153,13 +167,25 @@ class ChannelStore: DiscordDataStore {
       )
     }
 
+    defer {
+      // trim excess old messages
+      if hasLatestMessages && messages.count > ChannelStore.LoadedMessageLimit {
+        messages.removeFirst(
+          max(0, messages.count - ChannelStore.LoadedMessageLimit)
+        )
+      }
+    }
+
+    // check if latest messages are loaded, if so we append to the end else dont add
     let message = messageData.toMessage()
-    // Insert the new message at the end of the ordered dictionary
-    messages.updateValue(
-      message,
-      forKey: message.id,
-      insertingAt: messages.count
-    )
+    if hasLatestMessages {
+      // Insert the new message at the end of the ordered dictionary
+      messages.updateValue(
+        message,
+        forKey: message.id,
+        insertingAt: messages.count
+      )
+    }
 
     // Remove typing indicator for this user
     if let userId = message.author?.id {
@@ -203,9 +229,7 @@ class ChannelStore: DiscordDataStore {
     }
   }
 
-  private func handleMessageUpdate(
-    _ partialMessage: DiscordChannel.PartialMessage
-  ) {
+  private func handleMessageUpdate(_ message: DiscordChannel.PartialMessage) {
     defer {
       NotificationCenter.default.post(
         name: .chatViewShouldScrollToBottom,
@@ -213,12 +237,12 @@ class ChannelStore: DiscordDataStore {
       )
     }
 
-    guard var msg = messages[partialMessage.id] else { return }
-    msg.update(with: partialMessage)
+    guard var msg = messages[message.id] else { return }
+    msg.update(with: message)
     messages.updateValue(msg, forKey: msg.id)
 
     // store user data in user cache
-    for mention in partialMessage.mentions ?? [] {
+    for mention in message.mentions ?? [] {
       let user = mention.toPartialUser()
       gateway?.user.users[user.id, default: user].update(with: user)
     }
@@ -226,7 +250,7 @@ class ChannelStore: DiscordDataStore {
     // check for unknown member data from mentions if we have a guild store
     if let guildStore {
       var unknownMemberIds: Set<UserSnowflake> = []
-      for mention in partialMessage.mentions ?? [] {
+      for mention in message.mentions ?? [] {
         if guildStore.members[mention.id] == nil {
           unknownMemberIds.insert(mention.id)
         }
@@ -297,27 +321,21 @@ class ChannelStore: DiscordDataStore {
   private func handleMessageReactionAddMany(
     _ reactionAddMany: Gateway.MessageReactionAddMany
   ) {
-    //     we may have to discard this if no matching reactions exist. we can't init new reactions with this data
-    //    reactions[reactionAddMany.message_id, default: [:]].keys.forEach { emoji in
-    //      if var reaction = reactions[reactionAddMany.message_id, default: [:]][
-    //        emoji
-    //      ] {
-    //        reaction.addReactionData(
-    //          event: reactionAddMany,
-    //          reactions: reactionAddMany.reactions
-    //        )
-    //        reactions[reactionAddMany.message_id, default: [:]][emoji] = reaction
-    //      }
-    //    }
+    defer {
+      NotificationCenter.default.post(
+        name: .chatViewShouldScrollToBottom,
+        object: ["channelId": channelId]
+      )
+    }
+    // we may have to discard this if no matching reactions exist. we can't init new reactions with this data
     // nvm so any incoming reaction data can be init'd bc debounced reactions are specifically for normal reactions only, not burst
     // init new reactions if they don't exist
-    
+
     guard let message = messages[reactionAddMany.message_id] else { return }
     for debouncedReaction in reactionAddMany.reactions {
       if reactions[reactionAddMany.message_id, default: [:]][
         debouncedReaction.emoji
-      ] == nil
-      {
+      ] == nil {
         // make new object
         let reaction = Reaction(
           message: message,
@@ -339,6 +357,7 @@ class ChannelStore: DiscordDataStore {
       }
     }
   }
+
   private func handleMessageReactionRemove(
     _ reactionRemove: Gateway.MessageReactionRemove
   ) {
@@ -360,6 +379,7 @@ class ChannelStore: DiscordDataStore {
       }
     }
   }
+
   private func handleMessageReactionRemoveEmoji(
     _ reactionRemoveEmoji: Gateway.MessageReactionRemoveEmoji
   ) {
@@ -368,6 +388,7 @@ class ChannelStore: DiscordDataStore {
       forKey: reactionRemoveEmoji.emoji
     )
   }
+
   private func handleMessageReactionRemoveAll(
     _ removeAll: Gateway.MessageReactionRemoveAll
   ) {
@@ -413,34 +434,111 @@ class ChannelStore: DiscordDataStore {
     return false
   }
 
+  func tryFetchMoreMessageHistory() {
+    // if theres an ongoing task to fetch history, ignore this request.
+    guard loadingMessagesTask == nil else { return }
+    // ensure we're not already at the start of history, though the ui cant trigger this if that is the case. nonetheless ykyk
+    guard hasMoreHistory else { return }
+    print("[ChannelStore] Trying to fetch more message history...")
+    // fetching messages into the past, get the first message id we have and fetch before that
+    let firstMessage = messages.values.first
+    self.loadingMessagesTask = Task { @MainActor in
+      do {
+        try await self.fetchMessages(before: firstMessage?.id)
+      } catch {
+        PaicordAppState.instances.first?.value.error = error
+      }
+      self.loadingMessagesTask = nil
+    }
+  }
+
+  func tryFetchMoreMessageLatest() {
+    // if theres an ongoing task to fetch history, ignore this request.
+    guard loadingMessagesTask == nil else { return }
+    // ensure we're not at the latest messages already, ui should prevent this but just in case
+    guard !hasLatestMessages else { return }
+    // fetching messages into the past, get the first message id we have and fetch before that
+    guard let lastMessage = messages.values.last else { return }
+    self.loadingMessagesTask = Task { @MainActor in
+      do {
+        try await self.fetchMessages(after: lastMessage.id)
+      } catch {
+        PaicordAppState.instances.first?.value.error = error
+      }
+      self.loadingMessagesTask = nil
+    }
+  }
+
   /// Fetches messages.
   /// NOTE: `around`, `before` and `after` are mutually exclusive.
   func fetchMessages(
     around: MessageSnowflake? = nil,
     before: MessageSnowflake? = nil,
     after: MessageSnowflake? = nil,
-    limit: Int? = nil,
+    limit: Int? = nil
   ) async throws {
-    #warning("make this handle pagination etc maybe?")
     guard let gateway = gateway?.gateway else { return }
-    self.isLoadingMessages = true
-    defer { self.isLoadingMessages = false }
-    let res = try await gateway.client.listMessages(channelId: channelId)
-    do {
-      // ensure request was successful
-      try res.guardSuccess()
-      let messages = try res.decode()
 
-      for message in messages.reversed() {
-        self.messages.updateValue(
-          message,
-          forKey: message.id,
-          insertingAt: self.messages.count
-        )
+    let requestedLimit = limit ?? 50
+    let res = try await gateway.client.listMessages(
+      channelId: channelId,
+      around: around,
+      before: before,
+      after: after,
+      limit: requestedLimit
+    )
+
+    defer {
+      if before != nil {
+        if messages.count > Self.LoadedMessageLimit {
+          messages.removeLast(messages.count - Self.LoadedMessageLimit)
+        }
+      } else {
+        if messages.count > Self.LoadedMessageLimit {
+          messages.removeFirst(messages.count - Self.LoadedMessageLimit)
+        }
+      }
+    }
+
+    do {
+      try res.guardSuccess()
+      let fetched = try res.decode()
+
+      let fetchingBefore = before != nil
+      let fetchingAfter = after != nil
+      let initialLoad = (around == nil && before == nil && after == nil)
+
+      if fetchingBefore {
+        for message in fetched {
+          self.messages.updateValue(
+            message,
+            forKey: message.id,
+            insertingAt: 0
+          )
+        }
+
+        if fetched.count < requestedLimit {
+          self.hasMoreHistory = false
+        }
+      } else {
+        for message in fetched.reversed() {
+          self.messages.updateValue(
+            message,
+            forKey: message.id,
+            insertingAt: self.messages.count
+          )
+        }
+
+        if initialLoad && fetched.count < requestedLimit {
+          self.hasMoreHistory = false
+        }
+        if fetchingAfter && fetched.count < requestedLimit {
+          self.hasLatestMessages = true
+        }
       }
 
       // populate reactions data
-      for message in messages {
+      for message in fetched {
         guard let messageReactions = message.reactions else { continue }
         for messageReaction in messageReactions {
           let reaction = Reaction(
@@ -455,7 +553,7 @@ class ChannelStore: DiscordDataStore {
       }
 
       // cache user data from mentions in user cache
-      for message in messages {
+      for message in fetched {
         for mention in message.mentions {
           let user = mention.toPartialUser()
           self.gateway?.user.users[user.id, default: user].update(with: user)
@@ -497,6 +595,33 @@ class ChannelStore: DiscordDataStore {
       return nil
     }
     return messages.elements[safe: index - 1]?.value
+  }
+
+  /// Checks if the current user has the specified permission in this channel.
+  /// - Parameter permission: The permission to check.
+  /// - Returns: `true` if the user has the permission, `false` otherwise.
+  func hasPermission(
+    _ permission: Permission
+  ) -> Bool {
+    guard let guildStore else { return true }  // assume dms have all permissions
+    return guildStore.hasPermission(channel: self, permission)
+  }
+
+  /// Checks if a specific member has the specified permission in this channel.
+  /// - Parameters:
+  ///   - memberID: The ID of the member to check.
+  ///   - permission: The permission to check.
+  /// - Returns: `true` if the member has the permission, `false` otherwise.
+  func memberHasPermission(
+    memberID: UserSnowflake,
+    _ permission: Permission
+  ) -> Bool {
+    guard let guildStore else { return true }  // assume dms have all permissions
+    return guildStore.memberHasPermission(
+      memberID: memberID,
+      channel: self,
+      permission
+    )
   }
 }
 

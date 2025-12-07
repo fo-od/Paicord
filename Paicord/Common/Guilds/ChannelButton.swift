@@ -195,7 +195,7 @@ struct ChannelButton: View {
       guard let guild else { return false }
       return guild.hasPermission(
         channel: channel,
-        permission: .viewChannel
+        .viewChannel
       ) == false
     }
     var body: some View {
@@ -275,7 +275,7 @@ struct ChannelButton: View {
       let channels = channelIDs.compactMap { self.channels[$0] }
       let allHidden = channels.reduce(true) { partialResult, channel in
         partialResult
-          && guild?.hasPermission(channel: channel, permission: .viewChannel)
+          && guild?.hasPermission(channel: channel, .viewChannel)
             == false
       }
       return allHidden

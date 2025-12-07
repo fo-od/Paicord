@@ -22,7 +22,7 @@ final class PaicordAppState {
   // MARK: - Selected Guild & Channel Persistence
 
   private let storageKey = "AppState.PrevSelectedChannels"
-  private var suppressChannelSave = false
+  var suppressChannelSave = false
 
   private var _selectedGuild: GuildSnowflake? = nil {
     didSet {
@@ -83,6 +83,9 @@ final class PaicordAppState {
     selectedGuild = nil
     selectedChannel = nil
     rawPrevSelectedChannels = [:]
+    UserDefaults.standard.removeObject(
+      forKey: "AppState.PrevSelectedGuild"
+    )
     savePrevSelectedChannels()
   }
 

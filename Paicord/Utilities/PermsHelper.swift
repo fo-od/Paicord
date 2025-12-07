@@ -116,30 +116,30 @@ enum PermissionsHelper {
 extension GuildStore {
   func hasPermission(
     channel: ChannelStore?,
-    permission: Permission
+    _ permission: Permission
   ) -> Bool {
     self.memberHasPermission(
       memberID: self.gateway!.user.currentUser!.id,
       channel: channel,
-      permission: permission
+      permission
     )
   }
 
   func memberHasPermission(
     memberID: UserSnowflake,
     channel: ChannelStore?,
-    permission: Permission
+    _ permission: Permission
   ) -> Bool {
     self.memberHasPermission(
       memberID: memberID,
       channel: channel?.channel,
-      permission: permission
+      permission
     )
   }
 
   func hasPermission(
     channel: DiscordChannel?,
-    permission: Permission
+    _ permission: Permission
   ) -> Bool {
     // fetch member first ofc
     guard
@@ -168,7 +168,7 @@ extension GuildStore {
   func memberHasPermission(
     memberID: UserSnowflake,
     channel: DiscordChannel?,
-    permission: Permission
+    _ permission: Permission
   ) -> Bool {
     // fetch member first ofc
     guard let member = self.members[memberID] else {
@@ -189,20 +189,6 @@ extension GuildStore {
       )
       return basePermissions.contains(permission)
     }
-  }
-}
-
-extension ChannelStore {
-  func hasPermission(
-    permission: Permission
-  ) -> Bool {
-    guard let guildStore = self.guildStore else {
-      return true
-    }
-    return guildStore.hasPermission(
-      channel: self.channel,
-      permission: permission
-    )
   }
 }
 

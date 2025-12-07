@@ -254,10 +254,7 @@ struct EntityContextMenu<Entity>: ViewModifier {
     _ permission: Permission
   ) -> Bool {
     guard let guild else { return true }
-    return guild.hasPermission(
-      channel: channel,
-      permission: permission
-    )
+    return guild.hasPermission(channel: channel, permission)
   }
 
   func copyText(_ string: String) {
@@ -269,4 +266,3 @@ struct EntityContextMenu<Entity>: ViewModifier {
     #endif
   }
 }
-

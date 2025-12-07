@@ -30,8 +30,21 @@ struct ChatView: View {
       ScrollViewReader { proxy in
         ScrollView {
           LazyVStack(alignment: .leading, spacing: 0) {
-            PlaceholderMessageSet()
-
+            if !vm.messages.isEmpty {
+              if vm.hasMoreHistory && vm.hasPermission(.readMessageHistory) {
+                PlaceholderMessageSet()
+                  .onAppear {
+                    vm.tryFetchMoreMessageHistory()
+                  }
+              } else {
+                if vm.hasPermission(.readMessageHistory) {
+                  ChatHeaders.WelcomeStartOfChannelHeader()
+                } else {
+                  ChatHeaders.NoHistoryPermissionHeader()
+                }
+              }
+            }
+            
             ForEach(orderedMessages) { msg in
               let prior = vm.getMessage(before: msg)
               if messageAllowed(msg) {
@@ -46,11 +59,27 @@ struct ChatView: View {
                   }
                   .onDisappear {
                     // if the message is among the last 15 messages in the list, consider us not near the bottom
+                    // nvm this causes it to constantly set not near bottom when scrolling up or down as views
+                    //                    if let index = vm.messages.index(forKey: msg.id) {
+                    //                      if index >= vm.messages.count - 15 {
+                    //                        self.isNearBottom = false
+                    //                      }
+                    //                    }
+                    // instead we check if the 15th last message is gone only.
                     if let index = vm.messages.index(forKey: msg.id) {
-                      if index >= vm.messages.count - 15 {
+                      if index == vm.messages.count - 15 {
                         self.isNearBottom = false
                       }
                     }
+                  }
+              }
+            }
+            
+            if !vm.messages.isEmpty {
+              if !vm.hasLatestMessages && vm.hasPermission(.readMessageHistory) {
+                PlaceholderMessageSet()
+                  .onAppear {
+                    vm.tryFetchMoreMessageHistory()
                   }
               }
             }
@@ -88,13 +117,13 @@ struct ChatView: View {
           }
         }
         #if os(macOS)
-        // when new messages come in, try scroll to bottom
-        .onChange(of: vm.messages) {
-          NotificationCenter.default.post(
-            name: .chatViewShouldScrollToBottom,
-            object: ["channelId": vm.channelId]
-          )
-        }
+          // when new messages come in, try scroll to bottom
+          .onChange(of: vm.messages) {
+            NotificationCenter.default.post(
+              name: .chatViewShouldScrollToBottom,
+              object: ["channelId": vm.channelId]
+            )
+          }
         #endif
         .onReceive(
           NotificationCenter.default.publisher(
