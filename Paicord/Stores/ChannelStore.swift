@@ -10,6 +10,7 @@ import Algorithms
 import Collections
 import Foundation
 import PaicordLib
+import SwiftUI
 
 @Observable
 class ChannelStore: DiscordDataStore {
@@ -167,15 +168,6 @@ class ChannelStore: DiscordDataStore {
       )
     }
 
-    defer {
-      // trim excess old messages
-      if hasLatestMessages && messages.count > ChannelStore.LoadedMessageLimit {
-        messages.removeFirst(
-          max(0, messages.count - ChannelStore.LoadedMessageLimit)
-        )
-      }
-    }
-
     // check if latest messages are loaded, if so we append to the end else dont add
     let message = messageData.toMessage()
     if hasLatestMessages {
@@ -185,6 +177,10 @@ class ChannelStore: DiscordDataStore {
         forKey: message.id,
         insertingAt: messages.count
       )
+      
+      
+      // trim excess old messages
+      trimExtraMessagesIfNeeded(preferRemovingOldest: true)
     }
 
     // Remove typing indicator for this user
@@ -469,6 +465,23 @@ class ChannelStore: DiscordDataStore {
     }
   }
 
+  private func trimExtraMessagesIfNeeded(preferRemovingOldest: Bool = true) {
+    // if we dropped newest entries, we're going back in history hence shouldnt store latest messages
+    if !preferRemovingOldest {
+      hasLatestMessages = false
+    }
+    while messages.count > Self.LoadedMessageLimit {
+      print(messages.count)
+      if preferRemovingOldest {
+        // keep newest messages -> drop oldest entries
+        messages.removeFirst()
+      } else {
+        // keep oldest messages -> drop newest entries
+        messages.removeLast()
+      }
+    }
+  }
+
   /// Fetches messages.
   /// NOTE: `around`, `before` and `after` are mutually exclusive.
   func fetchMessages(
@@ -487,18 +500,6 @@ class ChannelStore: DiscordDataStore {
       after: after,
       limit: requestedLimit
     )
-
-    defer {
-      if before != nil {
-        if messages.count > Self.LoadedMessageLimit {
-          messages.removeLast(messages.count - Self.LoadedMessageLimit)
-        }
-      } else {
-        if messages.count > Self.LoadedMessageLimit {
-          messages.removeFirst(messages.count - Self.LoadedMessageLimit)
-        }
-      }
-    }
 
     do {
       try res.guardSuccess()
@@ -520,6 +521,22 @@ class ChannelStore: DiscordDataStore {
         if fetched.count < requestedLimit {
           self.hasMoreHistory = false
         }
+
+        trimExtraMessagesIfNeeded(preferRemovingOldest: false)
+
+        // get the "newest" message from the fetched batch to scroll to
+        if let newestMessage = fetched.first {
+          await MainActor.run {
+            NotificationCenter.default.post(
+              name: .chatViewShouldScrollToID,
+              object: [
+                "channelId": channelId,
+                "messageId": newestMessage.id,
+                "alignment": UnitPoint.top,
+              ]
+            )
+          }
+        }
       } else {
         for message in fetched.reversed() {
           self.messages.updateValue(
@@ -535,6 +552,8 @@ class ChannelStore: DiscordDataStore {
         if fetchingAfter && fetched.count < requestedLimit {
           self.hasLatestMessages = true
         }
+
+        trimExtraMessagesIfNeeded(preferRemovingOldest: true)
       }
 
       // populate reactions data
@@ -563,13 +582,11 @@ class ChannelStore: DiscordDataStore {
       // lastly request members if member data for any author is missing, also mentions
       if let guildStore {
         let unknownMembers = Set(
-          messages.map { message in
-            ([message.author?.id] + message.mentions.map(\.id)).compactMap({
+          fetched.map { message in
+            ([message.author?.id] + message.mentions.map(\.id)).compactMap {
               $0
-            })
-          }.flatMap({ $0 }).filter({
-            guildStore.members[$0] == nil
-          })
+            }
+          }.flatMap { $0 }.filter { guildStore.members[$0] == nil }
         )
         if !unknownMembers.isEmpty {
           print(

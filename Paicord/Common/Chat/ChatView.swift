@@ -44,7 +44,7 @@ struct ChatView: View {
                 }
               }
             }
-            
+
             ForEach(orderedMessages) { msg in
               let prior = vm.getMessage(before: msg)
               if messageAllowed(msg) {
@@ -74,9 +74,10 @@ struct ChatView: View {
                   }
               }
             }
-            
+
             if !vm.messages.isEmpty {
-              if !vm.hasLatestMessages && vm.hasPermission(.readMessageHistory) {
+              if !vm.hasLatestMessages && vm.hasPermission(.readMessageHistory)
+              {
                 PlaceholderMessageSet()
                   .onAppear {
                     vm.tryFetchMoreMessageHistory()
@@ -141,6 +142,20 @@ struct ChatView: View {
             proxy: proxy,
             lastID: vm.messages.values.last?.id
           )
+        }
+        .onReceive(
+          NotificationCenter.default.publisher(for: .chatViewShouldScrollToID)
+        ) { object in
+          guard let info = object.object as? [String: Any],
+            let channelId = info["channelId"] as? ChannelSnowflake,
+            channelId == vm.channelId,
+            let messageId = info["messageId"] as? MessageSnowflake,
+            let unitPoint = info["alignment"] as? UnitPoint
+          else { return }
+          print("Scrolling to message ID \(messageId) in channel \(channelId), unitPoint: \(unitPoint)")
+          DispatchQueue.main.async {
+            proxy.scrollTo(messageId, anchor: unitPoint)
+          }
         }
       }
     }
@@ -226,5 +241,9 @@ extension View {
 extension Notification.Name {
   static let chatViewShouldScrollToBottom = Notification.Name(
     "chatViewShouldScrollToBottom"
+  )
+
+  static let chatViewShouldScrollToID = Notification.Name(
+    "chatViewShouldScrollToID"
   )
 }
