@@ -427,8 +427,7 @@ extension Gateway {
 
     // user only
     public var sessions: [Session]
-    public var user_settings_proto:
-      DiscordProtos_DiscordUsers_V1_PreloadedUserSettings?
+    public var user_settings_proto: DiscordProtos_DiscordUsers_V1_PreloadedUserSettings?
     public var connected_accounts: [DiscordUser.Connection]
     public var user_guild_settings: [Guild.UserGuildSettings]
     //		public var guild_join_requests
@@ -539,8 +538,7 @@ extension Gateway {
     public var widget_enabled: Bool?
     public var widget_channel_id: ChannelSnowflake?
     public var verification_level: Guild.VerificationLevel
-    public var default_message_notifications:
-      Guild.DefaultMessageNotificationLevel
+    public var default_message_notifications: Guild.DefaultMessageNotificationLevel
     public var explicit_content_filter: Guild.ExplicitContentFilterLevel
     public var roles: [Role]
     public var emojis: [Emoji]

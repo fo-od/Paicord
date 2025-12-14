@@ -9,4 +9,3 @@
 import PaicordLib
 
 let client = await DefaultDiscordClient(token: .none)
-

@@ -420,7 +420,8 @@ public final class InlineParser {
                 let inner = String(combined.dropFirst(2).dropLast(2))
                 // Re-parse inner as inline content to preserve nested formatting
                 let parsedInner = try parseInlineContent(inner)
-                let underlineNode = AST.UnderlineNode(children: parsedInner, sourceLocation: startLocation)
+                let underlineNode = AST.UnderlineNode(
+                  children: parsedInner, sourceLocation: startLocation)
                 return AST.ItalicNode(children: [underlineNode], sourceLocation: startLocation)
               }
             }
@@ -763,8 +764,7 @@ public final class InlineParser {
     {
       // Check for missing required fields (e.g., no ID)
       let discordMentionRegex = "^<(?:@|@&|#|t:|a:[^:]+:|:[^:]+:)[0-9]+.*>$"
-      if url.range(of: discordMentionRegex, options: .regularExpression) == nil
-      {
+      if url.range(of: discordMentionRegex, options: .regularExpression) == nil {
         return nil
       }
     }

@@ -279,7 +279,7 @@ class MarkdownRendererVM {
   // document cache is redundant if we have block cache
   //  static let documentCache: NSCache<NSString, CachedDocument> = .init()
   static let blockCache: NSCache<NSString, CachedDocumentBlocks> = .init()
-  
+
   let theme = Theming.shared.currentTheme
 
   //  class CachedDocument: NSObject {
@@ -845,8 +845,7 @@ class MarkdownRendererVM {
             attrs[.font] = FontHelpers.makeFontBold(font)
           }
           attrs[.rawContent] = "<#\(c.id.rawValue)>"
-          if let url = URL(string: "paicord://mention/channel/\(c.id.rawValue)")
-          {
+          if let url = URL(string: "paicord://mention/channel/\(c.id.rawValue)") {
             attrs[.link] = url
           }
           attrs[.backgroundColor] = AppKitOrUIKitColor(
@@ -863,8 +862,7 @@ class MarkdownRendererVM {
           container.append(s)
         } else {
           var attrs = baseAttributes
-          if let url = URL(string: "paicord://mention/channel/\(c.id.rawValue)")
-          {
+          if let url = URL(string: "paicord://mention/channel/\(c.id.rawValue)") {
             attrs[.link] = url
           }
           let s = NSAttributedString(
@@ -1272,7 +1270,8 @@ enum PaicordChatLink {
   init?(url: URL) {
     guard
       url.scheme == "paicord"
-        || ((url.host() == "discord.com" || url.host() == "discord.gg" || url.host() == "discordapp.com")
+        || ((url.host() == "discord.com" || url.host() == "discord.gg"
+          || url.host() == "discordapp.com")
           && url.scheme == "https")
     else { return nil }
     switch url.host() {

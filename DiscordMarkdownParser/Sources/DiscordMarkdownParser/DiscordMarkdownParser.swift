@@ -297,8 +297,7 @@ public final class DiscordMarkdownParser: Sendable {
         if let textNode = node as? AST.TextNode {
           let content = textNode.content
           // Check if this text node contains a task marker
-          if content.contains("[") && (content.contains("]") || result.isEmpty)
-          {
+          if content.contains("[") && (content.contains("]") || result.isEmpty) {
             // This might be the start of a task marker
             if content.hasPrefix("[") && content.count >= 3
               && content.hasSuffix("]")

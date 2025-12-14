@@ -199,7 +199,7 @@ struct AttributedText: View {
           )
         }
       }
-      
+
       super.copy(sender)
 
       UIPasteboard.general.string = mutable.string

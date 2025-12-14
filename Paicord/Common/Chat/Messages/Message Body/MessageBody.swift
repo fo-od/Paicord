@@ -75,7 +75,7 @@ extension MessageCell {
           VStack(alignment: .leading, spacing: 4) {
             Group {
               Text(Image(systemName: "arrowshape.turn.up.right.fill"))
-              + Text(" Forwarded").italic()
+                + Text(" Forwarded").italic()
             }
             .font(.caption.italic())
             .foregroundStyle(.tertiary)

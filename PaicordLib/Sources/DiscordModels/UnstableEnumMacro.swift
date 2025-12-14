@@ -20,17 +20,17 @@
 /// If `Decodable`, adds a slightly-modified `init(from:)` initializer.
 /// If `CaseIterable`, repairs the `static var allCases` requirement.
 @attached(
-    member,
-    names: named(init),
-    named(rawValue),
-    named(__undocumented),
-    named(allCases)
+  member,
+  names: named(init),
+  named(rawValue),
+  named(__undocumented),
+  named(allCases)
 )
 @attached(
-    extension,
-    conformances: RawRepresentable,
-    LosslessRawRepresentable,
-    Hashable
+  extension,
+  conformances: RawRepresentable,
+  LosslessRawRepresentable,
+  Hashable
 )
 macro UnstableEnum<T>() = #externalMacro(module: "UnstableEnumMacro", type: "UnstableEnum")
 

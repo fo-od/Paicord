@@ -10,8 +10,6 @@ import PaicordLib
 import PhotosUI
 import SwiftUIX
 
-
-
 extension ChatView {
   struct InputBar: View {
     @Environment(\.appState) var appState
@@ -34,31 +32,31 @@ extension ChatView {
         ZStack(alignment: .top) {
           HStack(alignment: .bottom, spacing: 8) {
             inputBarButton
-            
+
             inputBarField
-            
-#if os(iOS)
-            if text.isEmpty == false {
-              Button(action: sendMessage) {
-                Image(systemName: "paperplane.fill")
-                  .imageScale(.large)
-                  .padding(5)
-                  .foregroundStyle(.white)
-                  .background(theme.common.primaryButton)
-                  .clipShape(.circle)
+
+            #if os(iOS)
+              if text.isEmpty == false {
+                Button(action: sendMessage) {
+                  Image(systemName: "paperplane.fill")
+                    .imageScale(.large)
+                    .padding(5)
+                    .foregroundStyle(.white)
+                    .background(theme.common.primaryButton)
+                    .clipShape(.circle)
+                }
+                .buttonStyle(.borderless)
+                .foregroundStyle(theme.common.primaryButton)
+                .transition(.move(edge: .trailing).combined(with: .opacity))
               }
-              .buttonStyle(.borderless)
-              .foregroundStyle(theme.common.primaryButton)
-              .transition(.move(edge: .trailing).combined(with: .opacity))
-            }
-#endif
+            #endif
           }
           .padding([.horizontal, .bottom], 8)
           .padding(.top, 4)
-#if os(iOS)
-          .animation(.default, value: text.isEmpty)
-#endif
-          
+          #if os(iOS)
+            .animation(.default, value: text.isEmpty)
+          #endif
+
           TypingIndicatorBar(vm: vm)
             .shadow(color: .black, radius: 10)
             .padding(.top, -18)  // away from bar
@@ -66,16 +64,16 @@ extension ChatView {
         .background {
           VariableBlurView()
             .rotationEffect(.degrees(180))
-          // extend upwards slightly
+            // extend upwards slightly
             .padding(.top, -8 + (vm.typingTimeoutTokens.isEmpty ? 0 : -10))
-#if os(iOS)
-            .padding(.bottom, isFocused ? 0 : (safeAreaInsets.bottom * -1))
-            .animation(.default, value: isFocused)
-#endif
+            #if os(iOS)
+              .padding(.bottom, isFocused ? 0 : (safeAreaInsets.bottom * -1))
+              .animation(.default, value: isFocused)
+            #endif
         }
         .ignoresSafeArea(.container, edges: .horizontal)
         if showingPhotoPicker, isFocused == false {
-          
+
           PhotosPicker(
             "Upload Photos",
             selection: $photoPickerItems,
@@ -104,12 +102,12 @@ extension ChatView {
             .clipShape(.circle)
             .rotationEffect(.degrees(45))
         }
-#if os(macOS)
-        .menuStyle(.button)
-        .buttonStyle(.plain)
-#else
-        .buttonStyle(.borderless)
-#endif
+        #if os(macOS)
+          .menuStyle(.button)
+          .buttonStyle(.plain)
+        #else
+          .buttonStyle(.borderless)
+        #endif
         .tint(.primary)
       } else {
         Menu {
@@ -121,7 +119,7 @@ extension ChatView {
           } label: {
             Label("Apps", systemImage: "puzzle.fill")
           }
-          
+
           Button {
             showingPhotoPicker = true
           } label: {
@@ -134,12 +132,12 @@ extension ChatView {
             .background(.regularMaterial)
             .clipShape(.circle)
         }
-#if os(macOS)
-        .menuStyle(.button)
-        .buttonStyle(.plain)
-#else
-        .buttonStyle(.borderless)
-#endif
+        #if os(macOS)
+          .menuStyle(.button)
+          .buttonStyle(.plain)
+        #else
+          .buttonStyle(.borderless)
+        #endif
         .tint(.primary)
       }
     }

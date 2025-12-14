@@ -356,8 +356,7 @@ public enum Payloads {
     }
 
     /// https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-data-structure
-    internal enum CallbackData: Sendable, MultipartEncodable, ValidatablePayload
-    {
+    internal enum CallbackData: Sendable, MultipartEncodable, ValidatablePayload {
       case message(Message)
       case autocomplete(Autocomplete)
       case modal(Modal)
@@ -365,7 +364,7 @@ public enum Payloads {
 
       var files: [RawFile]? {
         switch self {
-        case let .message(message):
+        case .message(let message):
           return message.files
         case .autocomplete, .modal, .flags:
           return nil
@@ -374,11 +373,11 @@ public enum Payloads {
 
       func validate() -> [ValidationFailure] {
         switch self {
-        case let .message(message):
+        case .message(let message):
           message.validate()
-        case let .autocomplete(autocomplete):
+        case .autocomplete(let autocomplete):
           autocomplete.validate()
-        case let .modal(modal):
+        case .modal(let modal):
           modal.validate()
         case .flags:
           /// For the result builder
@@ -389,13 +388,13 @@ public enum Payloads {
       func encode(to encoder: any Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
-        case let .message(message):
+        case .message(let message):
           try container.encode(message)
-        case let .autocomplete(autocomplete):
+        case .autocomplete(let autocomplete):
           try container.encode(autocomplete)
-        case let .modal(modal):
+        case .modal(let modal):
           try container.encode(modal)
-        case let .flags(flags):
+        case .flags(let flags):
           try container.encode(flags)
         }
       }
@@ -448,8 +447,7 @@ public enum Payloads {
     /// The `.ephemeral` message flag needs to be set here on a deferred message.
     /// The main message's flags can't override this flag.
     /// Discord barely mentions this behavior here: https://discord.com/developers/docs/interactions/receiving-and-responding#create-followup-message
-    public static func deferredUpdateMessage(isEphemeral: Bool = false) -> Self
-    {
+    public static func deferredUpdateMessage(isEphemeral: Bool = false) -> Self {
       .init(
         type: .deferredUpdateMessage,
         data: .flags(.init(isEphemeral: isEphemeral))
@@ -554,8 +552,7 @@ public enum Payloads {
 
   /// https://discord.com/developers/docs/resources/channel#create-message-jsonform-params
   /// https://docs.discord.food/resources/message#create-message
-  public struct CreateMessage: Sendable, MultipartEncodable, ValidatablePayload
-  {
+  public struct CreateMessage: Sendable, MultipartEncodable, ValidatablePayload {
     public var content: String?
     public var nonce: StringOrInt?
     public var tts: Bool?
@@ -567,7 +564,7 @@ public enum Payloads {
     public var files: [RawFile]?
     public var attachments: [Attachment]?
     public var flags: IntBitField<DiscordChannel.Message.Flag>?
-//    public var enforce_nonce: Bool?
+    //    public var enforce_nonce: Bool?
     public var poll: CreatePollRequest?
 
     enum CodingKeys: String, CodingKey {
@@ -581,7 +578,7 @@ public enum Payloads {
       case sticker_ids
       case attachments
       case flags
-//      case enforce_nonce
+      //      case enforce_nonce
       case poll
     }
 
@@ -597,7 +594,7 @@ public enum Payloads {
       files: [RawFile]? = nil,
       attachments: [Attachment]? = nil,
       flags: IntBitField<DiscordChannel.Message.Flag>? = nil,
-//      enforce_nonce: Bool? = nil,
+      //      enforce_nonce: Bool? = nil,
       poll: CreatePollRequest? = nil
     ) {
       self.content = content
@@ -611,7 +608,7 @@ public enum Payloads {
       self.files = files
       self.attachments = attachments
       self.flags = flags
-//      self.enforce_nonce = enforce_nonce
+      //      self.enforce_nonce = enforce_nonce
       self.poll = poll
     }
 
@@ -718,8 +715,7 @@ public enum Payloads {
   }
 
   /// https://discord.com/developers/docs/resources/webhook#execute-webhook-jsonform-params
-  public struct ExecuteWebhook: Sendable, MultipartEncodable, ValidatablePayload
-  {
+  public struct ExecuteWebhook: Sendable, MultipartEncodable, ValidatablePayload {
     public var content: String?
     public var username: String?
     public var avatar_url: String?
@@ -914,8 +910,7 @@ public enum Payloads {
     }
   }
 
-  public struct CreateThreadFromMessage: Sendable, Encodable, ValidatablePayload
-  {
+  public struct CreateThreadFromMessage: Sendable, Encodable, ValidatablePayload {
     public var name: String
     public var auto_archive_duration: DiscordChannel.AutoArchiveDuration?
     public var rate_limit_per_user: Int?
@@ -980,8 +975,7 @@ public enum Payloads {
   {
 
     /// https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel-forum-thread-message-params-object
-    public struct ForumMessage: Sendable, MultipartEncodable, ValidatablePayload
-    {
+    public struct ForumMessage: Sendable, MultipartEncodable, ValidatablePayload {
       public var content: String?
       public var embeds: [Embed]?
       public var allowed_mentions: AllowedMentions?
@@ -1196,8 +1190,7 @@ public enum Payloads {
     }
   }
 
-  public struct ApplicationCommandEdit: Sendable, Encodable, ValidatablePayload
-  {
+  public struct ApplicationCommandEdit: Sendable, Encodable, ValidatablePayload {
     public var name: String?
     public var name_localizations: DiscordLocaleDict<String>?
     public var description: String?
@@ -1386,8 +1379,7 @@ public enum Payloads {
     public var parent_id: AnySnowflake?
     public var rtc_region: String?
     public var video_quality_mode: DiscordChannel.VideoQualityMode?
-    public var default_auto_archive_duration:
-      DiscordChannel.AutoArchiveDuration?
+    public var default_auto_archive_duration: DiscordChannel.AutoArchiveDuration?
     public var flags: IntBitField<DiscordChannel.Flag>?
     public var available_tags: [PartialForumTag]?
     public var default_reaction_emoji: DiscordChannel.DefaultReaction?
@@ -1542,8 +1534,7 @@ public enum Payloads {
     public var parent_id: AnySnowflake?
     public var rtc_region: String?
     public var video_quality_mode: DiscordChannel.VideoQualityMode?
-    public var default_auto_archive_duration:
-      DiscordChannel.AutoArchiveDuration?
+    public var default_auto_archive_duration: DiscordChannel.AutoArchiveDuration?
     public var available_tags: [PartialForumTag]?
     public var default_reaction_emoji: DiscordChannel.DefaultReaction?
     public var default_sort_order: DiscordChannel.SortOrder?
@@ -1625,8 +1616,7 @@ public enum Payloads {
     public var name: String
     public var icon: ImageData?
     public var verification_level: Guild.VerificationLevel?
-    public var default_message_notifications:
-      Guild.DefaultMessageNotificationLevel?
+    public var default_message_notifications: Guild.DefaultMessageNotificationLevel?
     public var explicit_content_filter: Guild.ExplicitContentFilterLevel?
     public var roles: [Role]?
     public var channels: [DiscordChannel]?
@@ -1670,8 +1660,7 @@ public enum Payloads {
   public struct ModifyGuild: Sendable, Encodable, ValidatablePayload {
     public var name: String?
     public var verification_level: Guild.VerificationLevel?
-    public var default_message_notifications:
-      Guild.DefaultMessageNotificationLevel?
+    public var default_message_notifications: Guild.DefaultMessageNotificationLevel?
     public var explicit_content_filter: Guild.ExplicitContentFilterLevel?
     public var afk_channel_id: ChannelSnowflake?
     public var afk_timeout: Guild.AFKTimeout?
@@ -1789,8 +1778,7 @@ public enum Payloads {
   }
 
   /// https://docs.discord.food/resources/auto-moderation#execute-automod-alert-action
-  public struct ExecuteAutoModAlertAction: Sendable, Codable, ValidatablePayload
-  {
+  public struct ExecuteAutoModAlertAction: Sendable, Codable, ValidatablePayload {
     public var channel_id: ChannelSnowflake
     public var message_id: MessageSnowflake
     public var alert_action_type: AlertActionKind
@@ -1807,8 +1795,7 @@ public enum Payloads {
   }
 
   /// https://discord.com/developers/docs/resources/auto-moderation#create-auto-moderation-rule-json-params
-  public struct CreateAutoModerationRule: Sendable, Codable, ValidatablePayload
-  {
+  public struct CreateAutoModerationRule: Sendable, Codable, ValidatablePayload {
     public var name: String
     public var event_type: AutoModerationRule.EventKind
     public var trigger_type: AutoModerationRule.TriggerKind
@@ -1853,8 +1840,7 @@ public enum Payloads {
   }
 
   /// https://discord.com/developers/docs/resources/auto-moderation#modify-auto-moderation-rule
-  public struct ModifyAutoModerationRule: Sendable, Codable, ValidatablePayload
-  {
+  public struct ModifyAutoModerationRule: Sendable, Codable, ValidatablePayload {
     public var name: String?
     public var event_type: AutoModerationRule.EventKind?
     public var trigger_type: AutoModerationRule.TriggerKind?
@@ -1947,7 +1933,7 @@ public enum Payloads {
       switch self {
       case .unlimited:
         try container.encode(0)
-      case let .count(count):
+      case .count(let count):
         try container.encode(count)
       }
     }
@@ -1985,13 +1971,13 @@ public enum Payloads {
       switch max_age {
       case .unlimited, .none:
         Optional<ValidationFailure>.none
-      case let .count(count):
+      case .count(let count):
         validateNumberInRangeOrNil(count, min: 0, max: 604_800, name: "max_age")
       }
       switch max_uses {
       case .unlimited, .none:
         Optional<ValidationFailure>.none
-      case let .count(count):
+      case .count(let count):
         validateNumberInRangeOrNil(count, min: 0, max: 100, name: "max_uses")
       }
       if target_type == .stream {
@@ -2570,8 +2556,7 @@ public enum Payloads {
       [self.file]
     }
 
-    public init(name: String, description: String, tags: String, file: RawFile)
-    {
+    public init(name: String, description: String, tags: String, file: RawFile) {
       self.name = name
       self.description = description
       self.tags = tags
@@ -2935,8 +2920,7 @@ public enum Payloads {
   }
 
   /// https://docs.discord.food/resources/relationships#bulk-remove-relationships
-  public struct BulkRemoveRelationships: Sendable, Encodable, ValidatablePayload
-  {
+  public struct BulkRemoveRelationships: Sendable, Encodable, ValidatablePayload {
     public var filters: Set<Filter>?
     public init(filters: Set<Filter>? = nil) {
       self.filters = filters
@@ -2977,46 +2961,52 @@ public enum Payloads {
   /// https://docs.discord.food/resources/invite#accept-invite
   public struct AcceptInvite: Sendable, Encodable, ValidatablePayload {
     public var session_id: String?
-    
+
     public init(session_id: String? = nil) {
       self.session_id = session_id
     }
-    
+
     public func validate() -> [ValidationFailure] {}
   }
-  
+
   /// https://docs.discord.food/resources/invite#create-user-invite
   public struct CreateUserInvite: Sendable, Encodable, ValidatablePayload {
     public var code: String?
-    
+
     public init(code: String? = nil) {
       self.code = code
     }
-    
+
     public func validate() -> [ValidationFailure] {}
   }
-  
+
   /// https://docs.discord.food/interactions/receiving-and-responding#create-interaction
   public struct CreateInteraction: Sendable, Encodable, ValidatablePayload {
     public var type: Interaction.Kind
     public var application_id: ApplicationSnowflake
     public var guild_id: GuildSnowflake?
     public var channel_id: ChannelSnowflake
-    public var message_id: MessageSnowflake? // Only for MESSAGE_COMPONENT type
-    public var message_flags: IntBitField<DiscordChannel.Message.Flag>? // Only for MESSAGE_COMPONENT type
-    public var session_id: String? // Required so Discord can send send accompanying interaction events
+    public var message_id: MessageSnowflake?  // Only for MESSAGE_COMPONENT type
+    public var message_flags: IntBitField<DiscordChannel.Message.Flag>?  // Only for MESSAGE_COMPONENT type
+    public var session_id: String?  // Required so Discord can send send accompanying interaction events
     public var data: Interaction.Data
     public var files: [RawFile]?
     public var nonce: StringOrInt?
-//    public var analytics_location
+    //    public var analytics_location
     public var section_name: String?
-//    public var source
-    
+    //    public var source
+
     public func validate() -> [ValidationFailure] {
       // TODO: validate fields here
     }
-    
-    init(type: Interaction.Kind, application_id: ApplicationSnowflake, guild_id: GuildSnowflake? = nil, channel_id: ChannelSnowflake, message_id: MessageSnowflake? = nil, message_flags: IntBitField<DiscordChannel.Message.Flag>? = nil, session_id: String? = nil, files: [RawFile]? = nil, nonce: StringOrInt? = nil, section_name: String? = nil, data: Interaction.Data) {
+
+    init(
+      type: Interaction.Kind, application_id: ApplicationSnowflake, guild_id: GuildSnowflake? = nil,
+      channel_id: ChannelSnowflake, message_id: MessageSnowflake? = nil,
+      message_flags: IntBitField<DiscordChannel.Message.Flag>? = nil, session_id: String? = nil,
+      files: [RawFile]? = nil, nonce: StringOrInt? = nil, section_name: String? = nil,
+      data: Interaction.Data
+    ) {
       self.type = type
       self.application_id = application_id
       self.guild_id = guild_id
@@ -3029,7 +3019,7 @@ public enum Payloads {
       self.section_name = section_name
       self.data = data
     }
-    
+
     enum CodingKeys: String, CodingKey {
       case type
       case application_id
@@ -3043,7 +3033,7 @@ public enum Payloads {
       case nonce
       case section_name
     }
-    
+
     public func encode(to encoder: any Encoder) throws {
       var container = encoder.container(keyedBy: CodingKeys.self)
       try container.encode(type, forKey: .type)
@@ -3056,7 +3046,7 @@ public enum Payloads {
       try container.encodeIfPresent(nonce, forKey: .nonce)
       try container.encodeIfPresent(section_name, forKey: .section_name)
       try container.encodeIfPresent(files, forKey: .files)
-      
+
       switch data {
       case .applicationCommand(let applicationCommand):
         try container.encode(applicationCommand, forKey: .data)

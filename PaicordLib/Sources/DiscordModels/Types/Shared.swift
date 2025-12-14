@@ -10,7 +10,7 @@ public enum StringIntDoubleBool: Sendable, Codable {
 
     public var description: String {
       switch self {
-      case let .valueIsNotOfType(type, value):
+      case .valueIsNotOfType(let type, let value):
         return
           "StringIntDoubleBool.Error.valueIsNotOfType(\(String(describing: type)), value: \(value))"
       }
@@ -84,13 +84,13 @@ public enum StringIntDoubleBool: Sendable, Codable {
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     switch self {
-    case let .string(string):
+    case .string(let string):
       try container.encode(string)
-    case let .int(int):
+    case .int(let int):
       try container.encode(int)
-    case let .double(double):
+    case .double(let double):
       try container.encode(double)
-    case let .bool(bool):
+    case .bool(let bool):
       try container.encode(bool)
     }
   }
@@ -123,9 +123,9 @@ public enum StringOrInt: Sendable, Codable, Equatable, Hashable {
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     switch self {
-    case let .string(string):
+    case .string(let string):
       try container.encode(string)
-    case let .int(int):
+    case .int(let int):
       try container.encode(int)
     }
   }
@@ -150,9 +150,9 @@ public enum IntOrDouble: Sendable, Codable {
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.singleValueContainer()
     switch self {
-    case let .int(int):
+    case .int(let int):
       try container.encode(int)
-    case let .double(double):
+    case .double(let double):
       try container.encode(double)
     }
   }
@@ -244,8 +244,7 @@ extension DiscordLocaleDict: Sendable where C: Sendable {}
 extension DiscordLocaleDict: Hashable where C: Hashable {}
 
 extension DiscordLocaleDict: Equatable where C: Equatable {
-  public static func == (lhs: DiscordLocaleDict, rhs: DiscordLocaleDict) -> Bool
-  {
+  public static func == (lhs: DiscordLocaleDict, rhs: DiscordLocaleDict) -> Bool {
     return lhs.values == rhs.values
   }
 }
@@ -263,10 +262,10 @@ public struct DiscordTimestamp: Codable, Hashable {
 
     public var description: String {
       switch self {
-      case let .unexpectedFormat(codingKey, timestamp):
+      case .unexpectedFormat(let codingKey, let timestamp):
         return
           "DiscordTimestamp.DecodingError.unexpectedFormat(\(codingKey), \(timestamp))"
-      case let .conversionFailure(codingKey, timestamp, components):
+      case .conversionFailure(let codingKey, let timestamp, let components):
         return
           "DiscordTimestamp.DecodingError.conversionFailure(\(codingKey), \(timestamp), \(components))"
       }
@@ -831,8 +830,7 @@ public final class DereferenceBox<C>: Codable where C: Codable {
 
 extension DereferenceBox: Sendable where C: Sendable {}
 extension DereferenceBox: Equatable where C: Equatable {
-  public static func == (lhs: DereferenceBox<C>, rhs: DereferenceBox<C>) -> Bool
-  {
+  public static func == (lhs: DereferenceBox<C>, rhs: DereferenceBox<C>) -> Bool {
     return lhs.value == rhs.value
   }
 }

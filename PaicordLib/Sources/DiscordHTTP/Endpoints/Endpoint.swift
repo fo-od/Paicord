@@ -15,7 +15,7 @@ public protocol Endpoint: Sendable, CustomStringConvertible {
   /// Path parameters.
   var parameters: [String] { get }
   var id: Int { get }
-  
+
   var specialisedRatelimit: (maxRequests: Int, for: Duration)? { get }
 }
 
@@ -31,13 +31,13 @@ public enum AnyEndpoint: Endpoint {
 
   public var url: String {
     switch self {
-    case let .api(endpoint):
+    case .api(let endpoint):
       return endpoint.url
-    case let .userApi(endpoint):
+    case .userApi(let endpoint):
       return endpoint.url
-    case let .cdn(endpoint):
+    case .cdn(let endpoint):
       return endpoint.url
-    case let .loose(endpoint):
+    case .loose(let endpoint):
       return endpoint.url
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
@@ -48,13 +48,13 @@ public enum AnyEndpoint: Endpoint {
 
   public var urlDescription: String {
     switch self {
-    case let .api(endpoint):
+    case .api(let endpoint):
       return endpoint.urlDescription
-		case let .userApi(endpoint):
-			return endpoint.urlDescription
-    case let .cdn(endpoint):
+    case .userApi(let endpoint):
       return endpoint.urlDescription
-    case let .loose(endpoint):
+    case .cdn(let endpoint):
+      return endpoint.urlDescription
+    case .loose(let endpoint):
       return endpoint.urlDescription
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
@@ -65,13 +65,13 @@ public enum AnyEndpoint: Endpoint {
 
   public var httpMethod: HTTPMethod {
     switch self {
-    case let .api(endpoint):
+    case .api(let endpoint):
       return endpoint.httpMethod
-		case let .userApi(endpoint):
-			return endpoint.httpMethod
-    case let .cdn(endpoint):
+    case .userApi(let endpoint):
       return endpoint.httpMethod
-    case let .loose(endpoint):
+    case .cdn(let endpoint):
+      return endpoint.httpMethod
+    case .loose(let endpoint):
       return endpoint.httpMethod
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
@@ -82,13 +82,13 @@ public enum AnyEndpoint: Endpoint {
 
   public var countsAgainstGlobalRateLimit: Bool {
     switch self {
-    case let .api(endpoint):
+    case .api(let endpoint):
       return endpoint.countsAgainstGlobalRateLimit
-		case let .userApi(endpoint):
-			return endpoint.countsAgainstGlobalRateLimit
-    case let .cdn(endpoint):
+    case .userApi(let endpoint):
       return endpoint.countsAgainstGlobalRateLimit
-    case let .loose(endpoint):
+    case .cdn(let endpoint):
+      return endpoint.countsAgainstGlobalRateLimit
+    case .loose(let endpoint):
       return endpoint.countsAgainstGlobalRateLimit
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
@@ -99,13 +99,13 @@ public enum AnyEndpoint: Endpoint {
 
   public var requiresAuthorizationHeader: Bool {
     switch self {
-    case let .api(endpoint):
+    case .api(let endpoint):
       return endpoint.requiresAuthorizationHeader
-		case let .userApi(endpoint):
-			return endpoint.requiresAuthorizationHeader
-    case let .cdn(endpoint):
+    case .userApi(let endpoint):
       return endpoint.requiresAuthorizationHeader
-    case let .loose(endpoint):
+    case .cdn(let endpoint):
+      return endpoint.requiresAuthorizationHeader
+    case .loose(let endpoint):
       return endpoint.requiresAuthorizationHeader
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
@@ -116,13 +116,13 @@ public enum AnyEndpoint: Endpoint {
 
   public var parameters: [String] {
     switch self {
-    case let .api(endpoint):
+    case .api(let endpoint):
       return endpoint.parameters
-		case let .userApi(endpoint):
-			return endpoint.parameters
-    case let .cdn(endpoint):
+    case .userApi(let endpoint):
       return endpoint.parameters
-    case let .loose(endpoint):
+    case .cdn(let endpoint):
+      return endpoint.parameters
+    case .loose(let endpoint):
       return endpoint.parameters
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
@@ -133,13 +133,13 @@ public enum AnyEndpoint: Endpoint {
 
   public var id: Int {
     switch self {
-    case let .api(endpoint):
+    case .api(let endpoint):
       return endpoint.id
-		case let .userApi(endpoint):
-			return endpoint.id
-    case let .cdn(endpoint):
+    case .userApi(let endpoint):
+      return endpoint.id
+    case .cdn(let endpoint):
       return -endpoint.id
-    case let .loose(endpoint):
+    case .loose(let endpoint):
       return endpoint.id
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
@@ -150,13 +150,13 @@ public enum AnyEndpoint: Endpoint {
 
   public var description: String {
     switch self {
-    case let .api(endpoint):
+    case .api(let endpoint):
       return "AnyEndpoint.botApi(\(endpoint))"
-		case let .userApi(endpoint):
-			return "AnyEndpoint.userApi(\(endpoint))"
-    case let .cdn(endpoint):
+    case .userApi(let endpoint):
+      return "AnyEndpoint.userApi(\(endpoint))"
+    case .cdn(let endpoint):
       return "AnyEndpoint.cdn(\(endpoint))"
-    case let .loose(endpoint):
+    case .loose(let endpoint):
       return "AnyEndpoint.loose(\(endpoint))"
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
@@ -164,16 +164,16 @@ public enum AnyEndpoint: Endpoint {
       )
     }
   }
-  
+
   public var specialisedRatelimit: (maxRequests: Int, for: Duration)? {
     switch self {
-    case let .api(endpoint):
+    case .api(let endpoint):
       return endpoint.specialisedRatelimit
-    case let .userApi(endpoint):
+    case .userApi(let endpoint):
       return endpoint.specialisedRatelimit
-    case let .cdn(endpoint):
+    case .cdn(let endpoint):
       return endpoint.specialisedRatelimit
-    case let .loose(endpoint):
+    case .loose(let endpoint):
       return endpoint.specialisedRatelimit
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(

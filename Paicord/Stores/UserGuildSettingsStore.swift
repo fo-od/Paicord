@@ -6,8 +6,8 @@
 //  Copyright © 2025 Lakhan Lothiyi.
 //
 
-import PaicordLib
 import Foundation
+import PaicordLib
 import SwiftPrettyPrint
 
 // https://docs.discord.food/topics/read-state#how-unreads-work
@@ -17,7 +17,7 @@ class UserGuildSettingsStore: DiscordDataStore {
   var gateway: GatewayStore?
 
   var eventTask: Task<Void, Never>?
-  
+
   var userGuildSettings: [GuildSnowflake?: Guild.UserGuildSettings] = [:]
 
   func setupEventHandling() {

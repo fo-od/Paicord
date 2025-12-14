@@ -1160,7 +1160,7 @@ final class DiscordMarkdownParserTests: XCTestCase {
     let maybeText2 = para2.children[1] as? AST.TextNode
     XCTAssertNotNil(maybeText2)
     XCTAssertEqual(maybeText2?.content, " test")
-    
+
     let markdown3 =
       "https://cf407f6265b8.ngrok-free.app/latex-solver.php?step-by-step=true&q=[\\int%20\\frac{\\sec^2%20x}{\\sqrt{\\tan^2\\big(\\sinh^{-1}(\\sqrt{\\sec^2%20x%20-%201})\\big)%20+%201}}%20,%20dx]"
     let document3 = try await parser.parseToAST(markdown3)
@@ -1173,7 +1173,7 @@ final class DiscordMarkdownParserTests: XCTestCase {
     let maybeAutolink3 = para3.children[0] as? AST.AutolinkNode
     XCTAssertNotNil(maybeAutolink3)
   }
-  
+
   func testListEdgeCases() async throws {
     let markdown1 = """
       1.  **test `list` item**
@@ -1182,12 +1182,13 @@ final class DiscordMarkdownParserTests: XCTestCase {
           ```
       2.  gm
       """
-    
+
     let document1 = try await parser.parseToAST(markdown1)
   }
-  
+
   func testMaskedLinks() async throws {
-    let markdown1 = "[test](https://x.com/Leopeva64/status/1983735129140031680?t=I3-sVisE9mMRb50sCDuP5Q&s=19)"
+    let markdown1 =
+      "[test](https://x.com/Leopeva64/status/1983735129140031680?t=I3-sVisE9mMRb50sCDuP5Q&s=19)"
     let document1 = try await parser.parseToAST(markdown1)
     print(document1)
     guard let paragraphNode = document1.children.first,
@@ -1198,20 +1199,21 @@ final class DiscordMarkdownParserTests: XCTestCase {
       return
     }
   }
-  
+
   func testTokenizeLink() throws {
     let markdown = "[**bold** <:smile:123456>](https://example.com)"
     let tokenizer = MarkdownTokenizer(markdown)
     let tokens = tokenizer.tokenize()
-    
+
     print("=== TOKENS ===")
     for (index, token) in tokens.enumerated() {
       print("\(index): \(token.type) = '\(token.content)'")
     }
   }
-  
+
   func testMaskedLinksWithBracketsInURL() async throws {
-    let complexURL = "https://cf407f6265b8.ngrok-free.app/latex-solver.php?step-by-step=true&q=[\\int%20\\frac{\\sec^2%20x}{\\sqrt{\\tan^2\\big(\\sinh^{-1}(\\sqrt{\\sec^2%20x%20-%201})\\big)%20+%201}}%20,%20dx]"
+    let complexURL =
+      "https://cf407f6265b8.ngrok-free.app/latex-solver.php?step-by-step=true&q=[\\int%20\\frac{\\sec^2%20x}{\\sqrt{\\tan^2\\big(\\sinh^{-1}(\\sqrt{\\sec^2%20x%20-%201})\\big)%20+%201}}%20,%20dx]"
     let markdown = "[LaTeX Solver](\(complexURL))"
     print(markdown)
     let document = try await parser.parseToAST(markdown)
@@ -1222,11 +1224,12 @@ final class DiscordMarkdownParserTests: XCTestCase {
       XCTFail("No link node found")
       return
     }
-    XCTAssertEqual(linkNode.url, complexURL, "URL with complex brackets should be preserved correctly")
-    
+    XCTAssertEqual(
+      linkNode.url, complexURL, "URL with complex brackets should be preserved correctly")
+
     let linkText = linkNode.children.compactMap { $0 as? AST.TextNode }.first?.content
     XCTAssertEqual(linkText, "LaTeX Solver")
-    
+
     // Also test a simpler case
     let simpleMarkdown = "[test](https://example.com/path?q=[value])"
     let simpleDoc = try await parser.parseToAST(simpleMarkdown)

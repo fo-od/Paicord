@@ -1,5 +1,5 @@
 extension String {
-    func urlPathEncoded() -> String {
-        self.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? self
-    }
+  func urlPathEncoded() -> String {
+    self.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? self
+  }
 }

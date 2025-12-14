@@ -70,25 +70,30 @@ struct ChannelButton: View {
               .padding(2)
           } else {
             VStack {
-              if let firstUser = channel.recipients?.first(where: {$0.id != gw.user.currentUser?.id}),
-                 let lastUser = channel.recipients?.last(where: { $0.id != gw.user.currentUser?.id && $0.id != firstUser.id }) {
-                  Group {
+              if let firstUser = channel.recipients?.first(where: {
+                $0.id != gw.user.currentUser?.id
+              }),
+                let lastUser = channel.recipients?.last(where: {
+                  $0.id != gw.user.currentUser?.id && $0.id != firstUser.id
+                })
+              {
+                Group {
+                  Profile.Avatar(
+                    member: nil,
+                    user: firstUser.toPartialUser()
+                  )
+                  .profileShowsAvatarDecoration()
+                  .scaleEffect(0.75, anchor: .topLeading)
+                  .overlay(
                     Profile.Avatar(
                       member: nil,
-                      user: firstUser.toPartialUser()
+                      user: lastUser.toPartialUser()
                     )
                     .profileShowsAvatarDecoration()
-                    .scaleEffect(0.75, anchor: .topLeading)
-                    .overlay(
-                      Profile.Avatar(
-                        member: nil,
-                        user: lastUser.toPartialUser()
-                      )
-                      .profileShowsAvatarDecoration()
-                      .scaleEffect(0.75, anchor: .bottomTrailing)
-                    )
-                  }
-                  .padding(2)
+                    .scaleEffect(0.75, anchor: .bottomTrailing)
+                  )
+                }
+                .padding(2)
               } else if let user = channel.recipients?.first {
                 Profile.Avatar(
                   member: nil,
@@ -97,9 +102,9 @@ struct ChannelButton: View {
                 .profileShowsAvatarDecoration()
                 .padding(2)
               } else {
-                  Circle()
-                    .fill(Color.gray)
-                    .padding(2)
+                Circle()
+                  .fill(Color.gray)
+                  .padding(2)
               }
             }
             .aspectRatio(1, contentMode: .fit)
@@ -150,19 +155,19 @@ struct ChannelButton: View {
         .padding(.horizontal, 12)
       }
       .tint(.primary)
-  case .guildVoice:
-    textChannelButton { _ in
-      HStack {
-        Image(systemName: "speaker.wave.2.fill")
-          .imageScale(.medium)
-        Text(channel.name ?? "unknown")
+    case .guildVoice:
+      textChannelButton { _ in
+        HStack {
+          Image(systemName: "speaker.wave.2.fill")
+            .imageScale(.medium)
+          Text(channel.name ?? "unknown")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .minHeight(35)
+        .padding(.horizontal, 12)
       }
-      .frame(maxWidth: .infinity, alignment: .leading)
-      .minHeight(35)
-      .padding(.horizontal, 12)
-    }
-    .tint(.primary)
-    .disabled(true)
+      .tint(.primary)
+      .disabled(true)
     default:
       textChannelButton { _ in
         HStack {
@@ -312,13 +317,13 @@ struct ChannelButton: View {
               }
               Text(channel.name ?? "Unknown Category")
                 .font(.subheadline)
-              
+
               if idiom == .mac {
                 Image(systemName: "chevron.down")
                   .imageScale(.small)
                   .rotationEffect(.degrees(isExpanded ? 0 : -90))
               }
-              
+
               Spacer()
             }
             .foregroundStyle(.secondary)

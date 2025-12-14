@@ -70,7 +70,7 @@ struct ThemingSection: View {
                 ]
               )
             }
-            
+
             defer { url.stopAccessingSecurityScopedResource() }
             let data = try Data(contentsOf: url)
             let theme = try JSONDecoder().decode(

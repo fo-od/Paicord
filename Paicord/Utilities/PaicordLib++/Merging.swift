@@ -60,7 +60,7 @@ extension Guild {
     self.version = new.version
     self.guild_id = new.guild_id
   }
-  
+
   mutating func update(with new: Guild) {
     self.id = new.id
     self.name = new.name

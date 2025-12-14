@@ -20,7 +20,7 @@ struct GuildButton: View {
   @Environment(\.gateway) var gw
   @Environment(\.colorScheme) var colorScheme
   @Environment(\.theme) var theme
-  
+
   init(guild: Guild?) {
     self.guild = guild
     self.guilds = nil
@@ -95,7 +95,7 @@ struct GuildButton: View {
               .aspectRatio(1, contentMode: .fit)
               .overlay {
                 if folder.hasColor,
-                   let color = DiscordColor(value: Int(folder.color.value))?.asColor()
+                  let color = DiscordColor(value: Int(folder.color.value))?.asColor()
                 {
                   Image(systemName: "folder.fill")
                     .font(.title2)
@@ -171,7 +171,7 @@ struct GuildButton: View {
       }
       .background {
         if folder.hasColor,
-           let color = DiscordColor(value: Int(folder.color.value))?.asColor()
+          let color = DiscordColor(value: Int(folder.color.value))?.asColor()
         {
           Rectangle()
             .fill(color.secondary.opacity(0.35))
@@ -274,7 +274,7 @@ struct GuildButton: View {
                       colorScheme == .dark
                         ? Color.white
                         : (isSelected
-                           ? Color.white
+                          ? Color.white
                           : Color.black)
                     )
                 }
@@ -291,7 +291,8 @@ struct GuildButton: View {
                   colorScheme == .dark ? .white : isSelected ? .white : .black
                 )
             }
-            .background(isSelected ? theme.common.accent : theme.common.primaryButtonBackground.opacity(0.5))
+            .background(
+              isSelected ? theme.common.accent : theme.common.primaryButtonBackground.opacity(0.5))
         }
       }
       .clipShape(.rect(cornerRadius: isSelected ? 10 : 32, style: .continuous))

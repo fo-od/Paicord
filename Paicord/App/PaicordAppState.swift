@@ -13,9 +13,9 @@ import SwiftUIX
 final class PaicordAppState {
   // each window gets its own app state
   static var instances: [UUID: PaicordAppState] = [:]
-  
+
   let id = UUID()
-  
+
   // MARK: - iOS Specific
   var chatOpen: Bool = true
 

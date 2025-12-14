@@ -6,10 +6,10 @@
 // Copyright © 2025 Lakhan Lothiyi.
 //
 
+import Algorithms
 import Foundation
 import KeychainAccess
 import PaicordLib
-import Algorithms
 
 @Observable
 final class TokenStore {
@@ -115,10 +115,11 @@ final class TokenStore {
   private static func load() -> [AccountData] {
     let data = (try? keychain.getData(accountDataKey)) ?? Data()
     return
-      Array(((try? DiscordGlobalConfiguration.decoder.decode(
-        [AccountData].self,
-        from: data
-      )) ?? []).uniqued(on: \.user.id))
+      Array(
+        ((try? DiscordGlobalConfiguration.decoder.decode(
+          [AccountData].self,
+          from: data
+        )) ?? []).uniqued(on: \.user.id))
   }
 
   private static func save(_ data: [AccountData]) {

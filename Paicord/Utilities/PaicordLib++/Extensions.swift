@@ -10,7 +10,7 @@ import PaicordLib
 import SwiftUI
 
 extension DiscordColor {
-  
+
   /// Converts the `DiscordColor` to a SwiftUI `Color`.
   /// - Parameter ignoringZero: If `true`, a color value of zero will return `nil`.
   /// - Returns: A `Color` representation of the `DiscordColor`, or `nil` if the value is zero and `ignoringZero` is `true`.

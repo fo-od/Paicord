@@ -253,9 +253,7 @@ extension IntBitField where R == Permission {
 }
 
 extension DiscordChannel {
-  fileprivate var memberPermissionOverwrites:
-    [UserSnowflake: DiscordChannel.Overwrite]
-  {
+  fileprivate var memberPermissionOverwrites: [UserSnowflake: DiscordChannel.Overwrite] {
     var overwrites: [UserSnowflake: DiscordChannel.Overwrite] = [:]
     for overwrite in self.permission_overwrites ?? [] {
       switch overwrite.type {
@@ -267,9 +265,7 @@ extension DiscordChannel {
     }
     return overwrites
   }
-  fileprivate var rolePermissionOverwrites:
-    [RoleSnowflake: DiscordChannel.Overwrite]
-  {
+  fileprivate var rolePermissionOverwrites: [RoleSnowflake: DiscordChannel.Overwrite] {
     var overwrites: [RoleSnowflake: DiscordChannel.Overwrite] = [:]
     for overwrite in self.permission_overwrites ?? [] {
       switch overwrite.type {

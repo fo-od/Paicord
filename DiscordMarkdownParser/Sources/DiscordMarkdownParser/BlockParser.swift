@@ -334,7 +334,7 @@ public final class BlockParser {
       }
       return line
     }
-    
+
     let processedContent = processedLines.joined(separator: "\n")
 
     // Create new tokenizer and parser for block quote content

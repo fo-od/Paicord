@@ -8,7 +8,7 @@ public enum AuthenticationHeader: Sendable {
   case botToken(Secret)
   case oAuthToken(Secret)
   case userToken(Secret)
-	case userNone
+  case userNone
   case none
 
   @inlinable
@@ -20,8 +20,8 @@ public enum AuthenticationHeader: Sendable {
       return "o-\(secret.value.hash)"
     case .userToken(let secret):
       return "u-\(secret.value.hash)"
-		case .userNone:
-			return "u"
+    case .userNone:
+      return "u"
     case .none:
       return nil
     }
@@ -29,8 +29,7 @@ public enum AuthenticationHeader: Sendable {
 
   /// Adds an authentication header or throws an error.
   @inlinable
-  func addHeader(headers: inout HTTPHeaders, request: DiscordHTTPRequest) throws
-  {
+  func addHeader(headers: inout HTTPHeaders, request: DiscordHTTPRequest) throws {
     switch self {
     case .botToken(let secret):
       headers.replaceOrAdd(name: "Authorization", value: "Bot \(secret.value)")
@@ -39,7 +38,7 @@ public enum AuthenticationHeader: Sendable {
         name: "Authorization", value: "Bearer \(secret.value)")
     case .userToken(let secret):
       headers.replaceOrAdd(name: "Authorization", value: secret.value)
-		case .userNone, .none:
+    case .userNone, .none:
       throw DiscordHTTPError.authenticationHeaderRequired(request: request)
     }
   }
@@ -48,7 +47,7 @@ public enum AuthenticationHeader: Sendable {
   @inlinable
   func extractAppIdIfAvailable() -> ApplicationSnowflake? {
     switch self {
-    case let .botToken(token):
+    case .botToken(let token):
       if let base64 = token.value.split(separator: ".").first {
         for base64 in [base64, base64 + "=="] {
           if let data = Data(base64Encoded: String(base64)),
@@ -66,15 +65,15 @@ public enum AuthenticationHeader: Sendable {
         ]
       )
       return nil
-		case .oAuthToken, .userToken, .userNone, .none: return nil
+    case .oAuthToken, .userToken, .userNone, .none: return nil
     }
   }
-	
-	@inlinable
-	var userMode: Bool {
-		switch self {
-		case .userNone, .userToken: return true
-		default: return false
-		}
-	}
+
+  @inlinable
+  var userMode: Bool {
+    switch self {
+    case .userNone, .userToken: return true
+    default: return false
+    }
+  }
 }

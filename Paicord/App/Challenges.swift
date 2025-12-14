@@ -14,8 +14,7 @@ import PaicordLib
 final class Challenges {
   // Captcha
   var captchaChallenge: CaptchaChallengeData?
-  private var captchaContinuation:
-    CheckedContinuation<CaptchaSubmitData?, Never>?
+  private var captchaContinuation: CheckedContinuation<CaptchaSubmitData?, Never>?
 
   // MFA
   var mfaVerification: MFAVerificationData?

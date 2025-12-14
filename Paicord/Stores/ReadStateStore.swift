@@ -21,7 +21,7 @@ class ReadStateStore: DiscordDataStore {
   }
 
   var readStates: [AnySnowflake: Gateway.ReadState] = [:]
-  
+
   func setupEventHandling() {
     eventTask?.cancel()
     guard let gateway = gateway?.gateway else { return }
@@ -44,9 +44,7 @@ class ReadStateStore: DiscordDataStore {
       $0[$1.id] = $1
     }
   }
-  
-  
-  
+
   private func handleMessageAcknowledge(_ ackData: Gateway.MessageAcknowledge) {
     // Currently no-op
   }

@@ -49,8 +49,8 @@ public struct Reaction: Sendable, Codable, Hashable {
 
   public var urlPathDescription: String {
     switch self.base {
-    case let .unicodeEmoji(emoji): return emoji
-    case let .guildEmoji(name, id): return "\(name ?? ""):\(id.rawValue)"
+    case .unicodeEmoji(let emoji): return emoji
+    case .guildEmoji(let name, let id): return "\(name ?? ""):\(id.rawValue)"
     }
   }
 
@@ -76,11 +76,11 @@ public struct Reaction: Sendable, Codable, Hashable {
 
     public var description: String {
       switch self {
-      case let .moreThan1Emoji(input, count):
+      case .moreThan1Emoji(let input, let count):
         return "Reaction.Error.moreThan1Emoji(\(input), count: \(count))"
-      case let .notEmoji(input):
+      case .notEmoji(let input):
         return "Reaction.Error.notEmoji(\(input))"
-      case let .cantConvertEmoji(emoji):
+      case .cantConvertEmoji(let emoji):
         return "Reaction.Error.cantConvertEmoji(\(emoji))"
       }
     }
@@ -115,8 +115,8 @@ public struct Reaction: Sendable, Codable, Hashable {
   /// Is the same as the partial emoji?
   public func `is`(_ emoji: Emoji) -> Bool {
     switch self.base {
-    case let .unicodeEmoji(unicode): return unicode == emoji.name
-    case let .guildEmoji(_, id): return id == emoji.id
+    case .unicodeEmoji(let unicode): return unicode == emoji.name
+    case .guildEmoji(_, let id): return id == emoji.id
     }
   }
 }

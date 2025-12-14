@@ -68,54 +68,54 @@ public enum CDNEndpoint: Endpoint {
   var urlSuffix: String {
     let suffix: String
     switch self {
-    case let .customEmoji(emojiId):
+    case .customEmoji(let emojiId):
       suffix = "emojis/\(emojiId.rawValue)"
-    case let .guildIcon(guildId, icon):
+    case .guildIcon(let guildId, let icon):
       suffix = "icons/\(guildId.rawValue)/\(icon)"
-    case let .guildSplash(guildId, splash):
+    case .guildSplash(let guildId, let splash):
       suffix = "splashes/\(guildId.rawValue)/\(splash)"
-    case let .guildDiscoverySplash(guildId, splash):
+    case .guildDiscoverySplash(let guildId, let splash):
       suffix = "discovery-splashes/\(guildId.rawValue)/\(splash)"
-    case let .guildBanner(guildId, banner):
+    case .guildBanner(let guildId, let banner):
       suffix = "banners/\(guildId.rawValue)/\(banner)"
-    case let .guildTagBadge(guildId, badge):
+    case .guildTagBadge(let guildId, let badge):
       suffix = "guild-tag-badges/\(guildId.rawValue)/\(badge)"
-    case let .userBanner(userId, banner):
+    case .userBanner(let userId, let banner):
       suffix = "banners/\(userId.rawValue)/\(banner)"
     case .defaultUserAvatar(let id):
       // old system used discriminator modulo 5
       // new system uses user id bit shift left 22 then modulo 6
       let index = ((Int(id.rawValue) ?? 0) >> 22) % 6
       suffix = "embed/avatars/\(index)"
-    case let .userAvatar(userId, avatar):
+    case .userAvatar(let userId, let avatar):
       suffix = "avatars/\(userId.rawValue)/\(avatar)"
-    case let .guildMemberAvatar(guildId, userId, avatar):
+    case .guildMemberAvatar(let guildId, let userId, let avatar):
       suffix =
         "guilds/\(guildId.rawValue)/users/\(userId.rawValue)/avatars/\(avatar)"
-    case let .profileBadge(icon):
+    case .profileBadge(let icon):
       suffix = "badge-icons/\(icon)"
-    case let .userAvatarDecoration(userId, avatarDecoration):
+    case .userAvatarDecoration(let userId, let avatarDecoration):
       suffix = "avatar-decorations/\(userId.rawValue)/\(avatarDecoration)"
-    case let .avatarDecoration(asset):
+    case .avatarDecoration(let asset):
       suffix = "avatar-decoration-presets/\(asset)"
-    case let .collectibleNameplate(asset, file):
+    case .collectibleNameplate(let asset, let file):
       suffix = "assets/collectibles/\(asset)\(file.rawValue)"
-    case let .applicationIcon(appId, icon):
+    case .applicationIcon(let appId, let icon):
       suffix = "app-icons/\(appId.rawValue)/\(icon)"
-    case let .applicationCover(appId, cover):
+    case .applicationCover(let appId, let cover):
       suffix = "app-icons/\(appId.rawValue)/\(cover)"
-    case let .applicationAsset(appId, assetId):
+    case .applicationAsset(let appId, let assetId):
       suffix = "app-assets/\(appId.rawValue)/\(assetId.rawValue)"
-    case let .achievementIcon(appId, achievementId, icon):
+    case .achievementIcon(let appId, let achievementId, let icon):
       suffix =
         "app-assets/\(appId.rawValue)/achievements/\(achievementId.rawValue)/icons/\(icon)"
-    case let .storePageAsset(appId, assetId):
+    case .storePageAsset(let appId, let assetId):
       suffix = "app-assets/\(appId.rawValue)/store/\(assetId.rawValue)"
-    case let .stickerPackBanner(assetId):
+    case .stickerPackBanner(let assetId):
       suffix = "app-assets/710982414301790216/store/\(assetId.rawValue)"
-    case let .teamIcon(teamId, icon):
+    case .teamIcon(let teamId, let icon):
       suffix = "team-icons/\(teamId.rawValue)/\(icon)"
-    case let .sticker(stickerId, format):
+    case .sticker(let stickerId, let format):
       switch format {
       case .gif:
         suffix = "stickers/\(stickerId.rawValue).gif"
@@ -124,14 +124,14 @@ public enum CDNEndpoint: Endpoint {
       default:
         suffix = "stickers/\(stickerId.rawValue).png"
       }
-    case let .roleIcon(roleId, icon):
+    case .roleIcon(let roleId, let icon):
       suffix = "role-icons/\(roleId.rawValue)/\(icon)"
-    case let .guildScheduledEventCover(eventId, cover):
+    case .guildScheduledEventCover(let eventId, let cover):
       suffix = "guild-events/\(eventId.rawValue)/\(cover)"
-    case let .guildMemberBanner(guildId, userId, banner):
+    case .guildMemberBanner(let guildId, let userId, let banner):
       suffix =
         "guilds/\(guildId.rawValue)/users/\(userId.rawValue)/banners/\(banner)"
-    case let .channelIcon(channelId, icon):
+    case .channelIcon(let channelId, let icon):
       suffix = "channel-icons/\(channelId.rawValue)/\(icon)"
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
@@ -278,61 +278,61 @@ public enum CDNEndpoint: Endpoint {
 
   public var description: String {
     switch self {
-    case let .customEmoji(emojiId):
+    case .customEmoji(let emojiId):
       return "customEmoji(emojiId: \(emojiId))"
-    case let .guildIcon(guildId, icon):
+    case .guildIcon(let guildId, let icon):
       return "guildIcon(guildId: \(guildId), icon: \(icon))"
-    case let .guildSplash(guildId, splash):
+    case .guildSplash(let guildId, let splash):
       return "guildSplash(guildId: \(guildId), splash: \(splash))"
-    case let .guildDiscoverySplash(guildId, splash):
+    case .guildDiscoverySplash(let guildId, let splash):
       return "guildDiscoverySplash(guildId: \(guildId), splash: \(splash))"
-    case let .guildBanner(guildId, banner):
+    case .guildBanner(let guildId, let banner):
       return "guildBanner(guildId: \(guildId), banner: \(banner))"
-    case let .guildTagBadge(guildId, badge):
+    case .guildTagBadge(let guildId, let badge):
       return "guildTagBadge(guildId: \(guildId), badge: \(badge))"
-    case let .userBanner(userId, banner):
+    case .userBanner(let userId, let banner):
       return "userBanner(userId: \(userId), banner: \(banner))"
-    case let .defaultUserAvatar(discriminator):
+    case .defaultUserAvatar(let discriminator):
       return "defaultUserAvatar(discriminator: \(discriminator))"
-    case let .userAvatar(userId, avatar):
+    case .userAvatar(let userId, let avatar):
       return "userAvatar(userId: \(userId), avatar: \(avatar))"
-    case let .guildMemberAvatar(guildId, userId, avatar):
+    case .guildMemberAvatar(let guildId, let userId, let avatar):
       return
         "guildMemberAvatar(guildId: \(guildId), userId: \(userId), avatar: \(avatar))"
-    case let .profileBadge(icon):
+    case .profileBadge(let icon):
       return "profileBadge(icon: \(icon))"
-    case let .userAvatarDecoration(userId, avatarDecoration):
+    case .userAvatarDecoration(let userId, let avatarDecoration):
       return
         "userAvatarDecoration(userId: \(userId), avatarDecoration: \(avatarDecoration))"
-    case let .avatarDecoration(asset):
+    case .avatarDecoration(let asset):
       return "avatarDecoration(asset: \(asset))"
-    case let .collectibleNameplate(asset, file):
+    case .collectibleNameplate(let asset, let file):
       return "collectibleNameplate(asset: \(asset), file: \(file))"
-    case let .applicationIcon(appId, icon):
+    case .applicationIcon(let appId, let icon):
       return "applicationIcon(appId: \(appId), icon: \(icon))"
-    case let .applicationCover(appId, cover):
+    case .applicationCover(let appId, let cover):
       return "applicationCover(appId: \(appId), cover: \(cover))"
-    case let .applicationAsset(appId, assetId):
+    case .applicationAsset(let appId, let assetId):
       return "applicationAsset(appId: \(appId), assetId: \(assetId))"
-    case let .achievementIcon(appId, achievementId, icon):
+    case .achievementIcon(let appId, let achievementId, let icon):
       return
         "achievementIcon(appId: \(appId), achievementId: \(achievementId), icon: \(icon))"
-    case let .storePageAsset(appId, assetId):
+    case .storePageAsset(let appId, let assetId):
       return "storePageAsset(appId: \(appId), assetId: \(assetId))"
-    case let .stickerPackBanner(assetId):
+    case .stickerPackBanner(let assetId):
       return "stickerPackBanner(assetId: \(assetId))"
-    case let .teamIcon(teamId, icon):
+    case .teamIcon(let teamId, let icon):
       return "teamIcon(teamId: \(teamId), icon: \(icon))"
-    case let .sticker(stickerId, _):
+    case .sticker(let stickerId, _):
       return "sticker(stickerId: \(stickerId))"
-    case let .roleIcon(roleId, icon):
+    case .roleIcon(let roleId, let icon):
       return "roleIcon(roleId: \(roleId), icon: \(icon))"
-    case let .guildScheduledEventCover(eventId, cover):
+    case .guildScheduledEventCover(let eventId, let cover):
       return "guildScheduledEventCover(eventId: \(eventId), cover: \(cover))"
-    case let .guildMemberBanner(guildId, userId, banner):
+    case .guildMemberBanner(let guildId, let userId, let banner):
       return
         "guildMemberBanner(guildId: \(guildId), userId: \(userId), banner: \(banner))"
-    case let .channelIcon(channelId, icon):
+    case .channelIcon(let channelId, let icon):
       return "channelIcon(channelId: \(channelId), icon: \(icon))"
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(

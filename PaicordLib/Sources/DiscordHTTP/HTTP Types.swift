@@ -160,8 +160,7 @@ public struct DiscordHTTPResponse: Sendable, CustomStringConvertible {
   /// Doesn't check for success of the response
   @usableFromInline
   func _decode<D: Decodable>(as _: D.Type = D.self) throws -> D {
-    if let data = body.map({ Data(buffer: $0, byteTransferStrategy: .noCopy) })
-    {
+    if let data = body.map({ Data(buffer: $0, byteTransferStrategy: .noCopy) }) {
       do {
         return try DiscordGlobalConfiguration.decoder.decode(D.self, from: data)
       } catch {
@@ -275,9 +274,9 @@ public enum DiscordHTTPErrorResponse: Error, CustomStringConvertible {
 
   public var description: String {
     switch self {
-    case let .jsonError(jsonError):
+    case .jsonError(let jsonError):
       return "DiscordHTTPErrorResponse.jsonError(\(jsonError))"
-    case let .badStatusCode(response):
+    case .badStatusCode(let response):
       return "DiscordHTTPErrorResponse.badStatusCode(\(response))"
     }
   }
@@ -313,35 +312,35 @@ public enum DiscordHTTPError: Error, CustomStringConvertible {
 
   public var description: String {
     switch self {
-    case let .rateLimited(url):
+    case .rateLimited(let url):
       return "DiscordHTTPError.rateLimited(url: \(url))"
-    case let .badStatusCode(response):
+    case .badStatusCode(let response):
       return "DiscordHTTPError.badStatusCode(\(response))"
-    case let .cantDecodeJSONErrorFromSuccessfulResponse(response):
+    case .cantDecodeJSONErrorFromSuccessfulResponse(let response):
       return
         "DiscordHTTPError.cantDecodeJSONErrorFromSuccessfulResponse(\(response))"
-    case let .emptyBody(response):
+    case .emptyBody(let response):
       return "DiscordHTTPError.emptyBody(\(response))"
-    case let .noContentTypeHeader(response):
+    case .noContentTypeHeader(let response):
       return "DiscordHTTPError.noContentTypeHeader(\(response))"
-    case let .authenticationHeaderRequired(request):
+    case .authenticationHeaderRequired(let request):
       return
         "DiscordHTTPError.authenticationHeaderRequired(request: \(request))"
-    case let .decodingError(typeName, response, error):
+    case .decodingError(let typeName, let response, let error):
       return
         "DiscordHTTPError.decodingError(typeName: \(typeName), response: \(response), error: \(error))"
     case .appIdParameterRequired:
       return "DiscordHTTPError.appIdParameterRequired"
-    case let .queryParametersMutuallyExclusive(queries):
+    case .queryParametersMutuallyExclusive(let queries):
       return
         "DiscordHTTPError.queryParametersMutuallyExclusive(queries: \(queries))"
-    case let .queryParameterOutOfBounds(name, value, lowerBound, upperBound):
+    case .queryParameterOutOfBounds(let name, let value, let lowerBound, let upperBound):
       return
         "DiscordHTTPError.queryParameterOutOfBounds(name: \(name), value: \(value ?? "nil"), lowerBound: \(lowerBound), upperBound: \(upperBound))"
-    case let .assertionFailureBotOnlyEndpoint(endpoint):
+    case .assertionFailureBotOnlyEndpoint(let endpoint):
       return
         "DiscordHTTPError.assertionFailureBotOnlyEndpoint(endpoint: \(endpoint))"
-    case let .assertionFailureUserOnlyEndpoint(endpoint):
+    case .assertionFailureUserOnlyEndpoint(let endpoint):
       return
         "DiscordHTTPError.assertionFailureUserOnlyEndpoint(endpoint: \(endpoint))"
     }

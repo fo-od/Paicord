@@ -203,8 +203,7 @@ func thumbHashToRGBA(hash: Data) -> (Int, Int, Data) {
   return (w, h, rgba)
 }
 
-func thumbHashToAverageRGBA(hash: Data) -> (Float32, Float32, Float32, Float32)
-{
+func thumbHashToAverageRGBA(hash: Data) -> (Float32, Float32, Float32, Float32) {
   let h0 = UInt32(hash[0])
   let h1 = UInt32(hash[1])
   let h2 = UInt32(hash[2])

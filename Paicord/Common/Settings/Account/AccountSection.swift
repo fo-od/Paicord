@@ -16,7 +16,8 @@ extension SettingsView {
           guard let currentAccount = gw.accounts.currentAccount else { return }
           gw.accounts.removeAccount(currentAccount)
           await gw.logOut()
-        } catch: { _ in }
+        } catch: { _ in
+        }
 
       }
     }

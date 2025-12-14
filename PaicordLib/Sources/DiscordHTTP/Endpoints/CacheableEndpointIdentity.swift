@@ -14,21 +14,21 @@ public enum CacheableEndpointIdentity: Sendable, Hashable,
   @usableFromInline
   init?(endpoint: AnyEndpoint) {
     switch endpoint {
-    case let .userApi(endpoint):
+    case .userApi(let endpoint):
       if let endpoint = CacheableUserAPIEndpointIdentity(endpoint: endpoint) {
         self = .userApi(endpoint)
       } else {
         return nil
       }
-    case let .api(endpoint):
+    case .api(let endpoint):
       if let endpoint = CacheableAPIEndpointIdentity(endpoint: endpoint) {
         self = .api(endpoint)
       } else {
         return nil
       }
-    case let .cdn(endpoint):
+    case .cdn(let endpoint):
       self = .cdn(CDNEndpointIdentity(endpoint: endpoint))
-    case let .loose(endpoint):
+    case .loose(let endpoint):
       self = .loose(endpoint)
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(

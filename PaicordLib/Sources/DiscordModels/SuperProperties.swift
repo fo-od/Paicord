@@ -8,6 +8,8 @@
 
 import DiscordCore
 import Foundation
+import Playgrounds
+import SwiftUI
 import UInt128
 
 #if canImport(UIKit)
@@ -91,26 +93,27 @@ public enum SuperProperties {
   static let _initialisation_date = Date.now
   static let _client_launch_id = UUID()
   static let _launch_signature = UUID.generateLaunchSignature()
-  
+
   // this needs to be regenerated every 30 minutes
-  nonisolated(unsafe) private static var _client_heartbeat_session_id_last_generated: Date = Date.distantPast
+  nonisolated(unsafe) private static var _client_heartbeat_session_id_last_generated: Date = Date
+    .distantPast
   nonisolated(unsafe) private static var _client_heartbeat_session_id_cached: UUID? = nil
   static var _client_heartbeat_session_id: UUID {
-    get {
-      let now = Date.now
-      if now.timeIntervalSince(_client_heartbeat_session_id_last_generated) > Double(Duration.minutes(30).components.seconds) {
-        _client_heartbeat_session_id_last_generated = now
-        _client_heartbeat_session_id_cached = UUID()
-      }
-      return _client_heartbeat_session_id_cached!
+    let now = Date.now
+    if now.timeIntervalSince(_client_heartbeat_session_id_last_generated)
+      > Double(Duration.minutes(30).components.seconds)
+    {
+      _client_heartbeat_session_id_last_generated = now
+      _client_heartbeat_session_id_cached = UUID()
     }
+    return _client_heartbeat_session_id_cached!
   }
 
   public static func GenerateSuperPropertiesHeader() -> String {
     #if os(Android)
-    fatalError("Android smelly")
+      fatalError("Android smelly")
     #endif
-    
+
     let properties = Gateway.Identify.ConnectionProperties(ws: false)
     // try unsafe because it probably will be fine
     let encoded = try! DiscordGlobalConfiguration.encoder.encode(properties)
@@ -275,12 +278,12 @@ public enum SuperProperties {
 
   public static func launch_signature() -> String? {
     #if os(macOS)
-    return _launch_signature.uuidString.lowercased()
+      return _launch_signature.uuidString.lowercased()
     #elseif os(iOS)
-    // TODO: ios follows a different format, using an integer. not sure how this is generated yet.
-    // for now, i was told its safe to use macos one instead.
-//    return nil
-    return _launch_signature.uuidString.lowercased()
+      // TODO: ios follows a different format, using an integer. not sure how this is generated yet.
+      // for now, i was told its safe to use macos one instead.
+      //    return nil
+      return _launch_signature.uuidString.lowercased()
     #endif
   }
 
@@ -349,7 +352,7 @@ public enum SuperProperties {
       return nil
     #endif
   }
-  
+
   public static func client_heartbeat_session_id() -> String {
     return _client_heartbeat_session_id.uuidString.lowercased()
   }
@@ -381,11 +384,8 @@ extension UUID {
   }
 }
 
-import Playgrounds
-import SwiftUI
-
 #Playground {
-  let number: UInt = 1734653
+  let number: UInt = 1_734_653
   let parsed = IntBitField<Gateway.Capability>.init(rawValue: number)
   var capabilities: [Gateway.Capability] = []
   for cap in Gateway.Capability.allCases {

@@ -240,10 +240,10 @@ struct TestMessageView: View {
   }
 
   #if os(iOS)
-  var animatedKeyboardHeight: CGFloat {
-    (properties.pickerShown || isInputActive)
-      ? properties.keyboardHeight : 0
-  }
+    var animatedKeyboardHeight: CGFloat {
+      (properties.pickerShown || isInputActive)
+        ? properties.keyboardHeight : 0
+    }
   #endif
 }
 

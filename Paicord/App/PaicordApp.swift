@@ -73,7 +73,7 @@ struct PaicordApp: App {
 
   @Environment(\.openWindow) var openWindow
   @Environment(\.theme) var theme
-  
+
   var body: some Scene {
     WindowGroup {
       RootView(

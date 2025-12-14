@@ -110,15 +110,14 @@ class PresenceStore: DiscordDataStore {
     Task {
       let oldStatusActivity = self.currentClientStatusActivity
       let oldStatus = self.currentClientStatus
-        
+
       let currentSessionID = await gateway?.gateway?.getSessionID()
-      
+
       let otherSessions =
         sessions
         .filter { $0.id != "all" }
         .filter { $0.id != currentSessionID }
 
-      
       if let session = otherSessions.first {
         self.currentClientStatus = session.status
         if let existingActivity = session.activities.first(where: {

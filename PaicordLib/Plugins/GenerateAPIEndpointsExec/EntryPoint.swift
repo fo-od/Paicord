@@ -10,14 +10,14 @@ import Foundation
 
 @main
 struct EntryPoint {
-    static func main() async throws {
-        let fm = FileManager.default
-        let current = fm.currentDirectoryPath
-        let path = current + "/Sources/DiscordHTTP/Endpoints/APIEndpoint.swift"
-        let data = Data(result.utf8)
-        let write = fm.createFile(atPath: path, contents: data)
-        if !write {
-            fatalError("Failed to create/write at \(path.debugDescription)")
-        }
+  static func main() async throws {
+    let fm = FileManager.default
+    let current = fm.currentDirectoryPath
+    let path = current + "/Sources/DiscordHTTP/Endpoints/APIEndpoint.swift"
+    let data = Data(result.utf8)
+    let write = fm.createFile(atPath: path, contents: data)
+    if !write {
+      fatalError("Failed to create/write at \(path.debugDescription)")
     }
+  }
 }

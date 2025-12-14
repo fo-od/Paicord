@@ -31,7 +31,7 @@ extension SettingsView {
           }
         #endif
       }
-      
+
       Section("Playgrounds") {
         NavigationLink {
           TestMessageView().eraseToAnyView()
@@ -39,13 +39,14 @@ extension SettingsView {
           Label("Message Attachments Playground", systemImage: "app.dashed")
         }
       }
-      
+
       Section("Sketchy shit") {
         AsyncButton("Force fallback account switcher") {
           gw.accounts.currentAccountID = nil
           await gw.disconnectIfNeeded()
           gw.resetStores()
-        } catch: { _ in }
+        } catch: { _ in
+        }
       }
     }
   }

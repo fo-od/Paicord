@@ -239,7 +239,7 @@ public actor UserGatewayManager: GatewayManager {
         .cacheControl: "no-cache",
         .acceptEncoding: "gzip, deflate, br, deflate",
         .acceptLanguage: SuperProperties.GenerateLocaleHeader(),
-        
+
       ],
       extensions: [.nonNegotiatedExtension { decompressorWSExtension }]
     )
@@ -267,8 +267,7 @@ public actor UserGatewayManager: GatewayManager {
           self.state.store(.configured, ordering: .relaxed)
           self.stateCallback?(.configured)
 
-          for try await message in inbound.messages(maxSize: self.maxFrameSize)
-          {
+          for try await message in inbound.messages(maxSize: self.maxFrameSize) {
             await self.processBinaryData(
               message,
               forConnectionWithId: connectionId
@@ -511,8 +510,10 @@ extension UserGatewayManager {
         every: .milliseconds(Int64(hello.heartbeat_interval))
       )
       /// Sends the update time spent session id payload every 30 minutes, but also on connect too.
-      self.sendUpdateTimeSpentSessionID(forConnectionWithId: self.connectionId.load(ordering: .relaxed))
-      self.setupUpdateTimeSpentSessionID(forConnectionWithId: self.connectionId.load(ordering: .relaxed), every: .minutes(30))
+      self.sendUpdateTimeSpentSessionID(
+        forConnectionWithId: self.connectionId.load(ordering: .relaxed))
+      self.setupUpdateTimeSpentSessionID(
+        forConnectionWithId: self.connectionId.load(ordering: .relaxed), every: .minutes(30))
       logger.trace("Will resume or identify")
       await self.sendResumeOrIdentify()
     case .ready(let payload):
@@ -794,7 +795,7 @@ extension UserGatewayManager {
       self.setupPingTask(forConnectionWithId: connectionId, every: duration)
     }
   }
-  
+
   private func setupUpdateTimeSpentSessionID(
     forConnectionWithId connectionId: UInt,
     every duration: Duration
@@ -829,20 +830,20 @@ extension UserGatewayManager {
         "connectionId": .stringConvertible(connectionId)
       ]
     )
-//        self.send(
-//          message: .init(
-//            payload: .init(
-//              opcode: .heartbeat,
-//              data: .heartbeat(lastSequenceNumber: self.sequenceNumber)
-//            )
-//          )
-//        )
+    //        self.send(
+    //          message: .init(
+    //            payload: .init(
+    //              opcode: .heartbeat,
+    //              data: .heartbeat(lastSequenceNumber: self.sequenceNumber)
+    //            )
+    //          )
+    //        )
     // use QoS Heartbeat instead
     self.send(
       message: .init(
         payload: .init(
           opcode: .qosHeartbeat,
-          data: .qosHeartbeat(.init(seq: self.sequenceNumber, qos: .init())) // TODO: use actual client focus data instead
+          data: .qosHeartbeat(.init(seq: self.sequenceNumber, qos: .init()))  // TODO: use actual client focus data instead
         ),
       )
     )
@@ -893,7 +894,7 @@ extension UserGatewayManager {
       )
     )
   }
-  
+
   private nonisolated func send(message: Message) {
     self.sendQueue.perform { [weak self] in
       guard let self = self else { return }
@@ -928,13 +929,13 @@ extension UserGatewayManager {
       Task {
         // discordbm tried to turn discord's opcodes into a ws opcode. this only work for heartbeats.
         // this is really jank. fall back to .text opcode instead
-//        let opcode: WebSocketOpcode =
-//          message.opcode ?? .init(
-//            encodedWebSocketOpcode: message.payload.opcode.rawValue
-//          )!
+        //        let opcode: WebSocketOpcode =
+        //          message.opcode ?? .init(
+        //            encodedWebSocketOpcode: message.payload.opcode.rawValue
+        //          )!
         let opcode: WebSocketOpcode =
           message.opcode ?? .text
-        
+
         let data: Data
         do {
           data = try DiscordGlobalConfiguration.encoder.encode(message.payload)
@@ -1056,7 +1057,7 @@ extension UserGatewayManager {
     }
     self.outboundWriter = nil
   }
-  
+
   public func getSessionID() -> String? {
     return self.sessionId
   }

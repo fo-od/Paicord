@@ -526,7 +526,7 @@ class ClientConfigurationTests: XCTestCase {
         headers: [:],
         body: .init(string: "body right here :)")
       )
-      
+
       let item = ClientCache.CacheableItem(
         identity: .userApi(.getUserProfile),
         parameters: [

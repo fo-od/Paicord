@@ -29,26 +29,25 @@ extension ChatView {
             HStack {
               TypingIndicator()
                 .padding(.horizontal, 9)
-              if typingUsernames.count == 1, let username = typingUsernames.first
-              {
+              if typingUsernames.count == 1, let username = typingUsernames.first {
                 Text(username).fontWeight(.heavy) + Text(" is typing...")
               } else if typingUsernames.count == 2,
-                        let first = typingUsernames.first,
-                        let last = typingUsernames.last
+                let first = typingUsernames.first,
+                let last = typingUsernames.last
               {
                 Text(first).fontWeight(.heavy) + Text(" and ")
-                + Text(last).fontWeight(.heavy)
-                + Text(" are typing...")
+                  + Text(last).fontWeight(.heavy)
+                  + Text(" are typing...")
               } else {
                 let ppl = typingUsernames.reduce(Text("")) {
                   partialResult,
                   username in
                   if username == typingUsernames.last {
                     return partialResult + Text("and ")
-                    + Text(username).fontWeight(.heavy)
+                      + Text(username).fontWeight(.heavy)
                   } else {
                     return partialResult + Text(username).fontWeight(.heavy)
-                    + Text(", ")
+                      + Text(", ")
                   }
                 }
                 ppl + Text(" are typing...")

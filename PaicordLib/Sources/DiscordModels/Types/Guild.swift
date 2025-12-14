@@ -450,8 +450,7 @@ public struct PartialGuild: Sendable, Codable, Equatable, Hashable {
   public var widget_enabled: Bool?
   public var widget_channel_id: ChannelSnowflake?
   public var verification_level: Guild.VerificationLevel?
-  public var default_message_notifications:
-    Guild.DefaultMessageNotificationLevel?
+  public var default_message_notifications: Guild.DefaultMessageNotificationLevel?
   public var explicit_content_filter: Guild.ExplicitContentFilterLevel?
   public var roles: [Role]?
   public var emojis: [Emoji]?

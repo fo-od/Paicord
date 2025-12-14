@@ -135,7 +135,7 @@ class CurrentUserStore: DiscordDataStore {
   private func handleGuildCreate(_ guild: Gateway.GuildCreate) {
     guilds[guild.id] = guild.toGuild()
   }
-  
+
   private func handleGuildUpdate(_ guild: Guild) {
     guilds[guild.id]?.update(with: guild)
   }

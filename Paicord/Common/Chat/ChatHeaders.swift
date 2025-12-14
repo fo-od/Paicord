@@ -18,7 +18,7 @@ enum ChatHeaders {
           .font(.largeTitle)
           .padding(8)
           .background(.quaternary, in: .circle)
-        
+
         if let channelName = channel?.channel?.name {
           Text("Welcome to the start of #\(channelName)")
             .font(.headline)
@@ -31,7 +31,7 @@ enum ChatHeaders {
       .padding()
     }
   }
-  
+
   struct NoHistoryPermissionHeader: View {
     @Environment(\.theme) var theme
     @Environment(\.channelStore) var channel
@@ -41,7 +41,7 @@ enum ChatHeaders {
           .font(.largeTitle)
           .padding(8)
           .background(.quaternary, in: .circle)
-        
+
         if let channelName = channel?.channel?.name {
           Text("You don't have permission to view the message history of #\(channelName).")
             .font(.headline)

@@ -25,7 +25,7 @@ extension DiscordDataStore {
       setupEventHandling()
     }
   }
-  
+
   func cancelEventHandling() {
     eventTask?.cancel()
     eventTask = nil

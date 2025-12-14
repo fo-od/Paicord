@@ -12,12 +12,12 @@ struct FlowLayout: Layout {
   var xSpacing: CGFloat
   var ySpacing: CGFloat
   var alignment: HorizontalAlignment = .leading
-  
+
   init(spacing: CGFloat = 8, alignment: HorizontalAlignment = .leading) {
     self.xSpacing = spacing
     self.ySpacing = spacing
     self.alignment = alignment
-  } 
+  }
 
   init(
     xSpacing: CGFloat = 8,

@@ -61,7 +61,7 @@ public struct ScrollFadeMask<Content: View>: View {
     if distanceFromTrailing >= trailing { return trailing }
     return distanceFromTrailing
   }
-  
+
   // match scrollview init
   var axes: Axis.Set = .vertical
   public init(_ axes: Axis.Set = .vertical, @ViewBuilder content: @escaping () -> Content) {

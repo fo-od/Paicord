@@ -4,7 +4,7 @@
 //
 //  Created by Lakhan Lothiyi on 21/11/2025.
 //  Copyright © 2025 Lakhan Lothiyi.
-//  
+//
 
 import SwiftUIX
 
@@ -13,12 +13,16 @@ struct ShellView: View {
   @State private var doScrolling = true
   @State private var timer: Timer? = nil
 
-  @State private var fontSize = UserDefaults.standard.value(forKey: "Shell.FontSize") as? CGFloat ?? 12 {
+  @State private var fontSize =
+    UserDefaults.standard.value(forKey: "Shell.FontSize") as? CGFloat ?? 12
+  {
     didSet { UserDefaults.standard.set(self.fontSize, forKey: "Shell.FontSize") }
   }
   let _FontSizeRange: ClosedRange<CGFloat> = 6...18
 
-  @State private var keepPinned = UserDefaults.standard.value(forKey: "Shell.KeepPinned") as? Bool ?? true {
+  @State private var keepPinned =
+    UserDefaults.standard.value(forKey: "Shell.KeepPinned") as? Bool ?? true
+  {
     didSet { UserDefaults.standard.set(self.keepPinned, forKey: "Shell.KeepPinned") }
   }
 
@@ -43,7 +47,9 @@ struct ShellView: View {
               .frame(height: 0)
               .background(
                 GeometryReader { geo in
-                  Color.clear.preference(key: BottomPositionPreferenceKey.self, value: geo.frame(in: .named("logScroll")).minY)
+                  Color.clear.preference(
+                    key: BottomPositionPreferenceKey.self,
+                    value: geo.frame(in: .named("logScroll")).minY)
                 }
               )
           }
@@ -67,12 +73,14 @@ struct ShellView: View {
 
           if bottomIsVisible {
             self.timer?.invalidate()
-            self.timer = Timer.scheduledTimer(withTimeInterval: 5, repeats: false, block: { _ in
-              withAnimation { proxy.scrollTo("bottom") }
-              DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self.doScrolling = true
-              }
-            })
+            self.timer = Timer.scheduledTimer(
+              withTimeInterval: 5, repeats: false,
+              block: { _ in
+                withAnimation { proxy.scrollTo("bottom") }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                  self.doScrolling = true
+                }
+              })
           } else {
             self.timer?.invalidate()
             self.timer = nil
@@ -90,15 +98,15 @@ struct ShellView: View {
         .fill(Color(hue: 0.6416666667, saturation: 0.07, brightness: 0.17))
         .ignoresSafeArea()
     }
-#if !os(watchOS) && !os(macOS)
-    .toolbar {
-      Menu {
-        Slider(value: $fontSize, in: self._FontSizeRange)
-      } label: {
-        Image(systemName: "gear")
+    #if !os(watchOS) && !os(macOS)
+      .toolbar {
+        Menu {
+          Slider(value: $fontSize, in: self._FontSizeRange)
+        } label: {
+          Image(systemName: "gear")
+        }
       }
-    }
-#endif
+    #endif
   }
 
   @ViewBuilder
@@ -107,21 +115,21 @@ struct ShellView: View {
       let txt = Text(log.str.trimmingCharacters(in: .whitespacesAndNewlines))
         .frame(maxWidth: .infinity, alignment: .leading)
 
-#if !os(watchOS)
-      txt
-        .contextMenu {
-          Button("Copy") {
-#if os(iOS)
-            UIPasteboard.general.string = log.str
-#elseif os(macOS)
-            NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString(log.str, forType: .string)
-#endif
+      #if !os(watchOS)
+        txt
+          .contextMenu {
+            Button("Copy") {
+              #if os(iOS)
+                UIPasteboard.general.string = log.str
+              #elseif os(macOS)
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(log.str, forType: .string)
+              #endif
+            }
           }
-        }
-#else
-      txt
-#endif
+      #else
+        txt
+      #endif
       Divider()
     }
   }
@@ -143,7 +151,9 @@ final class ShellViewModel: ObservableObject {
     self.logs = StdOutInterceptor.shared.getLogs()
 
     // Subscribe to incremental log notifications (object is [LogItem])
-    self.observation = NotificationCenter.default.addObserver(forName: .newLogAdded, object: nil, queue: .main) { [weak self] note in
+    self.observation = NotificationCenter.default.addObserver(
+      forName: .newLogAdded, object: nil, queue: .main
+    ) { [weak self] note in
       guard let self = self else { return }
       if let items = note.object as? [StdOutInterceptor.LogItem], !items.isEmpty {
         self.logs.append(contentsOf: items)

@@ -2681,8 +2681,7 @@ extension DiscordClient {
 
   /// https://discord.com/developers/docs/resources/user#leave-guild
   @inlinable
-  public func leaveGuild(id: GuildSnowflake) async throws -> DiscordHTTPResponse
-  {
+  public func leaveGuild(id: GuildSnowflake) async throws -> DiscordHTTPResponse {
     let endpoint = APIEndpoint.leaveGuild(guildId: id)
     return try await self.send(request: .init(to: endpoint))
   }

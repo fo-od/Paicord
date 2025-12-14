@@ -178,8 +178,18 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
     public var premium_type: PremiumKind?
     public var premium_since: DiscordTimestamp?
     public var premium_guild_since: DiscordTimestamp?
-    
-    public init(application: ProfileApplication? = nil, user: PartialUser, user_profile: Metadata? = nil, badges: [Badge]? = nil, guild_member: Guild.Member? = nil, guild_member_profile: Metadata? = nil, guild_badges: [Badge]? = nil, legacy_username: String? = nil, mutual_guilds: [MutualGuild]? = nil, mutual_friends: [PartialUser]? = nil, mutual_friends_count: Int? = nil, connected_accounts: [PartialConnection]? = nil, application_role_connections: [ApplicationRoleConnection]? = nil, premium_type: PremiumKind? = nil, premium_since: DiscordTimestamp? = nil, premium_guild_since: DiscordTimestamp? = nil) {
+
+    public init(
+      application: ProfileApplication? = nil, user: PartialUser, user_profile: Metadata? = nil,
+      badges: [Badge]? = nil, guild_member: Guild.Member? = nil,
+      guild_member_profile: Metadata? = nil, guild_badges: [Badge]? = nil,
+      legacy_username: String? = nil, mutual_guilds: [MutualGuild]? = nil,
+      mutual_friends: [PartialUser]? = nil, mutual_friends_count: Int? = nil,
+      connected_accounts: [PartialConnection]? = nil,
+      application_role_connections: [ApplicationRoleConnection]? = nil,
+      premium_type: PremiumKind? = nil, premium_since: DiscordTimestamp? = nil,
+      premium_guild_since: DiscordTimestamp? = nil
+    ) {
       self.application = application
       self.user = user
       self.user_profile = user_profile
@@ -210,13 +220,17 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
       public var banner: String?
       public var accent_color: DiscordColor?  // Not respected on guild profiles
       public var theme_colors: [DiscordColor]?  // 2 values if present, as two gradient stops
-      
-//      public var popout_animation_particle_type: Int? // dolfies said these r unused
-//      public var emoji: Emoji?
-      
+
+      //      public var popout_animation_particle_type: Int? // dolfies said these r unused
+      //      public var emoji: Emoji?
+
       public var profile_effect: Effect?
-      
-      public init(guild_id: GuildSnowflake? = nil, pronouns: String? = nil, bio: String? = nil, banner: String? = nil, accent_color: DiscordColor? = nil, theme_colors: [DiscordColor]? = nil, profile_effect: Effect? = nil) {
+
+      public init(
+        guild_id: GuildSnowflake? = nil, pronouns: String? = nil, bio: String? = nil,
+        banner: String? = nil, accent_color: DiscordColor? = nil,
+        theme_colors: [DiscordColor]? = nil, profile_effect: Effect? = nil
+      ) {
         self.guild_id = guild_id
         self.pronouns = pronouns
         self.bio = bio
@@ -231,7 +245,7 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
     public struct Effect: Sendable, Codable, Equatable, Hashable {
       public var id: AnySnowflake
       public var expires_at: DiscordTimestamp?
-      
+
       public init(id: AnySnowflake, expires_at: DiscordTimestamp? = nil) {
         self.id = id
         self.expires_at = expires_at
@@ -244,7 +258,7 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
       public var description: String
       public var icon: String
       public var link: String?
-      
+
       public init(id: AnySnowflake, description: String, icon: String, link: String? = nil) {
         self.id = id
         self.description = description
@@ -257,7 +271,7 @@ public struct DiscordUser: Sendable, Codable, Equatable, Hashable {
     public struct MutualGuild: Sendable, Codable, Equatable, Hashable {
       public var id: GuildSnowflake
       public var nick: String?
-      
+
       public init(id: GuildSnowflake, nick: String? = nil) {
         self.id = id
         self.nick = nick
@@ -467,7 +481,7 @@ extension DiscordUser {
     public var identity_guild_id: GuildSnowflake?
     public var tag: String?
     public var badge: String?
-    
+
     public init(
       identity_enabled: Bool? = nil,
       identity_guild_id: GuildSnowflake? = nil,

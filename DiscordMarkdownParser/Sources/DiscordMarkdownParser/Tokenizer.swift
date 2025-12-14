@@ -134,8 +134,7 @@ public final class MarkdownTokenizer {
           if currentChar == ">" {
             // Only treat as blockquote if the '>' is followed by whitespace, another '>' (for >>>), or EOL
             let next = peek()
-            if next == ">" || next.isWhitespace || next == "\n" || next == "\r"
-            {
+            if next == ">" || next.isWhitespace || next == "\n" || next == "\r" {
               tokens.append(tokenizeBlockQuote())
               if !isAtEnd && currentChar.isWhitespace {
                 tokens.append(tokenizeWhitespace())
@@ -1119,8 +1118,7 @@ public final class MarkdownTokenizer {
       let c = currentChar
 
       // Stop on whitespace or explicit token delimiters
-      if c.isWhitespace || c == "<" || c == ">" || c == "\"" || c == "'"
-      {
+      if c.isWhitespace || c == "<" || c == ">" || c == "\"" || c == "'" {
         break
       }
       if c == ")" {
@@ -1576,5 +1574,3 @@ public final class TokenStream {
     position = max(0, min(pos, tokens.count))
   }
 }
-
-

@@ -41,9 +41,11 @@ extension SettingsView {
         .padding()
         .background(LoginView.MeshGradientBackground())
         .clipShape(.rounded)
-       
+
         VStack(alignment: .leading, spacing: 10) {
-          Text("If you like Paicord and would like to support its development, consider donating! You'll receive a Donator role in the Discord server and you'll receive custom badges!")
+          Text(
+            "If you like Paicord and would like to support its development, consider donating! You'll receive a Donator role in the Discord server and you'll receive custom badges!"
+          )
           Button {
             openURL(
               .init(
@@ -65,4 +67,3 @@ extension SettingsView {
     }
   }
 }
-

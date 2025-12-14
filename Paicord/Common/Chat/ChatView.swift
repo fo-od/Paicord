@@ -76,8 +76,7 @@ struct ChatView: View {
             }
 
             if !vm.messages.isEmpty {
-              if !vm.hasLatestMessages && vm.hasPermission(.readMessageHistory)
-              {
+              if !vm.hasLatestMessages && vm.hasPermission(.readMessageHistory) {
                 PlaceholderMessageSet()
                   .onAppear {
                     vm.tryFetchMoreMessageHistory()
@@ -152,7 +151,8 @@ struct ChatView: View {
             let messageId = info["messageId"] as? MessageSnowflake,
             let unitPoint = info["alignment"] as? UnitPoint
           else { return }
-          print("Scrolling to message ID \(messageId) in channel \(channelId), unitPoint: \(unitPoint)")
+          print(
+            "Scrolling to message ID \(messageId) in channel \(channelId), unitPoint: \(unitPoint)")
           DispatchQueue.main.async {
             proxy.scrollTo(messageId, anchor: unitPoint)
           }

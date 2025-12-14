@@ -9,13 +9,13 @@
 import Foundation
 
 public struct SoundboardSound: Sendable, Codable, Equatable, Hashable {
-	public var sound_id: SoundSnowflake
-	public var name: String
-	public var volume: Double
-	public var emoji_id: EmojiSnowflake?
-	public var emoji_name: String?
-	public var guild_id: GuildSnowflake
-	public var available: Bool
-	public var user: PartialUser?
-	public var user_id: UserSnowflake?
+  public var sound_id: SoundSnowflake
+  public var name: String
+  public var volume: Double
+  public var emoji_id: EmojiSnowflake?
+  public var emoji_name: String?
+  public var guild_id: GuildSnowflake
+  public var available: Bool
+  public var user: PartialUser?
+  public var user_id: UserSnowflake?
 }
