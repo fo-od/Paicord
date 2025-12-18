@@ -1,23 +1,32 @@
 # Paicord
 
-A Discord client written in SwiftUI that can resist breakages.
+A new Discord client written in SwiftUI, with a goal of feature parity with customisation and Quality-of-Life additions!
 
-## Again?
+## Features
+- [x] Cross-platform macOS and iOS
+- [x] Message sending and receiving 
+- [ ] Attachment uploading
+- [x] Discord-flavoured markdown rendering
+- [x] Embeds, message forwarding
+- [x] Replies, reactions, stickers and emojis
+- [ ] React to messages
+- [x] Permissions
+- [x] Member role colors
+- [x] Mention users, channels, roles
+- [ ] Discord settings
+- [ ] Theming support
+- [ ] Components V2 support
+- [ ] Threads
 
-Yes, whilst many clients have been written and then breaking after being left unmaintained, Paicord uses a fork of [DiscordBM](https://github.com/DiscordBM/DiscordBM) under the hood to function. It is resilient to API changes, hard typed and makes use of Swift async. This makes it maintainable and reusable for other platforms.
+This list is not exhaustive but the goal for Paicord is to have parity with the official Discord client, excluding unfavourable things like upselling of services.
 
-## What changed
+## Sponsor
 
-Paicord handles many things correctly. It can handle Captchas and MFA requests just fine on all endpoints. It also pulls values from your device to properly populate the `X-Super-Properties` header on all requests and client information at `IDENTIFY`. Thanks to PaicordLib's strong foundation established by DiscordBM, all use of the Discord API and gateway is done properly in static functions rather than [dynamically formed in code and typecasting](https://github.com/tealbathingsuit/accord/blob/c3b113db9c6ad2ae28b699614126d75b9ee9a772/Accord/UI/Chat/ChannelView/ChannelView.swift#L516-L546). It uses Stores that receive and categorise data, which get used as view models for Views. 
-## Future plans
-
-I really wanna see someone take PaicordLib and make a Linux client using one of those cool libraries for bringing some semblance of SwiftUI on Linux and Windows. If that person is you, reach out to me!
-
-PaicordLib needs some additions, mainly user API routes and some client-sent gateway payloads. The gateway payloads will probably be implemented by myself soon. User API routes will take time to go through.
+If you've enjoyed using Paicord, I would apprecate a [sponsor](https://github.com/sponsors/llsc12)! I work on Paicord in my free time outside of Uni work, so it would be awesome if you chipped in. Monthly sponsors over $5 get custom profile badges! Refer to sponsor page for information.
 
 ## References
 
-Only two projects have been used in Paicord directly. [DiscordBM](https://github.com/DiscordBM/DiscordBM) and [SwiftMarkdownParser](https://github.com/sciasxp/SwiftMarkdownParser). Other references are mentioned since I read their code to learn from others.
+Paicord uses modified versions of [DiscordBM](https://github.com/DiscordBM/DiscordBM) and [SwiftMarkdownParser](https://github.com/sciasxp/SwiftMarkdownParser). These other references are mentioned since I read their code to learn from others.
 
 - [Accord](https://github.com/tealbathingsuit/accord)
 - [Swiftcord](https://github.com/SwiftcordApp/Swiftcord)
