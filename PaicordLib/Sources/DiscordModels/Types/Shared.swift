@@ -280,66 +280,74 @@ public struct DiscordTimestamp: Codable, Hashable {
 
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
-    let string = try container.decode(String.self)
-
-    let startIndex = string.startIndex
-    func index(_ offset: Int) -> String.Index {
-      string.index(startIndex, offsetBy: offset)
-    }
-
-    let components: DateComponents
-
-    if string.count == 32 {
-      guard let year = Int(string[startIndex...index(3)]),
-        let month = Int(string[index(5)...index(6)]),
-        let day = Int(string[index(8)...index(9)]),
-        let hour = Int(string[index(11)...index(12)]),
-        let minute = Int(string[index(14)...index(15)]),
-        let second = Int(string[index(17)...index(18)]),
-        let microSecond = Int(string[index(20)...index(25)])
-      else {
+    if let string = try? container.decode(String.self) {
+      
+      let startIndex = string.startIndex
+      func index(_ offset: Int) -> String.Index {
+        string.index(startIndex, offsetBy: offset)
+      }
+      
+      let components: DateComponents
+      
+      if string.count == 32 {
+        guard let year = Int(string[startIndex...index(3)]),
+              let month = Int(string[index(5)...index(6)]),
+              let day = Int(string[index(8)...index(9)]),
+              let hour = Int(string[index(11)...index(12)]),
+              let minute = Int(string[index(14)...index(15)]),
+              let second = Int(string[index(17)...index(18)]),
+              let microSecond = Int(string[index(20)...index(25)])
+        else {
+          throw DecodingError.unexpectedFormat(container.codingPath, string)
+        }
+        components = DateComponents(
+          calendar: .utc,
+          year: year,
+          month: month,
+          day: day,
+          hour: hour,
+          minute: minute,
+          second: second,
+          nanosecond: microSecond * 1_000
+        )
+      } else if string.count == 25 {
+        guard let year = Int(string[startIndex...index(3)]),
+              let month = Int(string[index(5)...index(6)]),
+              let day = Int(string[index(8)...index(9)]),
+              let hour = Int(string[index(11)...index(12)]),
+              let minute = Int(string[index(14)...index(15)]),
+              let second = Int(string[index(17)...index(18)])
+        else {
+          throw DecodingError.unexpectedFormat(container.codingPath, string)
+        }
+        components = DateComponents(
+          calendar: .utc,
+          year: year,
+          month: month,
+          day: day,
+          hour: hour,
+          minute: minute,
+          second: second
+        )
+      } else {
         throw DecodingError.unexpectedFormat(container.codingPath, string)
       }
-      components = DateComponents(
-        calendar: .utc,
-        year: year,
-        month: month,
-        day: day,
-        hour: hour,
-        minute: minute,
-        second: second,
-        nanosecond: microSecond * 1_000
-      )
-    } else if string.count == 25 {
-      guard let year = Int(string[startIndex...index(3)]),
-        let month = Int(string[index(5)...index(6)]),
-        let day = Int(string[index(8)...index(9)]),
-        let hour = Int(string[index(11)...index(12)]),
-        let minute = Int(string[index(14)...index(15)]),
-        let second = Int(string[index(17)...index(18)])
-      else {
-        throw DecodingError.unexpectedFormat(container.codingPath, string)
+      guard let date = Calendar.utc.date(from: components) else {
+        throw DecodingError.conversionFailure(
+          container.codingPath,
+          string,
+          components
+        )
       }
-      components = DateComponents(
-        calendar: .utc,
-        year: year,
-        month: month,
-        day: day,
-        hour: hour,
-        minute: minute,
-        second: second
-      )
+      self.date = date
+    } else if let int = try? container.decode(Int.self) {
+      self.date = Date(timeIntervalSince1970: TimeInterval(int))
     } else {
-      throw DecodingError.unexpectedFormat(container.codingPath, string)
-    }
-    guard let date = Calendar.utc.date(from: components) else {
-      throw DecodingError.conversionFailure(
+      throw DecodingError.unexpectedFormat(
         container.codingPath,
-        string,
-        components
+        "Non String/Int value"
       )
     }
-    self.date = date
   }
 
   public func encode(to encoder: any Encoder) throws {

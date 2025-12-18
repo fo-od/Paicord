@@ -19,7 +19,7 @@ public enum DiscordGlobalConfiguration {
   public static let apiVersion = 9
 
   /// https://docs.discord.food/topics/gateway-events#qos-payload-structure
-  public static let qosVersion = 25
+  public static let qosVersion = 27
 
   /// The global decoder to decode JSONs with.
   public static var decoder: any DiscordDecoder {

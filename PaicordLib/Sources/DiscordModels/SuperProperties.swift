@@ -110,10 +110,6 @@ public enum SuperProperties {
   }
 
   public static func GenerateSuperPropertiesHeader() -> String {
-    #if os(Android)
-      fatalError("Android smelly")
-    #endif
-
     let properties = Gateway.Identify.ConnectionProperties(ws: false)
     // try unsafe because it probably will be fine
     let encoded = try! DiscordGlobalConfiguration.encoder.encode(properties)
@@ -156,7 +152,7 @@ public enum SuperProperties {
   public static func useragent(ws: Bool) -> String? {
     switch Gateway.Identify.ConnectionProperties.__defaultOS {
     // for these useragents, we will sub in values from the other functions
-    case "iOS":
+    case "iOS", "watchOS":
       if ws { return nil }  // no useragent when identifying browser_user_agent key in ws
       return
         "Discord/\(Self.client_build_number()!) CFNetwork/\(Self.cfnetwork_version()) Darwin/\(Self.kernel_version())"
@@ -194,21 +190,45 @@ public enum SuperProperties {
   }
 
   public static func os_version() -> String? {
-    #if os(macOS)
-      // get the kernel version on macos (idk why discord uses this)
-      return Self.kernel_version()
-    #elseif os(iOS)
-      // avoids uikit, bc uikit is mainactor isolated
-      var size: Int = 0
-      // need buffer size
-      if sysctlbyname("kern.osproductversion", nil, &size, nil, 0) != 0 {
-        return nil
-      }
-      var buffer = [CChar](repeating: 0, count: size)
-      if sysctlbyname("kern.osproductversion", &buffer, &size, nil, 0) != 0 {
-        return nil
-      }
-      return String(cString: buffer)
+#if os(macOS)
+    // get the kernel version on macos (idk why discord uses this)
+    return Self.kernel_version()
+#elseif os(iOS)
+    // avoids uikit, bc uikit is mainactor isolated
+    var size: Int = 0
+    // need buffer size
+    if sysctlbyname("kern.osproductversion", nil, &size, nil, 0) != 0 {
+      return nil
+    }
+    var buffer = [CChar](repeating: 0, count: size)
+    if sysctlbyname("kern.osproductversion", &buffer, &size, nil, 0) != 0 {
+      return nil
+    }
+    return String(cString: buffer)
+#elseif os(watchOS)
+    // only watchos 26 and above can be returned safely.
+    var size: Int = 0
+    // need buffer size
+    if sysctlbyname("kern.osproductversion", nil, &size, nil, 0) != 0 {
+      return nil
+    }
+    var buffer = [CChar](repeating: 0, count: size)
+    if sysctlbyname("kern.osproductversion", &buffer, &size, nil, 0) != 0 {
+      return nil
+    }
+    let version = String(cString: buffer)
+    let majorVersion = (version.split(separator: ".").first ?? "0").flatMap { Int($0) } ?? 0
+    if majorVersion >= 26 {
+      return version
+    } else {
+      // for watchos versions below 26, we buff the major version count to align with ios versions
+      let components = version.split(separator: ".")
+      // drop the major version
+      let minorAndPatch = components.dropFirst()
+      // last ios version before 26 was ios 18, but before watchos 26 was watchos 11.
+      // we add 7 to the major version to align it with ios versions.
+      return (majorVersion + 7).description + "." + minorAndPatch.joined(separator: ".")
+    }
     #else
       return nil
     #endif
@@ -230,7 +250,7 @@ public enum SuperProperties {
 
   public static func browser() -> String {
     switch Gateway.Identify.ConnectionProperties.__defaultOS {
-    case "iOS":
+    case "iOS", "watchOS":
       return "Discord iOS"
     case "Mac OS X":
       return "Discord Client"
@@ -241,7 +261,7 @@ public enum SuperProperties {
 
   public static func browser_version() -> String {
     switch Gateway.Identify.ConnectionProperties.__defaultOS {
-    case "iOS":
+    case "iOS", "watchOS":
       return ""
     case "Mac OS X":
       return "35.3.0"
@@ -252,7 +272,7 @@ public enum SuperProperties {
 
   public static func client_version() -> String {
     switch Gateway.Identify.ConnectionProperties.__defaultOS {
-    case "iOS":
+    case "iOS", "watchOS":
       return "300.0"
     case "Mac OS X":
       return "0.0.364"
@@ -263,7 +283,7 @@ public enum SuperProperties {
 
   public static func client_build_number() -> Int? {
     switch Gateway.Identify.ConnectionProperties.__defaultOS {
-    case "iOS":
+    case "iOS", "watchOS":
       return 86251
     case "Mac OS X":
       return 459631
@@ -279,7 +299,7 @@ public enum SuperProperties {
   public static func launch_signature() -> String? {
     #if os(macOS)
       return _launch_signature.uuidString.lowercased()
-    #elseif os(iOS)
+    #elseif os(iOS) || os(watchOS)
       // TODO: ios follows a different format, using an integer. not sure how this is generated yet.
       // for now, i was told its safe to use macos one instead.
       //    return nil
@@ -309,7 +329,7 @@ public enum SuperProperties {
   }
 
   public static func os_sdk_version() -> String? {
-    #if os(iOS) || os(macOS) || os(tvOS) || os(watchOS)
+    #if os(iOS) || os(macOS) || os(tvOS) || os(watchOS) || os(visionOS)
       let ver = Self.os_version()
       // get ver then split by . and get first value for major version which is the sdk version
       return ver?.components(separatedBy: ".").first ?? ""
@@ -319,7 +339,7 @@ public enum SuperProperties {
   }
 
   public static func client_app_state() -> String {
-    #if os(iOS)
+    #if os(iOS) || os(watchOS)
       return "active"
     #elseif os(macOS)
       return "focused"
@@ -329,7 +349,7 @@ public enum SuperProperties {
   }
 
   public static func device_vendor_id() -> String? {
-    #if os(iOS)
+    #if os(iOS) || os(watchOS)
       DispatchQueue.main.sync {
         if let uuid = UIDevice.current.identifierForVendor {
           return uuid.uuidString.uppercased()
@@ -344,7 +364,7 @@ public enum SuperProperties {
   }
 
   public static func design_id() -> Int? {
-    #if os(iOS)
+    #if os(iOS) || os(watchOS)
       return 2
     #elseif os(macOS)
       return nil
