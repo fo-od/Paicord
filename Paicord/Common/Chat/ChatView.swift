@@ -11,6 +11,8 @@ import PaicordLib
 @_spi(Advanced) import SwiftUIIntrospect
 import SwiftUIX
 
+// TODO: reimplementing scrolling using platform native scrollviews for better control.
+
 struct ChatView: View {
   var vm: ChannelStore
   @Environment(\.gateway) var gw
@@ -32,10 +34,10 @@ struct ChatView: View {
           LazyVStack(alignment: .leading, spacing: 0) {
             if !vm.messages.isEmpty {
               if vm.hasMoreHistory && vm.hasPermission(.readMessageHistory) {
-                PlaceholderMessageSet()
-                  .onAppear {
-                    vm.tryFetchMoreMessageHistory()
-                  }
+//                PlaceholderMessageSet()
+//                  .onAppear {
+//                    vm.tryFetchMoreMessageHistory()
+//                  }
               } else {
                 if vm.hasPermission(.readMessageHistory) {
                   ChatHeaders.WelcomeStartOfChannelHeader()
@@ -75,14 +77,14 @@ struct ChatView: View {
               }
             }
 
-            if !vm.messages.isEmpty {
-              if !vm.hasLatestMessages && vm.hasPermission(.readMessageHistory) {
-                PlaceholderMessageSet()
-                  .onAppear {
-                    vm.tryFetchMoreMessageHistory()
-                  }
-              }
-            }
+//            if !vm.messages.isEmpty {
+//              if !vm.hasLatestMessages && vm.hasPermission(.readMessageHistory) {
+//                PlaceholderMessageSet()
+//                  .onAppear {
+//                    vm.tryFetchMoreMessageHistory()
+//                  }
+//              }
+//            }
 
             // message drain here
           }
@@ -91,7 +93,6 @@ struct ChatView: View {
         .maxHeight(.infinity)
         .safeAreaPadding(.bottom, 22)
         .bottomAnchored()
-        .scrollDismissesKeyboard(.interactively)
         .onAppear {
           NotificationCenter.default.post(
             name: .chatViewShouldScrollToBottom,
@@ -159,8 +160,9 @@ struct ChatView: View {
         }
       }
     }
-    .safeAreaInset(edge: .bottom, spacing: 0) {
-      VStack(spacing: 0) {
+    .scrollDismissesKeyboard(.interactively)
+    .safeAreaInset(edge: .bottom, spacing: 10) {
+      if vm.hasPermission(.sendMessages) {
         InputBar(vm: vm)
       }
     }
