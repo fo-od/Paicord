@@ -599,7 +599,7 @@ extension DiscordClient {
   public func createAttachments(
     channelID: ChannelSnowflake,
     payload: Payloads.CreateAttachments
-  ) async throws -> DiscordClientResponse<[Gateway.CloudAttachment]> {
+  ) async throws -> DiscordClientResponse<Gateway.CreateAttachments> {
     let endpoint = UserAPIEndpoint.createAttachments(channelId: channelID)
     return try await self.send(request: .init(to: endpoint), payload: payload)
   }

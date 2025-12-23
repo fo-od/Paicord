@@ -2004,9 +2004,13 @@ extension Gateway {
     public var last_viewed: Int?
   }
   
+  public struct CreateAttachments: Sendable, Codable {
+    public var attachments: [CloudAttachment]
+  }
+  
   /// https://docs.discord.food/resources/message#cloud-attachment-structure
   public struct CloudAttachment: Sendable, Codable {
-    public var id: String?
+    public var id: AttachmentSnowflake?
     public var upload_url: String
     public var upload_filename: String
   }

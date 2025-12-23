@@ -3073,11 +3073,11 @@ public enum Payloads {
     public func validate() -> [ValidationFailure] {}
     
     public struct UploadAttachment: Sendable, Encodable {
-      public var id: String?
+      public var id: AttachmentSnowflake?
       public var filename: String
       public var file_size: Int
       
-      public init(id: String? = nil, filename: String, file_size: Int) {
+      public init(id: AttachmentSnowflake? = nil, filename: String, file_size: Int) {
         self.id = id
         self.filename = filename
         self.file_size = file_size
