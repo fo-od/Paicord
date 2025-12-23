@@ -166,6 +166,7 @@ struct ChatView: View {
         InputBar(vm: vm)
       }
     }
+    .ignoresSafeArea(.keyboard, edges: .all)
     .background(theme.common.secondaryBackground)
     .toolbar {
       ToolbarItem(placement: .navigation) {

@@ -26,6 +26,7 @@ class CurrentUserStore: DiscordDataStore {
   var sessions: [Gateway.Session] = []
   var emojis: [GuildSnowflake: [EmojiSnowflake: Emoji]] = [:]
   var stickers: [GuildSnowflake: [StickerSnowflake: Sticker]] = [:]
+  var premiumKind: DiscordUser.PremiumKind = .none
 
   // MARK: - Protocol Methods
 
@@ -94,6 +95,8 @@ class CurrentUserStore: DiscordDataStore {
   private func handleReady(_ readyData: Gateway.Ready) {
     sessions = readyData.sessions
     currentUser = readyData.user
+    
+    premiumKind = readyData.user.premium_type ?? .none
 
     guilds = readyData.guilds.reduce(into: [:]) { $0[$1.id] = $1 }
 
@@ -207,17 +210,7 @@ class CurrentUserStore: DiscordDataStore {
     }
     self.stickers[guildId] = stickersDict
   }
-
-  //	/// Updates the current user's presence
-  //	func updatePresence(status: Gateway.Identify.Presence.Status, customStatus: String? = nil) async {
-  //		fatalError("Not implemented")
-  //	}
-  //
-  //	/// Updates user settings
-  //	func updateSettings(_ settings: Gateway.Ready.UserSettings) async {
-  //		fatalError("Not implemented")
-  //	}
-  //
+  
   //	/// Sends a friend request
   //	func sendFriendRequest(to username: String, discriminator: String) async throws {
   //		fatalError("Not implemented")

@@ -41,8 +41,28 @@ struct GuildButton: View {
       FolderButtons(id: folder.id.value, folder: folder, guilds: guilds)
         .padding(-2)
     } else {
+      let height: CGFloat = {
+        // if the guild is selected
+        if appState.selectedGuild == guild?.id {
+          return 38
+        } else if /* if theres unreads TODO */
+        false {
+          return 4
+        } else {
+          return 0
+        }
+      }()
       // either a guild or DMs
       guildButton(from: guild)
+        .overlay(alignment: .leading) {
+          Capsule()
+            .fill(.primary)
+            .frame(width: 8)
+            .frame(height: height)
+//            .opacity(height == 0 ? 0 : 1)
+            .offset(x: -14 + (height == 0 ? -8 : 0))
+        }
+        .animation(.default, value: height)
     }
   }
 
@@ -95,7 +115,8 @@ struct GuildButton: View {
               .aspectRatio(1, contentMode: .fit)
               .overlay {
                 if folder.hasColor,
-                  let color = DiscordColor(value: Int(folder.color.value))?.asColor()
+                  let color = DiscordColor(value: Int(folder.color.value))?
+                    .asColor()
                 {
                   Image(systemName: "folder.fill")
                     .font(.title2)
@@ -145,9 +166,6 @@ struct GuildButton: View {
           }
         }
         .buttonStyle(.borderless)
-        .clipShape(
-          .rect(cornerRadius: 10, style: .continuous)
-        )
 
         if isExpanded {
           let guilds: [Guild] = folder.guildIds.compactMap { guildID in
@@ -175,12 +193,13 @@ struct GuildButton: View {
         {
           Rectangle()
             .fill(color.secondary.opacity(0.35))
+            .clipShape(.rect(cornerRadius: 10, style: .continuous))
         } else {
           Rectangle()
             .fill(theme.common.secondaryBackground.secondary)
+            .clipShape(.rect(cornerRadius: 10, style: .continuous))
         }
       }
-      .clipShape(.rect(cornerRadius: 10, style: .continuous))
     }
 
     @ViewBuilder
@@ -292,7 +311,10 @@ struct GuildButton: View {
                 )
             }
             .background(
-              isSelected ? theme.common.accent : theme.common.primaryButtonBackground.opacity(0.5))
+              isSelected
+                ? theme.common.accent
+                : theme.common.primaryButtonBackground.opacity(0.5)
+            )
         }
       }
       .clipShape(.rect(cornerRadius: isSelected ? 10 : 32, style: .continuous))

@@ -21,9 +21,7 @@ struct HomeView: View {
     HStack(spacing: 0) {
       GuildScrollBar()
         .scrollIndicators(.hidden)
-        .containerRelativeFrame(.horizontal) { length, _ in
-          length / 6
-        }
+        .frame(width: 65)
 
       Group {
         if let guild {

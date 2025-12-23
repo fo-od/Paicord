@@ -12,50 +12,242 @@ import SwiftUIX
 
 extension ChatView {
   struct InputBar: View {
+    static var inputVMs: [ChannelSnowflake: InputVM] = [:]
     @Environment(\.appState) var appState
     @Environment(\.gateway) var gw
     @Environment(\.theme) var theme
     var vm: ChannelStore
+    @Bindable var inputVM: InputVM
+
+    init(vm: ChannelStore) {
+      self.vm = vm
+      if let existingVM = InputBar.inputVMs[vm.channelId] {
+        self._inputVM = .init(existingVM)
+      } else {
+        let newVM = InputVM(channelStore: vm)
+        InputBar.inputVMs[vm.channelId] = newVM
+        self._inputVM = .init(newVM)
+      }
+    }
 
     #if os(iOS)
-      @Environment(\.safeAreaInsets) var safeAreaInsets
+      struct PickerInteractionProperties {
+        var storedKeyboardHeight: CGFloat = 0
+        var dragOffset: CGFloat = 0
+        var showPhotosPicker: Bool = false
+        var showFilePicker: Bool = false
+
+        var keyboardHeight: CGFloat {
+          storedKeyboardHeight == 0 ? 300 : storedKeyboardHeight
+        }
+
+        var pickerShown: Bool {
+          showPhotosPicker || showFilePicker
+        }
+
+        var safeArea: UIEdgeInsets {
+          if let safeArea = UIApplication.shared.connectedScenes.compactMap({
+            ($0 as? UIWindowScene)?.keyWindow
+          }).first?.safeAreaInsets {
+            return safeArea
+          }
+          return .zero
+        }
+
+        var screenSize: CGSize {
+          if let screen = UIApplication.shared.connectedScenes.compactMap({
+            ($0 as? UIWindowScene)?.screen
+          }).first {
+            return screen.bounds.size
+          }
+          return .zero
+        }
+
+        var animation: Animation {
+          .interpolatingSpring(duration: 0.2, bounce: 0, initialVelocity: 0)
+        }
+      }
+
+      @State private var properties = PickerInteractionProperties()
+
+      @State var pickersClosedWhenChatClosed: (photos: Bool, files: Bool) = (
+        false, false
+      )
+      @State var cameraPickerPresented: Bool = false
     #endif
-
     @FocusState private var isFocused: Bool
-    @State var text: String = ""
+    @State var filesRemovedDuringSelection: Error? = nil
 
-    @State var showingPhotoPicker: Bool = false
-    @State var photoPickerItems: [PhotosPickerItem] = []
+    enum SelectionError: LocalizedError {
+      case filesPastLimit(limit: Int)
+      case filesEmpty
+
+      var errorDescription: String? {
+        switch self {
+        case .filesPastLimit(let limit):
+          let formatter = ByteCountFormatter()
+          formatter.allowedUnits = [.useBytes, .useKB, .useMB]
+          formatter.countStyle = .file
+          let formattedLimit = formatter.string(fromByteCount: Int64(limit))
+          return "Please keep files under \(formattedLimit)."
+        case .filesEmpty:
+          return "Empty files cannot be uploaded."
+        }
+      }
+    }
 
     var body: some View {
       VStack {
         ZStack(alignment: .top) {
-          HStack(alignment: .bottom, spacing: 8) {
-            inputBarButton
+          VStack {
+            if inputVM.uploadItems.isEmpty == false {
+              AttachmentPreviewBar(inputVM: inputVM)
+                .frame(height: 60)
+            }
 
-            inputBarField
+            HStack(alignment: .bottom, spacing: 8) {
+              mediaPickerButton
 
+              textField
+            }
+            .padding([.horizontal, .bottom], 8)
+            .padding(.top, 4)
+            .geometryGroup()
             #if os(iOS)
-              if text.isEmpty == false {
-                Button(action: sendMessage) {
-                  Image(systemName: "paperplane.fill")
-                    .imageScale(.large)
-                    .padding(5)
-                    .foregroundStyle(.white)
-                    .background(theme.common.primaryButton)
-                    .clipShape(.circle)
+              .padding(.bottom, animatedKeyboardHeight)
+              .animation(properties.animation, value: animatedKeyboardHeight)
+              .animation(properties.animation, value: inputVM.content.isEmpty)
+              .onReceive(
+                NotificationCenter.default.publisher(
+                  for: UIResponder.keyboardWillChangeFrameNotification
+                )
+              ) { userInfo in
+                if let keyboardFrame = userInfo.userInfo?[
+                  UIResponder.keyboardFrameEndUserInfoKey
+                ] as? NSValue {
+                  let height = keyboardFrame.cgRectValue.height
+                  if properties.storedKeyboardHeight == 0 {
+                    properties.storedKeyboardHeight = max(
+                      height - properties.safeArea.bottom,
+                      0
+                    )
+                  }
                 }
-                .buttonStyle(.borderless)
-                .foregroundStyle(theme.common.primaryButton)
-                .transition(.move(edge: .trailing).combined(with: .opacity))
+              }  // get kb height
+              .sheet(isPresented: $properties.showPhotosPicker) {
+                PhotosPicker(
+                  "",
+                  selection: $inputVM.selectedPhotos,
+                  maxSelectionCount: 10,
+                  selectionBehavior: .continuous,
+                  preferredItemEncoding: .compatible
+                )
+                .photosPickerStyle(.inline)
+                .photosPickerDisabledCapabilities([
+                  .stagingArea, .sensitivityAnalysisIntervention,
+                ])
+                .presentationDetents([
+                  .height(properties.keyboardHeight), .large,
+                ])
+                .presentationBackgroundInteraction(
+                  .enabled(upThrough: .height(properties.keyboardHeight))
+                )  // allow whilst not expanded
               }
+              .sheet(isPresented: $properties.showFilePicker) {
+                DocumentPickerViewController { urls in
+                  inputVM.selectedFiles = urls.compactMap { url in
+                    var url: URL? = url
+                    let canAccess =
+                      url?.startAccessingSecurityScopedResource() ?? false
+                    defer {
+                      if canAccess {
+                        url?.stopAccessingSecurityScopedResource()
+                      }
+                    }
+                    // check filesize
+                    let fileSize =
+                      (try? url?.resourceValues(forKeys: [.fileSizeKey])
+                        .fileSize)
+                      ?? 0
+                    // discord wont let you upload empty files.
+                    if fileSize == 0 {
+                      url = nil
+                      self.filesRemovedDuringSelection =
+                        SelectionError.filesEmpty
+                    }
+                    let uploadMeta = gw.user.premiumKind.fileUpload(
+                      size: fileSize,
+                      to: vm
+                    )
+                    if uploadMeta.allowed == false {
+                      url = nil
+                      self.filesRemovedDuringSelection =
+                        SelectionError.filesPastLimit(
+                          limit: uploadMeta.limit
+                        )
+                    }
+
+                    return url
+                  }
+                }
+                .presentationBackground(.clear)
+                .presentationDetents([
+                  .height(properties.keyboardHeight), .large,
+                ])
+                .presentationBackgroundInteraction(
+                  .enabled(upThrough: .height(properties.keyboardHeight))
+                )
+              }
+              .alert(
+                "Some files were not added",
+                isPresented: Binding(
+                  get: { self.filesRemovedDuringSelection != nil },
+                  set: { newValue in
+                    if newValue == false {
+                      self.filesRemovedDuringSelection = nil
+                    }
+                  }
+                )
+              ) {
+                Button("OK", role: .cancel) {}
+              } message: {
+                if let error = filesRemovedDuringSelection {
+                  Text(error.localizedDescription)
+                } else {
+                  Text("idk bro ur files cooked")
+                }
+              }  // show errors for removed files
+              .onChange(of: isFocused) {
+                if isFocused {
+                  properties.showPhotosPicker = false
+                  properties.showFilePicker = false
+                }
+              }  // dismiss picker when keyboard is activated
+              .onChange(of: properties.pickerShown) {
+                if properties.pickerShown {
+                  isFocused = false
+                }
+              }  // dismiss keyboard when picker is activated
+              .onChange(of: appState.chatOpen) {
+                if appState.chatOpen == false {
+                  pickersClosedWhenChatClosed.photos =
+                    properties.showPhotosPicker
+                  pickersClosedWhenChatClosed.files = properties.showFilePicker
+                  properties.showPhotosPicker = false
+                  properties.showFilePicker = false
+                } else {
+                  // restore pickers if they were open before chat closed
+                  if pickersClosedWhenChatClosed.photos {
+                    properties.showPhotosPicker = true
+                  }
+                  if pickersClosedWhenChatClosed.files {
+                    properties.showFilePicker = true
+                  }
+                  pickersClosedWhenChatClosed = (false, false)
+                }
+              }  // dismiss pickers when chat is closed
             #endif
           }
-          .padding([.horizontal, .bottom], 8)
-          .padding(.top, 4)
-          #if os(iOS)
-            .animation(.default, value: text.isEmpty)
-          #endif
 
           TypingIndicatorBar(vm: vm)
             .shadow(color: .black, radius: 10)
@@ -67,49 +259,84 @@ extension ChatView {
             // extend upwards slightly
             .padding(.top, -8 + (vm.typingTimeoutTokens.isEmpty ? 0 : -10))
             #if os(iOS)
-              .padding(.bottom, isFocused ? 0 : (safeAreaInsets.bottom * -1))
+              .padding(
+                .bottom,
+                isFocused ? 0 : (properties.safeArea.bottom * -1)
+              )
               .animation(.default, value: isFocused)
             #endif
         }
         .ignoresSafeArea(.container, edges: .horizontal)
-        if showingPhotoPicker, isFocused == false {
-
-          PhotosPicker(
-            "Upload Photos",
-            selection: $photoPickerItems,
-            maxSelectionCount: 10,
-            selectionBehavior: .continuous,
-            preferredItemEncoding: .compatible
-          )
-          .photosPickerStyle(.inline)
-          // height is keyboard height, get safe area insets of keyboard
-          .ignoresSafeArea(.container, edges: .bottom)
-          .height(300)
-        }
       }
     }
 
     @ViewBuilder
-    var inputBarButton: some View {
-      if showingPhotoPicker {
-        Button {
-          showingPhotoPicker = false
-        } label: {
-          Image(systemName: "plus")
-            .imageScale(.large)
-            .padding(7.5)
-            .background(.regularMaterial)
-            .clipShape(.circle)
-            .rotationEffect(.degrees(45))
+    var mediaPickerButton: some View {
+      #if os(iOS)
+        if properties.pickerShown {
+          Button {
+            properties.showFilePicker = false
+            properties.showPhotosPicker = false
+          } label: {
+            Image(systemName: "plus")
+              .imageScale(.large)
+              .padding(7.5)
+              .background(.regularMaterial)
+              .clipShape(.circle)
+              .rotationEffect(.degrees(45))
+          }
+          #if os(macOS)
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+          #else
+            .buttonStyle(.borderless)
+          #endif
+          .tint(.primary)
+        } else {
+          Menu {
+            Button {
+              properties.showPhotosPicker = false
+              properties.showFilePicker = false
+
+            } label: {
+              Label("Camera", systemImage: "camera")
+            }
+            Button {
+              properties.showFilePicker = false
+              properties.showPhotosPicker = true
+            } label: {
+              Label("Upload Photos", systemImage: "photo.on.rectangle")
+            }
+            Button {
+              properties.showPhotosPicker = false
+              properties.showFilePicker = true
+            } label: {
+              Label("Upload Files", systemImage: "doc.on.doc")
+            }
+            Menu {
+              Button {
+              } label: {
+                Text("1")
+              }
+            } label: {
+              Label("Apps", systemImage: "puzzle.fill")
+            }
+          } label: {
+            Image(systemName: "plus")
+              .imageScale(.large)
+              .padding(7.5)
+              .background(.regularMaterial)
+              .clipShape(.circle)
+          }
+          #if os(macOS)
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+          #else
+            .buttonStyle(.borderless)
+          #endif
+          .tint(.primary)
         }
-        #if os(macOS)
-          .menuStyle(.button)
-          .buttonStyle(.plain)
-        #else
-          .buttonStyle(.borderless)
-        #endif
-        .tint(.primary)
-      } else {
+      #else
         Menu {
           Menu {
             Button {
@@ -121,9 +348,9 @@ extension ChatView {
           }
 
           Button {
-            showingPhotoPicker = true
+
           } label: {
-            Label("Upload Photos", systemImage: "photo.on.rectangle")
+            Label("Upload Files", systemImage: "doc.on.doc")
           }
         } label: {
           Image(systemName: "plus")
@@ -131,21 +358,15 @@ extension ChatView {
             .padding(7.5)
             .background(.regularMaterial)
             .clipShape(.circle)
+            .rotationEffect(.degrees(45))
         }
-        #if os(macOS)
-          .menuStyle(.button)
-          .buttonStyle(.plain)
-        #else
-          .buttonStyle(.borderless)
-        #endif
-        .tint(.primary)
-      }
+      #endif
     }
 
     @ViewBuilder
-    var inputBarField: some View {
+    var textField: some View {
       #if os(iOS)
-        TextField("Message", text: $text, axis: .vertical)
+        TextField("Message", text: $inputVM.content, axis: .vertical)
           .textFieldStyle(.plain)
           .maxHeight(150)
           .fixedSize(horizontal: false, vertical: true)
@@ -156,43 +377,47 @@ extension ChatView {
           .clipShape(.rect(cornerRadius: 18))
           .focused($isFocused)
       #else
-        TextView("Message", text: $text, submit: sendMessage)
+        TextView("Message", text: $inputVM.content, submit: sendMessage)
           .padding(8)
           .background(.regularMaterial)
           .clipShape(.rect(cornerRadius: 18))
       #endif
+
+      #if os(iOS)
+        if inputVM.content.isEmpty == false {
+          Button(action: sendMessage) {
+            Image(systemName: "paperplane.fill")
+              .imageScale(.large)
+              .padding(5)
+              .foregroundStyle(.white)
+              .background(theme.common.primaryButton)
+              .clipShape(.circle)
+          }
+          .buttonStyle(.borderless)
+          .foregroundStyle(theme.common.primaryButton)
+          .transition(
+            .move(edge: .trailing).combined(with: .opacity).animation(.default)
+          )
+        }
+      #endif
     }
 
+    #if os(iOS)
+      var animatedKeyboardHeight: CGFloat {
+        (properties.pickerShown || isFocused)
+          ? properties.keyboardHeight : 0
+      }
+    #endif
+
     private func sendMessage() {
-      let msg = text.trimmingCharacters(in: .whitespacesAndNewlines)
+      let msg = inputVM.content.trimmingCharacters(in: .whitespacesAndNewlines)
       guard !msg.isEmpty else { return }
       guard let channelId = appState.selectedChannel else { return }
-      text = ""  // clear input field
-      Task.detached {
-        //      let message: Payloads.CreateMessage = try! .init(
-        //        content: msg,
-        //        nonce: .string(MessageSnowflake.makeFake(date: .now).rawValue),
-        //        tts: false,
-        //        message_reference: nil,
-        //        sticker_ids: nil,
-        //        files: nil,
-        //        attachments: nil,
-        //        flags: nil,
-        //        poll: nil
-        //      )
-        do {
-          _ = try await gw.client.createMessage(
-            channelId: channelId,
-            payload: .init(
-              content: msg,
-              nonce: .string(MessageSnowflake.makeFake(date: .now).rawValue)
-            )
-          ).guardSuccess()
-        } catch {
-          await MainActor.run {
-            self.appState.error = error
-          }
-        }
+      // create a copy of the vm
+      let toSend = inputVM.copy()
+      inputVM.reset()
+      Task {
+        gw.messageDrain.send(toSend, in: channelId)
       }
     }
 
@@ -363,37 +588,66 @@ extension ChatView {
 }
 
 #if os(iOS)
-  extension EnvironmentValues {
-    fileprivate var safeAreaInsets: EdgeInsets {
-      self[SafeAreaInsetsKey.self]
+  private struct DocumentPickerViewController: UIViewControllerRepresentable {
+    @Environment(\.colorScheme) var colorScheme
+    let callback: ([URL]) -> Void
+
+    init(callback: @escaping ([URL]) -> Void) {
+      self.callback = callback
+    }
+
+    func makeUIViewController(context: Context)
+      -> UIDocumentPickerViewController
+    {
+      // open any files
+      let controller = UIDocumentPickerViewController(
+        forOpeningContentTypes: [.data]
+      )
+      controller.allowsMultipleSelection = true
+      controller.shouldShowFileExtensions = true
+      controller.delegate = context.coordinator
+      // it appears the color theme isn't inherited properly.
+      controller.overrideUserInterfaceStyle = .init(colorScheme)
+      return controller
+    }
+
+    func updateUIViewController(
+      _ uiViewController: UIDocumentPickerViewController,
+      context: Context
+    ) {
+      uiViewController.overrideUserInterfaceStyle = .init(colorScheme)
+    }
+
+    func makeCoordinator() -> Coordinator {
+      Coordinator(callback: callback)
+    }
+
+    class Coordinator: NSObject, UIDocumentPickerDelegate {
+      let callback: ([URL]) -> Void
+
+      init(callback: @escaping ([URL]) -> Void) {
+        self.callback = callback
+      }
+
+      func documentPicker(
+        _ controller: UIDocumentPickerViewController,
+        didPickDocumentsAt urls: [URL]
+      ) {
+        self.callback(urls)
+      }
+
+      func documentPickerWasCancelled(
+        _ controller: UIDocumentPickerViewController
+      ) {}
     }
   }
 
-  private struct SafeAreaInsetsKey: EnvironmentKey {
-    static var defaultValue: EdgeInsets {
-      UIApplication.shared.keyWindow?.safeAreaInsets.swiftUIInsets
-        ?? EdgeInsets()
-    }
-  }
-
-  extension UIEdgeInsets {
-    fileprivate var swiftUIInsets: EdgeInsets {
-      EdgeInsets(top: top, leading: left, bottom: bottom, trailing: right)
-    }
-  }
-
-  extension UIApplication {
-    fileprivate var keyWindow: UIWindow? {
-      connectedScenes
-        .compactMap {
-          $0 as? UIWindowScene
-        }
-        .flatMap {
-          $0.windows
-        }
-        .first {
-          $0.isKeyWindow
-        }
-    }
-  }
+//  import FLEX
+//
+//  #Preview {
+//    TestMessageView()
+//      .onAppear {
+//        FLEXManager.shared.showExplorer()
+//      }
+//  }
 #endif
