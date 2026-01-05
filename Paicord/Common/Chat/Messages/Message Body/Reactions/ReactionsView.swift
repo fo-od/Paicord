@@ -13,12 +13,39 @@ import SDWebImageSwiftUI
 import SwiftUIX
 
 struct ReactionsView: View {
+  @Environment(\.gateway) var gw
+  @Environment(\.channelStore) var channelStore
   let reactions: OrderedDictionary<Emoji, ChannelStore.Reaction>
 
   var body: some View {
     FlowLayout(spacing: 4) {
       ForEach(reactions.values.elements) { reaction in
-        Reaction(reaction: reaction)
+        AsyncButton {
+          ImpactGenerator.impact(style: .light)
+          let channelID = reaction.channelID
+          let messageID = reaction.messageID
+          if reaction.selfReacted {
+            try await gw.client.deleteOwnMessageReaction(
+              channelId: channelID,
+              messageId: messageID,
+              emoji: .init(emoji: reaction.emoji),
+              type: reaction.isBurst ? .burst : .normal
+            )
+            .guardSuccess()
+          } else {
+            try await gw.client.addMessageReaction(
+              channelId: channelID,
+              messageId: messageID,
+              emoji: .init(emoji: reaction.emoji),
+              type: reaction.isBurst ? .burst : .normal
+            )
+            .guardSuccess()
+          }
+        } catch: { _ in
+        } label: {
+          Reaction(reaction: reaction)
+        }
+        .buttonStyle(.plain)
       }
     }
   }

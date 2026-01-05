@@ -18,16 +18,20 @@ extension ChatView {
     @Environment(\.theme) var theme
     var vm: ChannelStore
     @State var inputVM: InputVM
+    
+    static func vm(for channel: ChannelStore) -> InputVM {
+      if let existingVM = InputBar.inputVMs[channel.channelId] {
+        return existingVM
+      } else {
+        let newVM = InputVM(channelStore: channel)
+        InputBar.inputVMs[channel.channelId] = newVM
+        return newVM
+      }
+    }
 
     init(vm: ChannelStore) {
       self.vm = vm
-      if let existingVM = InputBar.inputVMs[vm.channelId] {
-        self._inputVM = .init(initialValue: existingVM)
-      } else {
-        let newVM = InputVM(channelStore: vm)
-        InputBar.inputVMs[vm.channelId] = newVM
-        self._inputVM = .init(initialValue: newVM)
-      }
+      self._inputVM = State(initialValue: InputBar.vm(for: vm))
     }
 
     #if os(iOS)
@@ -120,6 +124,7 @@ extension ChatView {
               .padding(.bottom, animatedKeyboardHeight)
               .animation(properties.animation, value: animatedKeyboardHeight)
               .animation(properties.animation, value: inputVM.content.isEmpty)
+              .animation(properties.animation, value: inputVM.uploadItems.isEmpty)
               .onReceive(
                 NotificationCenter.default.publisher(
                   for: UIResponder.keyboardWillChangeFrameNotification
@@ -314,7 +319,8 @@ extension ChatView {
         }
         .ignoresSafeArea(.container, edges: .horizontal)
       }
-      .onFileDrop(delegate: .init(onDrop: { droppedItems in
+      .onFileDrop(
+        delegate: .init(onDrop: { droppedItems in
           let files = droppedItems.compactMap(\.loadedURL)
           // now do just like the file picker
           inputVM.selectedFiles = files.compactMap { url in
@@ -335,7 +341,7 @@ extension ChatView {
             if fileSize == 0 {
               url = nil
               self.filesRemovedDuringSelection =
-                SelectionError.filesEmpty
+                InputBar.SelectionError.filesEmpty
             }
             let uploadMeta = gw.user.premiumKind.fileUpload(
               size: fileSize,
@@ -344,14 +350,15 @@ extension ChatView {
             if uploadMeta.allowed == false {
               url = nil
               self.filesRemovedDuringSelection =
-                SelectionError.filesPastLimit(
+                InputBar.SelectionError.filesPastLimit(
                   limit: uploadMeta.limit
                 )
             }
 
             return url
-        }
-      }))
+          }
+        })
+      )
     }
 
     @ViewBuilder
@@ -458,7 +465,7 @@ extension ChatView {
         } label: {
           Image(systemName: "face.smiling")
             .imageScale(.large)
-            .padding(8)
+            .padding(.trailing, 6)
         }
         .buttonStyle(.borderless)
       }

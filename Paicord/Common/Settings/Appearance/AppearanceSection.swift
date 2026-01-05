@@ -10,9 +10,16 @@ import SettingsKit
 import SwiftUIX
 
 extension SettingsView {
+  @SettingsContentBuilder
   var appearanceSection: some SettingsContent {
-    CustomSettingsGroup("Appearance", systemImage: "paintbrush") {
+    CustomSettingsGroup("Theming", systemImage: "paintbrush") {
       ThemingSection()
+    }
+    
+    SettingsGroup("Appearance", systemImage: "display") {
+      SettingsItem("Animate Chat Messages", icon: "circle.grid.2x1.right.filled") {
+        Toggle("", isOn: $chatMessagesAnimated)
+      }
     }
   }
 }

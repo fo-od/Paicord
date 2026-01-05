@@ -61,7 +61,7 @@ extension DiscordChannel.Message.Attachment: DiscordMedia {
 }
 
 extension Payloads.CreateMessage: @retroactive Identifiable {
-  public var id: String {
-    self.nonce?.asString ?? "unknown"
+  public var id: MessageSnowflake {
+    .init(self.nonce?.asString ?? "unknown")
   }
 }

@@ -19,16 +19,23 @@ struct MarkdownText: View {
   @Environment(\.theme) var theme
 
   var renderer: MarkdownRendererVM
-
+  
+  var baseAttributesOverrides: [NSAttributedString.Key: Any] = [:]
+  
   init(
     content: String,
-    channelStore: ChannelStore? = nil,
-    baseAttributesOverrides: [NSAttributedString.Key: Any] = [:]
+    channelStore: ChannelStore? = nil
   ) {
     self.content = content
     self.channelStore = channelStore
-    self.renderer = MarkdownRendererVM(content)
-    self.renderer.baseAttributesOverrides = baseAttributesOverrides
+    self.renderer = MarkdownRendererVM(content, baseAttributesOverrides: baseAttributesOverrides)
+  }
+  
+  func baseAttributes(_ attributes: [NSAttributedString.Key: Any]) -> MarkdownText {
+    var copy = self
+    copy.baseAttributesOverrides = attributes
+    copy.renderer.baseAttributesOverrides = attributes
+    return copy
   }
 
   @State var userPopover: PartialUser?
@@ -299,7 +306,8 @@ class MarkdownRendererVM {
 
   var baseAttributesOverrides: [NSAttributedString.Key: Any] = [:]
 
-  init(_ content: String? = nil, ) {
+  init(_ content: String? = nil, baseAttributesOverrides: [NSAttributedString.Key: Any] = [:]) {
+    self.baseAttributesOverrides = baseAttributesOverrides
     guard let content else { return }
     // try cache check. do not parse if cache fail.
     if let cached = Self.blockCache.object(forKey: content as NSString) {

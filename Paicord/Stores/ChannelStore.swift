@@ -656,6 +656,14 @@ extension ChannelStore {
     var id: String {
       emoji.id?.rawValue ?? emoji.name ?? "idk man"
     }
+    
+    var channelID: ChannelSnowflake {
+      message.channel_id
+    }
+    
+    var messageID: MessageSnowflake {
+      message.id
+    }
 
     // the data of the message this reaction is for
     private var message: DiscordChannel.Message

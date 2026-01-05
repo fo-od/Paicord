@@ -118,8 +118,11 @@ extension GuildStore {
     channel: ChannelStore?,
     _ permission: Permission
   ) -> Bool {
-    self.memberHasPermission(
-      memberID: self.gateway!.user.currentUser!.id,
+    guard let id = self.gateway?.user.currentUser?.id else {
+      return true
+    }
+    return self.memberHasPermission(
+      memberID: id,
       channel: channel,
       permission
     )

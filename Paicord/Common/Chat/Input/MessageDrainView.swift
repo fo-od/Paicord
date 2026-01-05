@@ -10,46 +10,8 @@ import Collections
 import PaicordLib
 import SwiftUIX
 
-struct MessageDrainView: View {
-  @Environment(\.gateway) var gw
-  @Environment(\.channelStore) var vm
-
-  var drain: MessageDrainStore { gw.messageDrain }
-
-  var body: some View {
-    let pendingMessages:
-      OrderedDictionary<MessageSnowflake, Payloads.CreateMessage> =
-        if let channelId = vm?.channelId {
-          drain.pendingMessages[channelId, default: [:]]
-        } else { [:] }
-    ForEach(pendingMessages.values.reversed()) { message in
-      // if there is only one message, there is no prior. use the latest message from channelstore
-      if pendingMessages.count > 1,
-        let messageIndex = pendingMessages.values.firstIndex(where: {
-          $0.nonce == message.nonce
-        }),
-        messageIndex > 0
-      {
-        let priorMessage = pendingMessages.values[messageIndex - 1]
-        SendMessageCell(for: message, prior: priorMessage)
-      } else if let channelStore = vm,
-        let latestMessage = channelStore.messages.values.last
-      {
-        // if there is a prior message from the channel store, use that
-        SendMessageCell(for: message, prior: latestMessage)
-      } else {
-        // no prior message
-        SendMessageCell(
-          for: message,
-          prior: Optional<DiscordChannel.Message>.none
-        )
-      }
-    }
-  }
-}
-
 // copy of MessageCell for messages being sent
-extension MessageDrainView {
+extension ChatView {
   struct SendMessageCell: View {
     var message: Payloads.CreateMessage
     /// Set this if the prior message exists, from discord.
@@ -59,6 +21,8 @@ extension MessageDrainView {
     @Environment(\.channelStore) var channelStore
     @Environment(\.gateway) var gw
     @State var cellHighlighted = false
+
+    var drain: MessageDrainStore { gw.messageDrain }
 
     init(
       for message: Payloads.CreateMessage,
@@ -101,6 +65,10 @@ extension MessageDrainView {
       let inline =
         priorMessageExisting?.author?.id == gw.user.currentUser?.id
         || priorMessageEnqueued != nil && message.message_reference == nil
+      let nonce =
+        message.nonce?.asString != nil
+        ? MessageSnowflake(message.nonce!.asString) : nil
+      let error: Error? = nonce != nil ? drain.failedMessages[nonce!] : nil
 
       // adding them together can cause arithmetic overflow, so hash instead
       let cellHash: Int = {
@@ -112,6 +80,9 @@ extension MessageDrainView {
         if let priorMessage = priorMessageEnqueued {
           hasher.combine(priorMessage)
         }
+        if let error {
+          hasher.combine(String(describing: error))
+        }
         return hasher.finalize()
       }()
 
@@ -119,7 +90,8 @@ extension MessageDrainView {
         DefaultMessage(
           message: message,
           channelStore: channelStore!,
-          inline: inline
+          inline: inline,
+          error: error
         )
       }
       .background(Color.almostClear)
@@ -154,6 +126,7 @@ extension MessageDrainView {
     let channelStore: ChannelStore
     @Environment(\.gateway) var gw
     let inline: Bool
+    var error: Error?
 
     @State var editedPopover = false
     @State var avatarAnimated = false
@@ -184,12 +157,14 @@ extension MessageDrainView {
 
     @ViewBuilder
     var reply: some View {
-      if let refID = message.message_reference?.message_id, let msg = channelStore.messages[refID] {
+      if let refID = message.message_reference?.message_id,
+        let msg = channelStore.messages[refID]
+      {
         HStack(spacing: 0) {
           MessageCell.ReplyLine()
             .padding(.leading, MessageCell.avatarSize / 2)  // align with pfp
             .padding(.trailing, 6)
-          
+
           Group {
             Text("\(msg.author?.username ?? "Unknown") • ")
               .foregroundStyle(.secondary)
@@ -314,7 +289,17 @@ extension MessageDrainView {
 
     @ViewBuilder var content: some View {
       VStack(alignment: .leading, spacing: 4) {
+        #if os(iOS)
+          let attr: [NSAttributedString.Key: Any] = [
+            .foregroundColor: error != nil ? UIColor.red : nil
+          ]
+        #else
+          let attr: [NSAttributedString.Key: Any] = [
+            .foregroundColor: error != nil ? NSColor.red : nil
+          ]
+        #endif
         MarkdownText(content: message.content ?? "", channelStore: channelStore)
+          .baseAttributes(attr)
           .equatable(by: message.content)
       }
       .opacity(0.6)  // indicate pending state

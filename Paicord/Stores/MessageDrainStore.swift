@@ -10,6 +10,7 @@ import Collections
 import Foundation
 import PaicordLib
 import PhotosUI
+import SwiftUIX
 
 @Observable
 class MessageDrainStore: DiscordDataStore {
@@ -33,9 +34,13 @@ class MessageDrainStore: DiscordDataStore {
             let messageNonceSnowflake = Optional(MessageSnowflake(nonce))
           {
             // remove from pending as its been sent successfully
-            pendingMessages[message.channel_id, default: [:]].removeValue(
-              forKey: messageNonceSnowflake
-            )
+//            var transaction = Transaction()
+//            transaction.disablesAnimations = true
+//            _ = withTransaction(transaction) {
+              pendingMessages[message.channel_id, default: [:]].removeValue(
+                forKey: messageNonceSnowflake
+              )
+//            }
             // also remove from failed messages if it was there
             failedMessages.removeValue(forKey: messageNonceSnowflake)
             // also remove from message tasks if it was there
@@ -62,8 +67,7 @@ class MessageDrainStore: DiscordDataStore {
       MessageSnowflake, Payloads.CreateMessage
     >
   ]()
-  var failedMessages: [MessageSnowflake: Error?] = [:]
-
+  var failedMessages: [MessageSnowflake: Error] = [:]
   var messageSendQueueTask: Task<Void, Never>?
   var messageTasks: [MessageSnowflake: @Sendable () async throws -> Void] = [:]
 
@@ -312,17 +316,21 @@ class MessageDrainStore: DiscordDataStore {
         ).guardSuccess()
 
         print("[SendTask] Message send SUCCESS nonce:", nonce)
-
+        
+        // remove from pending and failed
+//        var transaction = Transaction()
+//        transaction.disablesAnimations = true
+//        _ = withTransaction(transaction) {
+          self.pendingMessages[channel, default: [:]].removeValue(forKey: nonce)
+//        }
+        self.failedMessages.removeValue(forKey: nonce)
+        self.messageTasks.removeValue(forKey: nonce)
       } catch {
         print("[SendTask] Message send FAILED nonce:", nonce)
         print("[SendTask] Error:", error)
         self.failedMessages[nonce] = error
         throw error
       }
-      // remove from pending and failed
-      self.pendingMessages[channel, default: [:]].removeValue(forKey: nonce)
-      self.failedMessages.removeValue(forKey: nonce)
-      self.messageTasks.removeValue(forKey: nonce)
     }
 
     // store in pending
@@ -345,7 +353,11 @@ class MessageDrainStore: DiscordDataStore {
     in channel: ChannelSnowflake
   ) {
     // remove from all dicts
-    pendingMessages[channel]?.removeValue(forKey: nonce)
+//    var transaction = Transaction()
+//    transaction.disablesAnimations = true
+//    _ = withTransaction(transaction) {
+      pendingMessages[channel]?.removeValue(forKey: nonce)
+//    }
     failedMessages.removeValue(forKey: nonce)
     messageTasks.removeValue(forKey: nonce)
   }

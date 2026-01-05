@@ -20,6 +20,9 @@ struct ChatView: View {
   @Environment(\.accessibilityReduceMotion) var accessibilityReduceMotion
   @Environment(\.userInterfaceIdiom) var idiom
   @Environment(\.theme) var theme
+  var drain: MessageDrainStore { gw.messageDrain }
+  
+  @AppStorage("Paicord.Appearance.ChatMessagesAnimated") var chatAnimatesMessages: Bool = false
 
   @ViewStorage private var isNearBottom = true  // used to track if we are near the bottom, if so scroll.
   @ViewStorage private var pendingScrollWorkItem: DispatchWorkItem?
@@ -28,6 +31,12 @@ struct ChatView: View {
 
   var body: some View {
     let orderedMessages = vm.messages.values
+    let pendingMessages:
+      OrderedDictionary<MessageSnowflake, Payloads.CreateMessage> =
+        drain.pendingMessages[vm.channelId, default: [:]]
+
+    let shouldAnimate =
+      orderedMessages.last?.author?.id != gw.user.currentUser?.id
     VStack(spacing: 0) {
       ScrollViewReader { proxy in
         ScrollView {
@@ -80,7 +89,27 @@ struct ChatView: View {
             //                  }
             //              }
             //            } else {
-            MessageDrainView()
+            ForEach(pendingMessages.values.reversed()) { message in
+              // if there is only one message, there is no prior. use the latest message from channelstore
+              if pendingMessages.count > 1,
+                let messageIndex = pendingMessages.values.firstIndex(where: {
+                  $0.nonce == message.nonce
+                }),
+                messageIndex > 0
+              {
+                let priorMessage = pendingMessages.values[messageIndex - 1]
+                SendMessageCell(for: message, prior: priorMessage)
+              } else if let latestMessage = vm.messages.values.last {
+                // if there is a prior message from the channel store, use that
+                SendMessageCell(for: message, prior: latestMessage)
+              } else {
+                // no prior message
+                SendMessageCell(
+                  for: message,
+                  prior: Optional<DiscordChannel.Message>.none
+                )
+              }
+            }
             //          }
 
             // message drain view, represents messages being sent etc
@@ -88,7 +117,7 @@ struct ChatView: View {
           .scrollTargetLayout()
         }
         .maxHeight(.infinity)
-        .safeAreaPadding(.bottom, 22)
+        .safeAreaPadding(.bottom, 15)
         .bottomAnchored()
         .onAppear {
           NotificationCenter.default.post(
@@ -115,12 +144,14 @@ struct ChatView: View {
           }
         }
         // when sending a message, try scroll to bottom
-        .onChange(of: gw.messageDrain.pendingMessages.count) {
-          NotificationCenter.default.post(
-            name: .chatViewShouldScrollToBottom,
-            object: ["channelId": vm.channelId]
-          )
-        }
+        //        .onChange(of: gw.messageDrain.pendingMessages) { _, newValue in
+        //          let pending: MessageSnowflake? =
+        //            newValue[vm.channelId, default: [:]].keys.first
+        //          NotificationCenter.default.post(
+        //            name: .chatViewShouldScrollToBottom,
+        //            object: ["channelId": vm.channelId, "id": pending as Any]
+        //          )
+        //        }
         #if os(macOS)
           // when new messages come in, try scroll to bottom
           .onChange(of: vm.messages) {
@@ -142,9 +173,10 @@ struct ChatView: View {
           guard isNearBottom || (info["immediate"] as? Bool == true) else {
             return
           }
+          let pending: MessageSnowflake? = info["id"] as? MessageSnowflake
           scheduleScrollToBottom(
             proxy: proxy,
-            lastID: vm.messages.values.last?.id
+            lastID: pending ?? vm.messages.values.last?.id
           )
         }
         .onReceive(
@@ -165,6 +197,8 @@ struct ChatView: View {
         }
       }
     }
+    .animation(shouldAnimate && chatAnimatesMessages ? .default : nil, value: orderedMessages)
+    .animation(chatAnimatesMessages ? .default : nil, value: pendingMessages)
     .scrollDismissesKeyboard(.interactively)
     .safeAreaInset(edge: .bottom, spacing: 10) {
       if vm.hasPermission(.sendMessages) {
