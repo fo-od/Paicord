@@ -39,12 +39,7 @@ public struct Emoji: Sendable, Codable, Equatable, Hashable {
 
 /// A reaction emoji.
 public struct Reaction: Sendable, Codable, Hashable {
-  /// https://docs.discord.food/resources/message#create-reaction
-  public enum Kind: Int, Sendable {
-    case normal = 0
-    case burst = 1
-  }
-
+  
   private enum Base: Sendable, Codable, Hashable {
     case unicodeEmoji(String)
     case guildEmoji(name: String?, id: EmojiSnowflake)

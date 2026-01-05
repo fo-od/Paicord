@@ -542,15 +542,21 @@ extension DiscordClient {
     channelId: ChannelSnowflake,
     messageId: MessageSnowflake,
     emoji: Reaction,
-    type: Reaction.Kind = .normal
+    type: Gateway.ReactionKind = .normal
   ) async throws -> DiscordHTTPResponse {
     let endpoint = APIEndpoint.addMessageReaction(
       channelId: channelId,
       messageId: messageId,
-      emojiName: emoji.urlPathDescription,
-      type: type
+      emojiName: emoji.urlPathDescription
     )
-    return try await self.send(request: .init(to: endpoint))
+    return try await self.send(
+      request: .init(
+        to: endpoint,
+        queries: [
+          ("type", "\(type.rawValue)")
+        ]
+      )
+    )
   }
 
   /// https://discord.com/developers/docs/resources/channel#delete-own-reaction
@@ -559,7 +565,7 @@ extension DiscordClient {
     channelId: ChannelSnowflake,
     messageId: MessageSnowflake,
     emoji: Reaction,
-    type: Reaction.Kind
+    type: Gateway.ReactionKind
   ) async throws -> DiscordHTTPResponse {
     let endpoint = APIEndpoint.deleteOwnMessageReaction(
       channelId: channelId,
@@ -2685,7 +2691,8 @@ extension DiscordClient {
 
   /// https://discord.com/developers/docs/resources/user#leave-guild
   @inlinable
-  public func leaveGuild(id: GuildSnowflake) async throws -> DiscordHTTPResponse {
+  public func leaveGuild(id: GuildSnowflake) async throws -> DiscordHTTPResponse
+  {
     let endpoint = APIEndpoint.leaveGuild(guildId: id)
     return try await self.send(request: .init(to: endpoint))
   }

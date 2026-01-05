@@ -266,8 +266,7 @@ public enum APIEndpoint: Endpoint {
   case addMessageReaction(
     channelId: ChannelSnowflake,
     messageId: MessageSnowflake,
-    emojiName: String,
-    type: Reaction.Kind
+    emojiName: String
   )
   case bulkDeleteMessages(channelId: ChannelSnowflake)
   case createMessage(channelId: ChannelSnowflake)
@@ -290,7 +289,7 @@ public enum APIEndpoint: Endpoint {
     channelId: ChannelSnowflake,
     messageId: MessageSnowflake,
     emojiName: String,
-    type: Reaction.Kind
+    type: Gateway.ReactionKind
   )
   case deleteUserMessageReaction(
     channelId: ChannelSnowflake,
@@ -869,7 +868,8 @@ public enum APIEndpoint: Endpoint {
     case .listMessageReactionsByEmoji(
       let channelId,
       let messageId,
-      let emojiName
+      let emojiName,
+      
     ):
       let channelId = channelId.rawValue
       let messageId = messageId.rawValue
@@ -882,14 +882,13 @@ public enum APIEndpoint: Endpoint {
     case .addMessageReaction(
       let channelId,
       let messageId,
-      let emojiName,
-      let type
+      let emojiName
     ):
       let channelId = channelId.rawValue
       let messageId = messageId.rawValue
       let emojiName = emojiName.urlPathEncoded()
       suffix =
-        "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/@me?type=\(type.rawValue)"
+        "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/@me"
     case .bulkDeleteMessages(let channelId):
       let channelId = channelId.rawValue
       suffix = "channels/\(channelId)/messages/bulk-delete"
@@ -1590,14 +1589,13 @@ public enum APIEndpoint: Endpoint {
     case .addMessageReaction(
       let channelId,
       let messageId,
-      let emojiName,
-      let type
+      let emojiName
     ):
       let channelId = channelId.rawValue
       let messageId = messageId.rawValue
       let emojiName = emojiName.urlPathEncoded()
       suffix =
-        "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/@me?type=\(type.rawValue)"
+        "channels/\(channelId)/messages/\(messageId)/reactions/\(emojiName)/@me"
     case .bulkDeleteMessages(let channelId):
       let channelId = channelId.rawValue
       suffix = "channels/\(channelId)/messages/bulk-delete"
@@ -2722,11 +2720,9 @@ public enum APIEndpoint: Endpoint {
       let channelId,
       let messageId,
       let emojiName,
-      let type
     ):
       return [
         channelId.rawValue, messageId.rawValue, emojiName,
-        type.rawValue.description,
       ]
     case .bulkDeleteMessages(let channelId):
       return [channelId.rawValue]
@@ -3417,11 +3413,10 @@ public enum APIEndpoint: Endpoint {
     case .addMessageReaction(
       let channelId,
       let messageId,
-      let emojiName,
-      let type
+      let emojiName
     ):
       return
-        "addMessageReaction(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), emojiName: \(emojiName)), type: \(type))"
+        "addMessageReaction(channelId.rawValue: \(channelId.rawValue), messageId.rawValue: \(messageId.rawValue), emojiName: \(emojiName))"
     case .bulkDeleteMessages(let channelId):
       return "bulkDeleteMessages(channelId.rawValue: \(channelId.rawValue))"
     case .createMessage(let channelId):
