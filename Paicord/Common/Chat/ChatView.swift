@@ -207,10 +207,11 @@ struct ChatView: View {
     .safeAreaInset(edge: .bottom, spacing: 10) {
       if vm.hasPermission(.sendMessages) {
         InputBar(vm: vm)
+          .id(vm.channelId)
       }
     }
-    .ignoresSafeArea(.keyboard, edges: .all)
     .background(theme.common.secondaryBackground)
+    .ignoresSafeArea(.keyboard, edges: .all)
     .toolbar {
       ToolbarItem(placement: .navigation) {
         ChannelHeader(vm: vm)
