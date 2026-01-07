@@ -18,8 +18,10 @@ extension ChatView.InputBar {
         LazyHStack(spacing: 8) {
           ForEach(inputVM.uploadItems) { attachment in
             AttachmentPreview(inputVM: inputVM, attachment: attachment) {
+              // remove callback
               inputVM.uploadItems.removeAll { $0.id == attachment.id }
             }
+            .transition(.blurReplace)
           }
         }
         .padding(.horizontal, 8)

@@ -90,7 +90,7 @@ struct ChatView: View {
             //                  }
             //              }
             //            } else {
-            ForEach(pendingMessages.values.reversed()) { message in
+            ForEach(pendingMessages.values) { message in
               // if there is only one message, there is no prior. use the latest message from channelstore
               if pendingMessages.count > 1,
                 let messageIndex = pendingMessages.values.firstIndex(where: {

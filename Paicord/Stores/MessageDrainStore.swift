@@ -353,10 +353,8 @@ class MessageDrainStore: DiscordDataStore {
     }
 
     // store in pending
-    pendingMessages[channel, default: [:]].updateValueAndMoveToFront(
-      message,
-      forKey: nonce
-    )
+    pendingMessages[channel, default: [:]]
+      .updateValue(message, forKey: nonce)
     // store task
     messageTasks[nonce] = task
 

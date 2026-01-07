@@ -46,8 +46,6 @@ enum Profile {
     @Environment(\.guildStore) var guildStore
     let member: Guild.PartialMember?
     let user: PartialUser?
-    //    var animated: Bool = false
-    //    var showDecoration: Bool = false
     @Environment(\.profileAnimated) var animated
     @Environment(\.profileShowAvatarDecoration) var showDecoration
 

@@ -7,7 +7,7 @@
 //
 
 import PaicordLib
-import SwiftUI
+import SwiftUIX
 
 struct AccountPicker: View {
   @Environment(\.theme) var theme
@@ -31,6 +31,8 @@ struct AccountPicker: View {
                 onSelect(account.user.id)
               } label: {
                 HStack {
+                  Profile.Avatar(member: nil, user: account.user.toPartialUser())
+                    .maxHeight(35)
                   Text(account.user.username)
                     .font(.title3)
                   Spacer()

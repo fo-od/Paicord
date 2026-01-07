@@ -63,6 +63,19 @@ extension ChatView.InputBar {
           if uploadItems.count > 10 {
             uploadItems = Array(uploadItems.prefix(10))
           }
+          
+          // prune selected photos again
+          for uploadItem in uploadItems {
+            switch uploadItem {
+            case .pickerItem(_, let photoItem):
+              if selectedPhotos.contains(photoItem) == false {
+                if let index = uploadItems.firstIndex(of: uploadItem) {
+                  uploadItems.remove(at: index)
+                }
+              }
+            default: continue
+            }
+          }
         }
       }
 

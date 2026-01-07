@@ -144,6 +144,7 @@ extension ChatView {
         .ignoresSafeArea(.container, edges: .horizontal)
       }
       .animation(.default, value: inputVM.messageAction.debugDescription)
+      .animation(.default, value: inputVM.uploadItems)
       .onFileDrop(
         delegate: .init(onDrop: { droppedItems in
           let files = droppedItems.compactMap(\.loadedURL)
@@ -210,12 +211,11 @@ extension ChatView {
             UIResponder.keyboardFrameEndUserInfoKey
           ] as? NSValue {
             let height = keyboardFrame.cgRectValue.height
-            if properties.storedKeyboardHeight == 0 {
+//            guard properties.storedKeyboardHeight == 0 else { return }
               properties.storedKeyboardHeight = max(
                 height - properties.safeArea.bottom,
                 0
               )
-            }
           }
         }  // get kb height
         .sheet(isPresented: $properties.showPhotosPicker) {

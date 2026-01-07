@@ -55,6 +55,7 @@ struct RootView: View {
             LargeBaseplate()
           }
         }
+        .sponsorSheet()
         .task {
           appState.loadPrevGuild()
           #if os(iOS)

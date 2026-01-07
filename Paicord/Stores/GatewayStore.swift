@@ -219,6 +219,9 @@ final class GatewayStore {
         )
       )
     }
+    
+    // update user data in account storage
+    accounts.updateProfile(for: data.user.id, data.user)
 
     // if we have subscribed guilds, we need to clear out non-focused channel stores
     //    guard self.subscribedGuilds.isEmpty == false else { return } // not needed, below logic wont do anything if empty

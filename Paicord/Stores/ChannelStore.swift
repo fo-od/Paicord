@@ -525,12 +525,16 @@ class ChannelStore: DiscordDataStore {
           }
         }
       } else {
-        for message in fetched.reversed() {
-          self.messages.updateValue(
-            message,
-            forKey: message.id,
-            insertingAt: self.messages.count
-          )
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+          for message in fetched.reversed() {
+            self.messages.updateValue(
+              message,
+              forKey: message.id,
+              insertingAt: self.messages.count
+            )
+          }
         }
 
         if initialLoad && fetched.count < requestedLimit {
