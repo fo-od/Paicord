@@ -15,6 +15,11 @@ extension View {
   }
 }
 
+extension NSNotification.Name {
+  static let presentSponsorSheet =
+    NSNotification.Name("Paicord.Sponsor.PresentSheet")
+}
+
 private struct SponsorSheetModifier: ViewModifier {
   @State private var isPresented: Bool = false
 
@@ -22,6 +27,13 @@ private struct SponsorSheetModifier: ViewModifier {
     content
       .sheet(isPresented: $isPresented) {
         SponsorView(isPresented: $isPresented)
+      }
+      .onReceive(
+        NotificationCenter.default.publisher(
+          for: .presentSponsorSheet
+        )
+      ) { _ in
+        isPresented = true
       }
       .onAppear {
         // set Paicord.Sponsor.InstallDate if not set

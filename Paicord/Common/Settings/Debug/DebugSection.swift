@@ -33,6 +33,12 @@ extension SettingsView {
       }
 
       Section("Playgrounds") {
+        Button("PresentSponsorSheet") {
+          NotificationCenter.default.post(
+            name: .presentSponsorSheet,
+            object: nil
+          )
+        }
 //        NavigationLink {
 //          TestMessageView().eraseToAnyView()
 //        } label: {

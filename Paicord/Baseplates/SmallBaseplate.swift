@@ -76,9 +76,15 @@ struct SmallBaseplate: View {
               }
             #endif
         } else {
-          Text(":3")
-            .font(.largeTitle)
-            .foregroundStyle(.secondary)
+          VStack {
+            Text(":3")
+              .font(.largeTitle)
+              .foregroundStyle(.secondary)
+
+            Text("Select a channel to start chatting")
+              .foregroundStyle(.secondary)
+              .font(.title2)
+          }
         }
       }
     }

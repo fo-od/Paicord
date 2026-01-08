@@ -24,6 +24,7 @@ struct MFAView: View {
 
   @Binding var chosenMethod: Payloads.MFASubmitData.MFAKind?
   @State var input: String = ""
+  @FocusState var inputFocused: Bool
   @Environment(\.theme) var theme
 
   init(
@@ -139,6 +140,123 @@ struct MFAView: View {
             }
           }
           .disabled(taskInProgress)
+        }
+      case .backup:
+        VStack {
+          Text("Enter your backup code")
+            .foregroundStyle(.secondary)
+            .font(.caption)
+          Text("You can only use each backup code once.")
+            .foregroundStyle(.tertiary)
+            .font(.caption2)
+
+          TextField("", text: $input)
+            .textFieldStyle(.plain)
+            .padding(10)
+            .frame(maxWidth: .infinity)
+            .focused($inputFocused)
+            .background(theme.common.primaryBackground.opacity(0.75))
+            .clipShape(.rounded)
+            .overlay {
+              RoundedRectangle()
+                .stroke(
+                  inputFocused ? theme.common.primaryButton : Color.clear,
+                  lineWidth: 1
+                )
+                .fill(.clear)
+            }
+            .disabled(taskInProgress)
+            .onChange(of: input) {
+              input = String(
+                input.replacingOccurrences(of: "-", with: "").prefix(8)
+              ).lowercased()
+              guard input.count == 8 else { return }
+              self.taskInProgress = true
+              self.mfaTask = .init {
+                defer { self.taskInProgress = false }
+                do {
+                  let req = try await loginClient.verifyMFALogin(
+                    type: chosenMethod!,
+                    payload: .init(code: input, ticket: authentication.ticket!),
+                    fingerprint: fingerprint
+                  )
+                  if let error = req.asError() { throw error }
+                  let data = try req.decode()
+                  guard let token = data.token else {
+                    throw
+                      "No authentication token was sent despite MFA being completed."
+                  }
+                  onFinish(token)
+                } catch {
+                  self.appState.error = error
+                }
+              }
+            }
+        }
+      case .sms:
+        VStack {
+          Text("Enter the code sent to your phone")
+            .foregroundStyle(.secondary)
+            .font(.caption)
+
+          HStack {
+            TextField("", text: $input)
+              .textFieldStyle(.plain)
+              .keyboardType(.numberPad)
+              .padding(10)
+              .frame(maxWidth: .infinity)
+              .focused($inputFocused)
+            
+            Divider()
+              .maxHeight(10)
+
+            AsyncButton("Send SMS") {
+              let req = try await loginClient.verifySendSMS(
+                ticket: authentication.ticket!,
+                fingerprint: fingerprint
+              )
+              if let error = req.asError() { throw error }
+              try? await Task.sleep(for: .seconds(30)) // throttle
+            } catch: { error in
+              self.appState.error = error
+            }
+              .padding(.trailing, 8)
+          }
+          .background(theme.common.primaryBackground.opacity(0.75))
+          .clipShape(.rounded)
+          .overlay {
+            RoundedRectangle()
+              .stroke(
+                inputFocused ? theme.common.primaryButton : Color.clear,
+                lineWidth: 1
+              )
+              .fill(.clear)
+          }
+          .disabled(taskInProgress)
+          .onChange(of: input) {
+            input = String(input.filter { $0.isNumber }.prefix(6))
+            guard input.count == 6 else { return }
+            self.taskInProgress = true
+            self.mfaTask = .init {
+              defer { self.taskInProgress = false }
+              do {
+                let req = try await loginClient.verifyMFALogin(
+                  type: chosenMethod!,
+                  payload: .init(code: input, ticket: authentication.ticket!),
+                  fingerprint: fingerprint
+                )
+                if let error = req.asError() { throw error }
+                let data = try req.decode()
+                guard let token = data.token else {
+                  throw
+                    "No authentication token was sent despite MFA being completed."
+                }
+                onFinish(token)
+              } catch {
+                self.appState.error = error
+              }
+            }
+          }
         }
       default:
         Text("wip bro go do totp")

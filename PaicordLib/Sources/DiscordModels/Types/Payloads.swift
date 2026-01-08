@@ -74,7 +74,7 @@ public enum Payloads {
     }
 
     public func validate() -> [ValidationFailure] {
-      validateCharacterCountInRange(code, min: 6, max: 6, name: "code")
+      validateCharacterCountInRange(code, min: 6, max: 8, name: "code")
     }
   }
 
