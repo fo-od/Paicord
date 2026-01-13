@@ -690,7 +690,6 @@ class MarkdownRendererVM {
         var newAttrs = baseAttributes
         if let url = URL(string: link.url) {
           newAttrs[.link] = url
-        } else {
           newAttrs[.foregroundColor] = AppKitOrUIKitColor(
             theme.common.hyperlink
           )
