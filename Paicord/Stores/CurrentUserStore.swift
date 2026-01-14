@@ -95,15 +95,19 @@ class CurrentUserStore: DiscordDataStore {
   private func handleReady(_ readyData: Gateway.Ready) {
     sessions = readyData.sessions
     currentUser = readyData.user
-    
+
     premiumKind = readyData.user.premium_type ?? .none
 
     guilds = readyData.guilds.reduce(into: [:]) { $0[$1.id] = $1 }
 
     privateChannels = readyData.private_channels
       .sorted(by: {
-        $0.last_message_id ?? (try! .makeFake(date: .discordPast)) > $1
-          .last_message_id ?? (try! .makeFake(date: .discordPast))
+        let lhsDate =
+          $0.last_message_id ?? MessageSnowflake($0.id)
+        let rhsDate =
+          $1.last_message_id ?? MessageSnowflake($1.id)
+
+        return lhsDate > rhsDate
       })
       .reduce(into: [:]) { $0[$1.id] = $1 }
 
@@ -210,7 +214,7 @@ class CurrentUserStore: DiscordDataStore {
     }
     self.stickers[guildId] = stickersDict
   }
-  
+
   //	/// Sends a friend request
   //	func sendFriendRequest(to username: String, discriminator: String) async throws {
   //		fatalError("Not implemented")
