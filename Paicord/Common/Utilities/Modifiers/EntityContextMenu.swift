@@ -52,65 +52,93 @@ struct EntityContextMenu<Entity>: ViewModifier {
 
   @ViewBuilder
   func messageContextMenu(message: DiscordChannel.Message) -> some View {
-    if hasPermission(.addReactions) {
+    //    if hasPermission(.addReactions) {
+    //      ControlGroup {
+    //        Button {
+    //        } label: {
+    //          WebImage(
+    //            url: .init(
+    //              string:
+    //                "https://cdn.discordapp.com/emojis/1026533070955872337.png?size=96"
+    //            )
+    //          )
+    //          .resizable()
+    //          .scaledToFit()
+    //          .frame(width: 36, height: 36)
+    //        }
+    //        Button {
+    //        } label: {
+    //          WebImage(
+    //            url: .init(
+    //              string:
+    //                "https://cdn.discordapp.com/emojis/1026533070955872337.png?size=96"
+    //            )
+    //          )
+    //          .resizable()
+    //          .scaledToFit()
+    //          .frame(width: 36, height: 36)
+    //        }
+    //        Button {
+    //        } label: {
+    //          WebImage(
+    //            url: .init(
+    //              string:
+    //                "https://cdn.discordapp.com/emojis/1026533070955872337.png?size=96"
+    //            )
+    //          )
+    //          .resizable()
+    //          .scaledToFit()
+    //          .frame(width: 36, height: 36)
+    //        }
+    //        Button {
+    //        } label: {
+    //          WebImage(
+    //            url: .init(
+    //              string:
+    //                "https://cdn.discordapp.com/emojis/1024751291504791654.png?size=96"
+    //            )
+    //          )
+    //          .resizable()
+    //          .scaledToFit()
+    //          .frame(width: 36, height: 36)
+    //        }
+    //      }
+    //      .controlGroupStyle(.compactMenu)
+    //    }
+
+    #if os(iOS)
       ControlGroup {
-        Button {
-        } label: {
-          WebImage(
-            url: .init(
-              string:
-                "https://cdn.discordapp.com/emojis/1026533070955872337.png?size=96"
-            )
-          )
-          .resizable()
-          .scaledToFit()
-          .frame(width: 36, height: 36)
+        if hasPermission(.createPublicThreads) {
+          Button {
+          } label: {
+            Label("Thread", systemImage: "option")
+          }
         }
         Button {
         } label: {
-          WebImage(
-            url: .init(
-              string:
-                "https://cdn.discordapp.com/emojis/1026533070955872337.png?size=96"
-            )
-          )
-          .resizable()
-          .scaledToFit()
-          .frame(width: 36, height: 36)
+          Label("Forward", systemImage: "arrowshape.turn.up.right.fill")
         }
-        Button {
-        } label: {
-          WebImage(
-            url: .init(
-              string:
-                "https://cdn.discordapp.com/emojis/1026533070955872337.png?size=96"
-            )
-          )
-          .resizable()
-          .scaledToFit()
-          .frame(width: 36, height: 36)
+        if hasPermission(.sendMessages) {
+          Button {
+            guard let channel else { return }
+            let vm = ChatView.InputBar.vm(for: channel)
+            vm.messageAction = .reply(message: message, mention: true)
+          } label: {
+            Label("Reply", systemImage: "arrowshape.turn.up.left.fill")
+          }
         }
-        Button {
-        } label: {
-          WebImage(
-            url: .init(
-              string:
-                "https://cdn.discordapp.com/emojis/1024751291504791654.png?size=96"
-            )
-          )
-          .resizable()
-          .scaledToFit()
-          .frame(width: 36, height: 36)
+        if messageIsFromSelf(message) {
+          Button {
+          } label: {
+            Label("Edit Message", systemImage: "pencil")
+          }
         }
       }
-      .controlGroupStyle(.compactMenu)
-    }
-
-    ControlGroup {
+    #elseif os(macOS)
       if hasPermission(.createPublicThreads) {
         Button {
         } label: {
-          Label("Thread", systemImage: "option")
+          Label("Create Thread", systemImage: "option")
         }
       }
       Button {
@@ -128,15 +156,58 @@ struct EntityContextMenu<Entity>: ViewModifier {
       }
       if messageIsFromSelf(message) {
         Button {
+          guard let channel else { return }
+          let vm = ChatView.InputBar.vm(for: channel)
+          vm.messageAction = .edit(message: message)
         } label: {
           Label("Edit Message", systemImage: "pencil")
         }
       }
-    }
+    #endif
 
     Divider()
 
-    Menu {
+    #if os(iOS)
+      Menu {
+        Button {
+          copyText(message.content)
+        } label: {
+          Label("Copy Text", systemImage: "document.on.document.fill")
+        }
+        Button {
+          let guildID = appState.selectedGuild?.rawValue ?? "@me"
+          let channelID = message.channel_id.rawValue
+          let messageID = message.id.rawValue
+          copyText(
+            "https://discord.com/channels/\(guildID)/\(channelID)/\(messageID)"
+          )
+        } label: {
+          Label("Copy Message Link", systemImage: "link")
+        }
+        if isDeveloperModeEnabled() {
+          Button {
+            copyText(message.id.rawValue)
+          } label: {
+            Label(
+              "Copy Message ID",
+              systemImage: "circle.grid.2x1.right.filled"
+            )
+          }
+          if let authorID = message.author?.id.rawValue {
+            Button {
+              copyText(authorID)
+            } label: {
+              Label(
+                "Copy Author ID",
+                systemImage: "circle.grid.2x1.right.filled"
+              )
+            }
+          }
+        }
+      } label: {
+        Label("Copy", systemImage: "doc.on.doc.fill")
+      }
+    #elseif os(macOS)
       Button {
         copyText(message.content)
       } label: {
@@ -166,9 +237,7 @@ struct EntityContextMenu<Entity>: ViewModifier {
           }
         }
       }
-    } label: {
-      Label("Copy", systemImage: "doc.on.doc.fill")
-    }
+    #endif
 
     Button {
     } label: {
@@ -188,6 +257,9 @@ struct EntityContextMenu<Entity>: ViewModifier {
     }
 
     Button {
+      guard let channel else { return }
+      let vm = ChatView.InputBar.vm(for: channel)
+      vm.content += "<@\(message.author?.id.rawValue ?? "")> "
     } label: {
       Label("Mention", systemImage: "at")
     }
@@ -195,34 +267,58 @@ struct EntityContextMenu<Entity>: ViewModifier {
     Divider()
 
     if messageIsFromSelf(message) || hasPermission(.manageMessages) {
-      Menu {
-        Section {
-          Button(role: .destructive) {
-            Task {
-              var res: DiscordHTTPResponse?
-              do {
-                res = try await gw.client.deleteMessage(
-                  channelId: message.channel_id,
-                  messageId: message.id
-                )
-                try res?.guardSuccess()
-              } catch {
-                if let error = res?.asError() {
-                  appState.error = error
-                } else {
-                  appState.error = error
+      #if os(iOS)
+        Menu {
+          Section {
+            Button(role: .destructive) {
+              Task {
+                var res: DiscordHTTPResponse?
+                do {
+                  res = try await gw.client.deleteMessage(
+                    channelId: message.channel_id,
+                    messageId: message.id
+                  )
+                  try res?.guardSuccess()
+                } catch {
+                  if let error = res?.asError() {
+                    appState.error = error
+                  } else {
+                    appState.error = error
+                  }
                 }
               }
+            } label: {
+              Label("Delete", systemImage: "trash")
             }
-          } label: {
-            Label("Delete", systemImage: "trash")
+          } header: {
+            Text("Are you sure?")
           }
-        } header: {
-          Text("Are you sure?")
+        } label: {
+          Label("Delete Message", systemImage: "trash")
         }
-      } label: {
-        Label("Delete Message", systemImage: "trash")
-      }
+      #elseif os(macOS)
+        Button(role: .destructive) {
+          Task {
+            var res: DiscordHTTPResponse?
+            do {
+              res = try await gw.client.deleteMessage(
+                channelId: message.channel_id,
+                messageId: message.id
+              )
+              try res?.guardSuccess()
+            } catch {
+              if let error = res?.asError() {
+                appState.error = error
+              } else {
+                appState.error = error
+              }
+            }
+          }
+        } label: {
+          Label("Delete", systemImage: "trash")
+        }
+      #endif
+
     }
   }
 

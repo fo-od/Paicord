@@ -104,8 +104,33 @@ class MessageDrainStore: DiscordDataStore {
   // key methods
 
   func send(_ vm: ChatView.InputBar.InputVM, in channel: ChannelSnowflake) {
+    if case .edit = vm.messageAction {
+      _editMessage(vm, in: channel)
+    } else {
+      _enqueueMessage(vm, in: channel)
+    }
+  }
+  
+  private func _editMessage(_ vm: ChatView.InputBar.InputVM, in channel: ChannelSnowflake) {
+    guard let gateway = gateway?.gateway else { return }
+    guard case .edit(let origMessage) = vm.messageAction else { return }
+    print(vm.content, vm.messageAction)
+    let message = Payloads.EditMessage.init(content:  vm.content)
+
+    Task {
+      do {
+        try await gateway.client.updateMessage(channelId: channel, messageId: origMessage.id, payload: message)
+          .guardSuccess()
+      } catch {
+        print("[MessageDrainStore EditMessage] Failed to edit message:", error)
+      }
+    }
+  }
+  
+  private func _enqueueMessage(_ vm: ChatView.InputBar.InputVM, in channel: ChannelSnowflake) {
     // the message instance will die inside the task
     guard let gateway = gateway?.gateway else { return }
+
     // the swiftui side inits the message with a nonce already btw
     // set our message up
     let nonce: MessageSnowflake = try! .makeFake(date: .now)

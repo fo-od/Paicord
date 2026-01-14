@@ -18,7 +18,7 @@ extension ChatView {
     @Environment(\.theme) var theme
     var vm: ChannelStore
     @State var inputVM: InputVM
-    
+
     static func vm(for channel: ChannelStore) -> InputVM {
       if let existingVM = InputBar.inputVMs[channel.channelId] {
         return existingVM
@@ -79,9 +79,9 @@ extension ChatView {
       )
       @State var cameraPickerPresented: Bool = false
     #else
-    @State private var fileImporterPresented: Bool = false
+      @State private var fileImporterPresented: Bool = false
     #endif
-    
+
     @FocusState private var isFocused: Bool
     @State var filesRemovedDuringSelection: Error? = nil
 
@@ -111,13 +111,13 @@ extension ChatView {
               AttachmentPreviewBar(inputVM: inputVM)
                 .frame(height: 60)
             }
-            
+
             if inputVM.messageAction != nil {
               messageActionBar
                 .padding(.bottom, -4)
                 .transition(
                   .offset(y: 25)
-                  .combined(with: .opacity)
+                    .combined(with: .opacity)
                 )
             }
 
@@ -186,11 +186,19 @@ extension ChatView {
         })
       )
     }
-    
+
     @ViewBuilder
     var messageInputBar: some View {
       HStack(alignment: .bottom, spacing: 8) {
         mediaPickerButton
+          .disabled(
+            {
+              switch inputVM.messageAction {
+              case .edit: return true
+              default: return false
+              }
+            }()
+          )
 
         textField
       }
@@ -211,11 +219,11 @@ extension ChatView {
             UIResponder.keyboardFrameEndUserInfoKey
           ] as? NSValue {
             let height = keyboardFrame.cgRectValue.height
-//            guard properties.storedKeyboardHeight == 0 else { return }
-              properties.storedKeyboardHeight = max(
-                height - properties.safeArea.bottom,
-                0
-              )
+            //            guard properties.storedKeyboardHeight == 0 else { return }
+            properties.storedKeyboardHeight = max(
+              height - properties.safeArea.bottom,
+              0
+            )
           }
         }  // get kb height
         .sheet(isPresented: $properties.showPhotosPicker) {
@@ -331,7 +339,11 @@ extension ChatView {
           }
         }  // dismiss pickers when chat is closed
       #else
-        .fileImporter(isPresented: $fileImporterPresented, allowedContentTypes: [.content], allowsMultipleSelection: true) { result in
+        .fileImporter(
+          isPresented: $fileImporterPresented,
+          allowedContentTypes: [.content],
+          allowsMultipleSelection: true
+        ) { result in
           do {
             let urls = try result.get()
             inputVM.selectedFiles = urls.compactMap { url in
@@ -459,23 +471,23 @@ extension ChatView {
         .buttonStyle(.plain)
       #endif
     }
-    
+
     @ViewBuilder
     var textField: some View {
       HStack {
-#if os(iOS)
-        TextField("Message", text: $inputVM.content, axis: .vertical)
-          .textFieldStyle(.plain)
-          .maxHeight(150)
-          .fixedSize(horizontal: false, vertical: true)
-          .disabled(appState.chatOpen == false)
-          .padding(.vertical, 7)
-          .padding(.horizontal, 12)
-          .focused($isFocused)
-#else
-        TextView("Message", text: $inputVM.content, submit: sendMessage)
-          .padding(8)
-#endif
+        #if os(iOS)
+          TextField("Message", text: $inputVM.content, axis: .vertical)
+            .textFieldStyle(.plain)
+            .maxHeight(150)
+            .fixedSize(horizontal: false, vertical: true)
+            .disabled(appState.chatOpen == false)
+            .padding(.vertical, 7)
+            .padding(.horizontal, 12)
+            .focused($isFocused)
+        #else
+          TextView("Message", text: $inputVM.content, submit: sendMessage)
+            .padding(8)
+        #endif
         Button {
         } label: {
           Image(systemName: "face.smiling")
@@ -489,7 +501,9 @@ extension ChatView {
       .clipShape(.rect(cornerRadius: 18))
 
       #if os(iOS)
-        if inputVM.content.isEmpty == false || inputVM.uploadItems.isEmpty == false {
+        if inputVM.content.isEmpty == false
+          || inputVM.uploadItems.isEmpty == false
+        {
           Button(action: sendMessage) {
             Image(systemName: "paperplane.fill")
               .imageScale(.large)
@@ -513,7 +527,7 @@ extension ChatView {
           ? properties.keyboardHeight : 0
       }
     #endif
-    
+
     @ViewBuilder
     var messageActionBar: some View {
       HStack {
@@ -521,9 +535,15 @@ extension ChatView {
           switch action {
           case .reply(let message, _):
             let author: Text = {
-              guard let author = message.author else { return Text("Unknown User").bold() }
-              if let member = vm.guildStore?.members[author.id] ?? message.member {
-                return Text(member.nick ?? author.global_name ?? author.username).bold()
+              guard let author = message.author else {
+                return Text("Unknown User").bold()
+              }
+              if let member = vm.guildStore?.members[author.id]
+                ?? message.member
+              {
+                return Text(
+                  member.nick ?? author.global_name ?? author.username
+                ).bold()
               } else {
                 return Text(author.global_name ?? author.username).bold()
               }
@@ -539,7 +559,10 @@ extension ChatView {
           Spacer()
           if case .reply(let message, let mention) = action {
             Button {
-              inputVM.messageAction = .reply(message: message, mention: !mention)
+              inputVM.messageAction = .reply(
+                message: message,
+                mention: !mention
+              )
             } label: {
               HStack(spacing: 2) {
                 Image(systemName: "at")
@@ -550,7 +573,7 @@ extension ChatView {
             .buttonStyle(.borderless)
             .tint(mention ? nil : .secondary)
           }
-            
+
           Button {
             inputVM.messageAction = nil
           } label: {
@@ -713,13 +736,13 @@ extension ChatView {
 
         class SubmissiveTextView: NSTextView {
           var onSubmit: (() -> Void)?
-          
+
           override var acceptableDragTypes: [NSPasteboard.PasteboardType] {
             [
               NSPasteboard.PasteboardType.string,
               NSPasteboard.PasteboardType.rtf,
               NSPasteboard.PasteboardType.rtfd,
-              NSPasteboard.PasteboardType.html
+              NSPasteboard.PasteboardType.html,
             ]
           }
 

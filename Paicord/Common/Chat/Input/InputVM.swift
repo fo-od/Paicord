@@ -162,24 +162,23 @@ extension ChatView.InputBar {
 
     func copy() -> InputVM {
       let vm = InputVM(channelStore: channelStore)
-      vm.content = content
       #if os(iOS)
         vm.selectedPhotos = selectedPhotos
       #endif
-      vm.selectedFiles = selectedFiles
       vm.uploadItems = uploadItems
       vm.messageAction = messageAction
+      vm.content = content
       return vm
     }
 
     func reset() {
-      content = ""
       #if os(iOS)
         selectedPhotos = []
       #endif
       selectedFiles = []
       uploadItems = []
       messageAction = nil
+      content = ""
     }
   }
 }
