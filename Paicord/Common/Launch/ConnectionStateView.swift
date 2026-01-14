@@ -118,7 +118,7 @@ struct ConnectionStateView: View {
     "waiting for us-east-1 to respond…",
     "butta dawg, dawg with da butta",
     "Obliterating React Native 😁",
-    "Pai "Paige' Pie",
+    "Pai \"Paige\" Pie",
   ].randomElement()!
 }
 
