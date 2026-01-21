@@ -480,38 +480,8 @@ jobs:
             sparklebins/sign_update \
             sparklebins/BinaryDelta
 
-
-      - name: Generate appcast
-        run: |
-          set -euo pipefail
-          COMMIT_HASH=$(git rev-parse --short HEAD)
-          TAG="paicord-nightly-${GITHUB_RUN_ID}"
-          OUT_DIR="out"
-          BIN_DIR="sparklebins"
-          GENERATOR="${BIN_DIR}/generate_appcast"
-
-          if [ ! -x "$GENERATOR" ]; then
-            echo "generate_appcast not found at $GENERATOR" >&2
-            ls -al "$BIN_DIR" || true
-            exit 1
-          fi
-
-          # Use the release download prefix so generated appcast points at the release asset URLs.
-          RELEASE_BASE="https://github.com/${REPO}/releases/download/${TAG}"
-
-          # generate_appcast will sign updates and write an appcast file into the archives directory.
-          # pass the EdDSA private key via stdin using --ed-key-file -.
-          # The output appcast will be written to OUT_DIR/appcast.xml
-          echo "$SPARKLE_PRIVATE_KEY" | "$GENERATOR" \
-            --ed-key-file - \
-            --download-url-prefix "${RELEASE_BASE}" \
-            -o "${OUT_DIR}/appcast.xml" \
-            "${OUT_DIR}/macos"
-
-          ls -al "${OUT_DIR}/appcast.xml" || true
-          sed -n '1,120p' "${OUT_DIR}/appcast.xml" || true
-
       - name: Create release
+        id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -538,6 +508,38 @@ jobs:
             --target "${GITHUB_REF_NAME:-main}"
 
           echo "Release created. Release assets uploaded."
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Generate appcast
+        run: |
+          set -euo pipefail
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          TAG="${{ steps.create_release.outputs.tag }}"
+          OUT_DIR="out"
+          BIN_DIR="sparklebins"
+          GENERATOR="${BIN_DIR}/generate_appcast"
+
+          if [ ! -x "$GENERATOR" ]; then
+            echo "generate_appcast not found at $GENERATOR" >&2
+            ls -al "$BIN_DIR" || true
+            exit 1
+          fi
+
+          # Use the release download prefix so generated appcast points at the release asset URLs.
+          RELEASE_BASE="https://github.com/${REPO}/releases/download/${TAG}"
+
+          # generate_appcast will sign updates and write an appcast file into the archives directory.
+          # pass the EdDSA private key via stdin using --ed-key-file -.
+          # The output appcast will be written to OUT_DIR/appcast.xml
+          echo "$SPARKLE_PRIVATE_KEY" | "$GENERATOR" \
+            --ed-key-file - \
+            --download-url-prefix "${RELEASE_BASE}" \
+            -o "${OUT_DIR}/appcast.xml" \
+            "${OUT_DIR}/macos"
+
+          ls -al "${OUT_DIR}/appcast.xml" || true
+          sed -n '1,120p' "${OUT_DIR}/appcast.xml" || true
 
       - name: Update small feeds/appcast.xml and feeds/latest.json on updates branch (only metadata)
         env:
