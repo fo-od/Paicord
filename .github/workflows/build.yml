@@ -547,7 +547,7 @@ jobs:
         run: |
           set -euo pipefail
           COMMIT_HASH=$(git rev-parse --short HEAD)
-          TAG="paicord-nightly-${GITHUB_RUN_ID}"
+          TAG="${{ steps.create_release.outputs.tag }}"
           RAW_BASE="https://github.com/${REPO}/releases/download/${TAG}"
           MAC_URL="${RAW_BASE}/Paicord-macOS-${COMMIT_HASH}.dmg"
           IOS_URL="${RAW_BASE}/Paicord-iOS-${COMMIT_HASH}.ipa"
