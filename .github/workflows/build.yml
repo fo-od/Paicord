@@ -9,6 +9,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # fallback value. just in case.
+  SHORT_VERSION: "0.1.0"
+  UPDATES_BRANCH: "updates"
+
 jobs:
   build-macos:
     name: Build macOS
@@ -16,7 +21,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
 
       - name: Setup Certificates
         uses: apple-actions/import-codesign-certs@v5
@@ -31,6 +37,30 @@ jobs:
       - name: Disable Swift macro plugin consent prompt
         run: |
           defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
+
+      - name: Inject build info into macOS Info.plist
+        run: |
+          set -euo pipefail
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+          echo "Injecting commit ${COMMIT_HASH} and build ${BUILD_NUMBER} into Info.plist"
+
+          INFO_PLIST_PATH="Paicord/Info.plist"
+
+          if [ ! -f "$INFO_PLIST_PATH" ]; then
+            echo "ERROR: Info.plist not found at $INFO_PLIST_PATH" >&2
+            ls -la || true
+            exit 1
+          fi
+
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$INFO_PLIST_PATH" || \
+            /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD_NUMBER" "$INFO_PLIST_PATH"
+
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${SHORT_VERSION}" "$INFO_PLIST_PATH" || \
+            /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string ${SHORT_VERSION}" "$INFO_PLIST_PATH"
+
+          /usr/libexec/PlistBuddy -c "Set :GitCommit $COMMIT_HASH" "$INFO_PLIST_PATH" || \
+            /usr/libexec/PlistBuddy -c "Add :GitCommit string $COMMIT_HASH" "$INFO_PLIST_PATH"
 
       - name: Cache Xcode DerivedData (macOS)
         uses: actions/cache@v4
@@ -49,13 +79,53 @@ jobs:
             -destination "platform=macOS" \
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+
           mkdir -p dist/dmg
           cp -R build/Build/Products/Release/Paicord.app dist/dmg/Paicord.app
+
+      - name: Decode Sparkle private key (raw or base64)
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          printf '%s' "$SPARKLE_PRIVATE_KEY" > sparkle_private.key
+          chmod 600 sparkle_private.key
+
+      - name: Sparkle embed pubkey
+        run: |
+          set -euo pipefail
+          GEN_KEYS="./build/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys"
+          if [ ! -x "$GEN_KEYS" ]; then
+            echo "generate_keys not found at $GEN_KEYS. If you use SPM, ensure dependencies are resolved (xcodebuild above should produce the artifacts path), and that SPM artifacts are in build/SourcePackages/artifacts." >&2
+            ls -al build/SourcePackages/artifacts || true
+            exit 1
+          fi
+
+          # Import the private key into the generate_keys tool
+          "$GEN_KEYS" -f sparkle_private.key
+
+          # Emit public key (strip newlines for embedding)
+          PUBLIC_KEY=$("$GEN_KEYS" -p | tr -d '\n')
+          echo "Public key length: ${#PUBLIC_KEY}"
+
+          # Path to the app's Info.plist inside the bundled app
+          APP_PLIST="dist/dmg/Paicord.app/Contents/Info.plist"
+          if [ ! -f "$APP_PLIST" ]; then
+            echo "ERROR: $APP_PLIST not found" >&2
+            exit 1
+          fi
+
+          # Set SUPublicEDKey
+          /usr/libexec/PlistBuddy -c "Set :SUPublicEDKey $PUBLIC_KEY" "$APP_PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Add :SUPublicEDKey string $PUBLIC_KEY" "$APP_PLIST"
+          echo "Embedded SUPublicEDKey into $APP_PLIST"
+
+          # Remove key file now if you don't need it further in this job
+          rm -f sparkle_private.key || true
 
       - name: Sign macOS .app
         run: |
           codesign --deep --force --options runtime --sign "${{ secrets.DEV_ID_IDENTITY_NAME }}" \
-          dist/dmg/Paicord.app
+            dist/dmg/Paicord.app
 
       - name: Create DMG
         run: |
@@ -75,12 +145,18 @@ jobs:
           xcrun notarytool submit dist/Paicord.dmg --apple-id "${{ secrets.APPLE_ID_EMAIL }}" --password "${{ secrets.APPLE_ID_PASSWORD }}" --team-id "${{ secrets.APPLE_ID_TEAM }}" --wait
           xcrun stapler staple dist/Paicord.dmg
 
-      - name: Upload Universal DMG
+      - name: Upload Universal DMG artifact
         uses: actions/upload-artifact@v4
         with:
           name: Paicord-macOS
-          path: |
-            dist/Paicord.dmg
+          path: dist/Paicord.dmg
+
+      # for use in update job
+      - name: Upload Sparkle CLI binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: sparkle-bin
+          path: build/SourcePackages/artifacts/sparkle/Sparkle/bin
 
   build-ios:
     name: Build iOS
@@ -88,10 +164,36 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Disable Swift macro plugin consent prompt
         run: |
           defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
+
+      - name: Inject build info into iOS Info.plist
+        run: |
+          set -euo pipefail
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+          echo "Injecting commit ${COMMIT_HASH} and build ${BUILD_NUMBER} into iOS Info.plist"
+
+          IOS_INFO_PLIST="Paicord/Info.plist"
+
+          if [ ! -f "$IOS_INFO_PLIST" ]; then
+            echo "ERROR: iOS Info.plist not found at $IOS_INFO_PLIST" >&2
+            ls -la || true
+            exit 1
+          fi
+
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$IOS_INFO_PLIST" || \
+            /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD_NUMBER" "$IOS_INFO_PLIST"
+
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${SHORT_VERSION}" "$IOS_INFO_PLIST" || \
+            /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string ${SHORT_VERSION}" "$IOS_INFO_PLIST"
+
+          /usr/libexec/PlistBuddy -c "Set :GitCommit $COMMIT_HASH" "$IOS_INFO_PLIST" || \
+            /usr/libexec/PlistBuddy -c "Add :GitCommit string $COMMIT_HASH" "$IOS_INFO_PLIST"
 
       - name: Install ldid
         run: |
@@ -148,25 +250,27 @@ jobs:
           zip -r9 ../Paicord.ipa Payload
           cd ..
           mkdir -p output
-          mv Paicord.ipa output/Paicord-iOS.ipa
+          mv Paicord.ipa output/Paicord.ipa
 
       - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Paicord-iOS
-          path: output/Paicord-iOS.ipa
+          path: output/Paicord.ipa
 
-  notify:
-    name: Notify Discord
-    runs-on: ubuntu-latest
+  publish-updates:
+    name: Publish updates (use Sparkle tools, create GitHub Release)
+    runs-on: macos-26
     needs: [build-macos, build-ios]
     env:
-      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-      NIGHTLY_LINK_TOKEN: ${{ secrets.NIGHTLY_LINK_TOKEN }}
       REPO: ${{ github.repository }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SPARKLE_SECRET_NAME: SPARKLE_PRIVATE_KEY
     steps:
-      - name: Checkout (for git info)
+      - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download macOS artifact
         uses: actions/download-artifact@v4
@@ -180,121 +284,156 @@ jobs:
           name: Paicord-iOS
           path: output
 
-      - name: Gather Info and notify Discord
-        id: notify
+      - name: Download Sparkle CLI binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: sparkle-bin
+          path: sparklebins
+
+      - name: Prepare artifact filenames
         run: |
           set -euo pipefail
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          mkdir -p out/macos
+          # Prefer the exact DMG name if available, otherwise pick any dmg under output
+          MAC_SRC=$(find output -type f -iname "*.dmg" -print -quit || true)
+          IOS_SRC=$(find output -type f -iname "*.ipa" -print -quit || true)
 
-          # Ensure webhook is present
-          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
-            echo "ERROR: DISCORD_WEBHOOK_URL is not set. Add it to repository secrets." >&2
+          if [ -z "$MAC_SRC" ]; then
+            echo "No DMG found in output"
+            exit 1
+          fi
+          if [ -z "$IOS_SRC" ]; then
+            echo "No IPA found in output"
             exit 1
           fi
 
-          # Show downloaded artifacts for debugging
-          echo "Contents of output directory:"
-          ls -al output || true
-          echo "Recursive listing:"
-          ls -alR output || true
+          MAC_DST="out/macos/Paicord-macOS-${COMMIT_HASH}.dmg"
+          IOS_DST="out/Paicord-iOS-${COMMIT_HASH}.ipa"
+          cp "$MAC_SRC" "$MAC_DST"
+          cp "$IOS_SRC" "$IOS_DST"
+          ls -al out
 
-          # Commit info
+      - name: Prep Sparkle private key
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SPARKLE_PRIVATE_KEY:-}" ]; then
+            echo "SPARKLE_PRIVATE_KEY secret is empty or not set" >&2
+            exit 1
+          fi
+          printf '%s' "$SPARKLE_PRIVATE_KEY" > sparkle_private.key
+          chmod 600 sparkle_private.key
+          ls -al sparkle_private.key
+
+      - name: Generate appcast
+        run: |
+          set -euo pipefail
           COMMIT_HASH=$(git rev-parse --short HEAD)
-          COMMIT_TITLE=$(git log -1 --pretty=%s)
-          COMMIT_DESC=$(git log -1 --pretty=%b)
-          COMMIT_AUTHOR=$(git log -1 --pretty=%an)
-          COMMIT_AUTHOR_LOGIN=${{ github.actor }}
+          TAG="paicord-nightly-${GITHUB_RUN_ID}"
+          OUT_DIR="out"
+          BIN_DIR="sparklebins"
+          GENERATOR="${BIN_DIR}/generate_appcast"
 
-          # Artifact sizes (download-artifact)
-          # Find the DMG and IPA files under the output directory and report human-readable sizes
-          MACOS_FILE=$(find output -type f -iname "*.dmg" -print -quit || true)
-          if [ -n "${MACOS_FILE:-}" ]; then
-            echo "Found macOS file: $MACOS_FILE"
-            MACOS_SIZE=$(du -h "$MACOS_FILE" | cut -f1)
-          else
-            # fallback: try to find any file whose name contains Paicord-macOS or the artifact zip
-            MACOS_FILE_ALT=$(find output -type f -iname "Paicord-macOS*" -print -quit || true)
-            if [ -n "${MACOS_FILE_ALT:-}" ]; then
-              echo "Found macOS alternate file: $MACOS_FILE_ALT"
-              MACOS_SIZE=$(du -h "$MACOS_FILE_ALT" | cut -f1)
-            else
-              MACOS_SIZE="unknown"
-            fi
+          if [ ! -x "$GENERATOR" ]; then
+            echo "generate_appcast not found at $GENERATOR" >&2
+            ls -al "$BIN_DIR" || true
+            exit 1
           fi
 
-          IOS_FILE=$(find output -type f -iname "*.ipa" -print -quit || true)
-          if [ -n "${IOS_FILE:-}" ]; then
-            echo "Found iOS file: $IOS_FILE"
-            IOS_SIZE=$(du -h "$IOS_FILE" | cut -f1)
-          else
-            IOS_FILE_ALT=$(find output -type f -iname "Paicord-iOS*" -print -quit || true)
-            if [ -n "${IOS_FILE_ALT:-}" ]; then
-              echo "Found iOS alternate file: $IOS_FILE_ALT"
-              IOS_SIZE=$(du -h "$IOS_FILE_ALT" | cut -f1)
-            else
-              IOS_SIZE="unknown"
-            fi
+          # Use the release download prefix so generated appcast points at the release asset URLs.
+          RELEASE_BASE="https://github.com/${REPO}/releases/download/${TAG}"
+
+          # generate_appcast will sign updates and write an appcast file into the archives directory.
+          # pass the EdDSA private key via stdin using --ed-key-file -.
+          # The output appcast will be written to OUT_DIR/appcast.xml
+          echo "$SPARKLE_PRIVATE_KEY" | "$GENERATOR" \
+            --ed-key-file - \
+            --download-url-prefix "${RELEASE_BASE}" \
+            -o "${OUT_DIR}/appcast.xml" \
+            "${OUT_DIR}/macos"
+
+          ls -al "${OUT_DIR}/appcast.xml" || true
+          sed -n '1,120p' "${OUT_DIR}/appcast.xml" || true
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          TAG="paicord-nightly-${GITHUB_RUN_ID}"
+          OUT_DIR="out"
+          MAC_ASSET="macos/Paicord-macOS-${COMMIT_HASH}.dmg"
+          IOS_ASSET="Paicord-iOS-${COMMIT_HASH}.ipa"
+
+          # Install or verify gh exists
+          if ! command -v gh >/dev/null 2>&1; then
+            echo "gh CLI not found. Installing..."
+            brew install gh
           fi
 
-          # Nightly.link URLs
-          NIGHTLY_MAC_URL="https://nightly.link/llsc12/Paicord/actions/runs/${GITHUB_RUN_ID}/Paicord-macOS.zip?h=${NIGHTLY_LINK_TOKEN}"
-          NIGHTLY_IOS_URL="https://nightly.link/llsc12/Paicord/actions/runs/${GITHUB_RUN_ID}/Paicord-iOS.zip?h=${NIGHTLY_LINK_TOKEN}"
+          # Create release and upload binaries
+          echo "Creating release $TAG with DMG and IPA"
+          gh release create "$TAG" \
+            "$OUT_DIR/$MAC_ASSET" \
+            "$OUT_DIR/$IOS_ASSET" \
+            --title "Paicord Nightly ${COMMIT_HASH}" \
+            --notes "Automated build for commit ${COMMIT_HASH}" \
+            --target "${GITHUB_REF_NAME:-main}"
 
-          # Get commit author avatar
-          author_api="https://api.github.com/users/$COMMIT_AUTHOR_LOGIN"
-          author_icon=$(curl -s "$author_api" | awk -F'"' '/"avatar_url"/ {print $4; exit}' || echo "")
+          echo "Release created. Release assets uploaded."
 
-          # Compose payload
-          cat > payload.json <<EOF
+      - name: Update small feeds/appcast.xml and feeds/latest.json on updates branch (only metadata)
+        env:
+          UPDATES_BRANCH: ${{ env.UPDATES_BRANCH }}
+        run: |
+          set -euo pipefail
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          TAG="paicord-nightly-${GITHUB_RUN_ID}"
+          RAW_BASE="https://github.com/${REPO}/releases/download/${TAG}"
+          MAC_URL="${RAW_BASE}/Paicord-macOS-${COMMIT_HASH}.dmg"
+          IOS_URL="${RAW_BASE}/Paicord-iOS-${COMMIT_HASH}.ipa"
+
+          # Ensure updates branch exists locally
+          git fetch origin "${UPDATES_BRANCH}" || true
+          if git ls-remote --exit-code --heads origin "${UPDATES_BRANCH}"; then
+            git checkout "${UPDATES_BRANCH}"
+          else
+            git checkout -b "${UPDATES_BRANCH}"
+          fi
+
+          mkdir -p feeds
+
+          # Copy the appcast generated by generate_appcast into the updates branch
+          if [ -f out/appcast.xml ]; then
+            cp out/appcast.xml feeds/appcast.xml
+          else
+            echo "Warning: out/appcast.xml not found; skipping appcast copy" >&2
+          fi
+
+          cat > feeds/latest.json <<EOF
           {
-            "content": null,
-            "embeds": [
-              {
-                "title": "Paicord Build",
-                "description": "Commit ${COMMIT_HASH}\n\n${COMMIT_TITLE}\n${COMMIT_DESC}",
-                "url": "https://github.com/${REPO}/commit/${COMMIT_HASH}",
-                "color": 4063045,
-                "fields": [
-                  {
-                    "name": "macOS",
-                    "value": "[Download (${MACOS_SIZE})](${NIGHTLY_MAC_URL})",
-                    "inline": true
-                  },
-                  {
-                    "name": "iOS",
-                    "value": "[Download (${IOS_SIZE})](${NIGHTLY_IOS_URL})",
-                    "inline": true
-                  }
-                ],
-                "author": {
-                  "name": "${COMMIT_AUTHOR}",
-                  "url": "https://github.com/${COMMIT_AUTHOR_LOGIN}",
-                  "icon_url": "${author_icon}"
-                }
-              }
-            ],
-            "username": "Paicord Builds",
-            "attachments": []
+            "commit": "${COMMIT_HASH}",
+            "published_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "mac": {
+              "version": "${GITHUB_RUN_NUMBER:-0}",
+              "short_version": "${SHORT_VERSION}",
+              "url": "${MAC_URL}"
+            },
+            "ios": {
+              "version": "${GITHUB_RUN_NUMBER:-0}",
+              "short_version": "${SHORT_VERSION}",
+              "url": "${IOS_URL}"
+            }
           }
           EOF
 
-          # Send and capture response
-          RESPONSE_FILE=response.json
-          HTTP_STATUS=$(curl -sS -o "$RESPONSE_FILE" -w "%{http_code}" -H "Content-Type: application/json" -X POST -d @payload.json "$DISCORD_WEBHOOK_URL" || echo "000")
+          git add feeds/appcast.xml feeds/latest.json || true
+          git commit -m "Update appcast and json for ${COMMIT_HASH}" || echo "No changes to commit"
+          git push origin "${UPDATES_BRANCH}"
 
-          echo "HTTP status: $HTTP_STATUS"
-          echo "Response body:"
-          cat "$RESPONSE_FILE" || true
-
-          case "$HTTP_STATUS" in
-            2*)
-              echo "Discord webhook POST succeeded."
-              ;;
-            000)
-              echo "ERROR: curl failed to execute." >&2
-              exit 1
-              ;;
-            *)
-              echo "ERROR: Discord webhook POST failed with status $HTTP_STATUS" >&2
-              exit 1
-              ;;
-          esac
+      - name: Cleanup sensitive files
+        run: |
+          rm -f sparkle_private.key || true
