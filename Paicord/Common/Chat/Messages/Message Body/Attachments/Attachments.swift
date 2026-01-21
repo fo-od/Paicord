@@ -35,13 +35,17 @@ extension MessageCell {
     }
 
     @AppStorage("Paicord.Chat.Attachments.ShowMosaic") var showMosaic: Bool =
-      true
+      false
+
+    private let maxMosaicWidth: CGFloat = 500
+    private let tileSpacing: CGFloat = 2
 
     var body: some View {
       VStack(alignment: .leading) {
         if showMosaic {
-          // previews in a grid dependign on count
-          mosaic
+            VStack(alignment: .leading, spacing: 0) {
+              mosaic
+            }
         } else {
           // show as list
           list
@@ -58,311 +62,7 @@ extension MessageCell {
 
     @ViewBuilder
     var mosaic: some View {
-      switch previewableAttachments.count {
-      case 1:
-        // single attachment as normal
-        let attachment = previewableAttachments[0]
-        AttachmentSizedView(attachment: attachment) {
-          AttachmentGridItemPreview(
-            attachment: attachment
-          )
-        }
-      case 2:
-        // side by side, 50/50. each image is square
-        HStack(spacing: 2) {
-          AttachmentGridItemPreview(
-            attachment: previewableAttachments[0]
-          )
-          .clipShape(.rect(cornerRadius: 5))
-          AttachmentGridItemPreview(
-            attachment: previewableAttachments[1]
-          )
-          .clipShape(.rect(cornerRadius: 5))
-        }
-        .clipShape(.rounded)
-        .frame(maxWidth: 500, alignment: .leading)
-      case 3:
-        // 2 horizontal items, 1 is square. on the right is a vstack with 2 square items
-        HStack(spacing: 2) {
-          AttachmentGridItemPreview(
-            attachment: previewableAttachments[0]
-          )
-          .clipShape(.rect(cornerRadius: 5))
-          VStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[1]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[2]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-        }
-        .clipShape(.rounded)
-        .frame(maxWidth: 500, alignment: .leading)
-      case 4:
-        // 2x2 grid of items with aspect ratio of 500x300
-        VStack(spacing: 2) {
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[0]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[1]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[2]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[3]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-        }
-        .clipShape(.rounded)
-        .frame(maxWidth: 500, alignment: .leading)
-      case 5:
-        // top row has 2 items, bottom row has 3 items, all square
-        VStack(spacing: 2) {
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[0]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[1]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[2]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[3]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[4]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-        }
-        .clipShape(.rounded)
-        .frame(maxWidth: 500, alignment: .leading)
-      case 6:
-        // 2 rows of 3 square items
-        VStack(spacing: 2) {
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[0]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[1]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[2]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[3]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[4]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[5]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-        }
-        .clipShape(.rounded)
-        .frame(maxWidth: 500, alignment: .leading)
-      case 7:
-        // 3 rows, top row is 1 item taking up a non-square space, middle row is 3 square items, bottom row is 3 square items
-        VStack(spacing: 2) {
-          AttachmentGridItemPreview(
-            attachment: previewableAttachments[0]
-          )
-          .clipShape(.rect(cornerRadius: 5))
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[1]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[2]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[3]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[4]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[5]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[6]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-        }
-        .clipShape(.rounded)
-        .frame(maxWidth: 500, alignment: .leading)
-      case 8:
-        // 3 rows, top row is 2 items square, middle row is 3 square items, bottom row is 3 square items
-        VStack(spacing: 2) {
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[0]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[1]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[2]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[3]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[4]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[5]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[6]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[7]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-        }
-        .clipShape(.rounded)
-        .frame(maxWidth: 500, alignment: .leading)
-      case 9:
-        // 3x3 grid of square items
-        VStack(spacing: 2) {
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[0]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[1]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[2]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[3]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[4]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[5]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[6]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[7]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[8]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-        }
-        .clipShape(.rounded)
-        .frame(maxWidth: 500, alignment: .leading)
-      case 10:
-        // 3x4 grid, top row has 1 item taking non-square space, other rows have 3 square items
-        VStack(spacing: 2) {
-          AttachmentGridItemPreview(
-            attachment: previewableAttachments[0]
-          )
-          .clipShape(.rect(cornerRadius: 5))
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[1]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[2]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[3]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-          HStack(spacing: 2) {
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[4]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[5]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-            AttachmentGridItemPreview(
-              attachment: previewableAttachments[6]
-            )
-            .clipShape(.rect(cornerRadius: 5))
-          }
-        }
-        .clipShape(.rounded)
-        .frame(maxWidth: 500, alignment: .leading)
-      default:
-        // default to list, but we shouldn't reach here
         list
-      }
     }
 
     @ViewBuilder
@@ -470,6 +170,7 @@ extension MessageCell {
           .resizable()
           .scaledToFill()
           .frame(maxWidth: .infinity, maxHeight: .infinity)
+          .clipped()
         }
       }
 
@@ -496,7 +197,7 @@ extension MessageCell {
           if !wantsPlayback {
             WebImage(url: poster)
               .resizable()
-              .scaledToFit()
+              .scaledToFill()
               .overlay(
                 Button {
                   wantsPlayback = true
@@ -515,6 +216,7 @@ extension MessageCell {
                 }
                 .buttonStyle(.borderless)
               )
+              .clipped()
           } else {
             VideoPlayerView(attachment: attachment)
           }

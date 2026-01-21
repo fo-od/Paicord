@@ -594,6 +594,7 @@ extension DiscordClient {
     return try await self.send(request: .init(to: endpoint))
   }
 
+  /// Creates attachment URLs to upload the intended attachments directly to Discord's GCP storage bucket.
   /// https://docs.discord.food/resources/message#create-attachments
   @inlinable
   public func createAttachments(
@@ -604,6 +605,7 @@ extension DiscordClient {
     return try await self.send(request: .init(to: endpoint), payload: payload)
   }
 
+  /// Deletes an attachment from Discord's GCP storage bucket.
   /// https://docs.discord.food/resources/message#delete-attachment
   @inlinable
   public func deleteAttachment(
@@ -613,5 +615,45 @@ extension DiscordClient {
       uploadFilename: uploadFilename
     )
     return try await self.send(request: .init(to: endpoint))
+  }
+
+  /// Creates a new remote auth session. This sends the current user info to the desktop client.
+  /// https://docs.discord.food/remote-authentication/mobile#create-remote-auth-session
+  @inlinable
+  public func createRemoteAuthSession(payload: Payloads.CreateRemoteAuthSession)
+    async throws -> DiscordClientResponse<Gateway.CreateRemoteAuthSession>
+  {
+    let endpoint = UserAPIEndpoint.createRemoteAuthSession
+    return try await self.send(request: .init(to: endpoint), payload: payload)
+  }
+  
+  /// Finishes a remote auth session. This ends the remote auth session by sending an authentication token to the desktop client.
+  /// https://docs.discord.food/remote-authentication/mobile#finish-remote-auth
+  @inlinable
+  public func finishRemoteAuthSession(
+    payload: Payloads.RemoteAuthSession
+  ) async throws -> DiscordHTTPResponse {
+    let endpoint = UserAPIEndpoint.finishRemoteAuthSession
+    return try await self.send(request: .init(to: endpoint), payload: payload)
+  }
+  
+  /// Cancels a remote auth session. This ends the remote auth session without sending an authentication token.
+  /// https://docs.discord.food/remote-authentication/mobile#cancel-remote-auth
+  @inlinable
+  public func cancelRemoteAuthSession(
+    payload: Payloads.RemoteAuthSession
+  ) async throws -> DiscordHTTPResponse {
+    let endpoint = UserAPIEndpoint.cancelRemoteAuthSession
+    return try await self.send(request: .init(to: endpoint), payload: payload)
+  }
+  
+  /// Exchange a remote auth ticket for an encrypted authentication token.
+  /// https://docs.discord.food/remote-authentication/mobile#cancel-remote-auth
+  @inlinable
+  public func exchangeRemoteAuthTicket(
+    payload: Payloads.ExchangeRemoteAuthTicket
+  ) async throws -> DiscordClientResponse<Gateway.ExchangeRemoteAuthTicket> {
+    let endpoint = UserAPIEndpoint.exchangeRemoteAuthTicket
+    return try await self.send(request: .init(to: endpoint), payload: payload)
   }
 }

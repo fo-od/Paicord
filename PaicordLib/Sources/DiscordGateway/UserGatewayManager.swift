@@ -552,20 +552,7 @@ extension UserGatewayManager {
       logger.trace("Got Discord gateway url from 'resumeGatewayURL'")
       return gatewayURL
     } else {
-      do {
-        let gatewayURL = try await client.getGateway().decode().url
-        logger.trace("Got Discord gateway url from gateway api call")
-        return gatewayURL
-      } catch {
-        logger.error(
-          "Cannot get gateway url to connect to. Will retry in 10 seconds",
-          metadata: [
-            "error": .string(String(reflecting: error))
-          ]
-        )
-        try? await Task.sleep(for: .seconds(10))
-        return await self.getGatewayURL()
-      }
+      return DiscordGlobalConfiguration.gatewayURL
     }
   }
 

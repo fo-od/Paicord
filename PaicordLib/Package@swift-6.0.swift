@@ -70,6 +70,7 @@ let package = Package(
       url: "https://github.com/Jitsusama/UInt128.git",
       branch: "master"
     ),
+    .package(url: "https://github.com/apple/swift-crypto.git", "1.0.0" ..< "5.0.0"),
   ],
   targets: [
     .target(
@@ -108,6 +109,8 @@ let package = Package(
         .product(name: "WSClient", package: "swift-websocket"),
         .product(name: "CompressNIO", package: "compress-nio"),
         .target(name: "DiscordHTTP"),
+        .product(name: "Crypto", package: "swift-crypto"),
+        .product(name: "_CryptoExtras", package: "swift-crypto"),
       ],
       swiftSettings: swiftSettings
     ),

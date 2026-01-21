@@ -127,6 +127,12 @@ public enum UserAPIEndpoint: Endpoint {
     withMutualFriendsCount: Bool,
     guildId: GuildSnowflake?
   )
+  
+  // MARK: - Remote Authentication
+  case createRemoteAuthSession
+  case finishRemoteAuthSession
+  case cancelRemoteAuthSession
+  case exchangeRemoteAuthTicket
 
   /// This case serves as a way of discouraging exhaustive switch statements
   case __DO_NOT_USE_THIS_CASE
@@ -278,6 +284,16 @@ public enum UserAPIEndpoint: Endpoint {
       let queryString =
         queryItems.isEmpty ? "" : "?" + queryItems.joined(separator: "&")
       suffix = "users/\(userId.rawValue)/profile\(queryString)"
+      
+      // MARK: - Remote Authentication
+    case .createRemoteAuthSession:
+      suffix = "users/@me/remote-auth"
+    case .finishRemoteAuthSession:
+      suffix = "users/@me/remote-auth/finish"
+    case .cancelRemoteAuthSession:
+      suffix = "users/@me/remote-auth/cancel"
+    case .exchangeRemoteAuthTicket:
+      suffix = "users/@me/remote-auth/login"
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
         "If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used"
@@ -411,6 +427,14 @@ public enum UserAPIEndpoint: Endpoint {
       let queryString =
         queryItems.isEmpty ? "" : "?" + queryItems.joined(separator: "&")
       suffix = "users/\(userId.rawValue)/profile\(queryString)"
+    case .createRemoteAuthSession:
+      suffix = "users/@me/remote-auth"
+    case .finishRemoteAuthSession:
+      suffix = "users/@me/remote-auth/finish"
+    case .cancelRemoteAuthSession:
+      suffix = "users/@me/remote-auth/cancel"
+    case .exchangeRemoteAuthTicket:
+      suffix = "users/@me/remote-auth/login"
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
         "If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used"
@@ -468,6 +492,10 @@ public enum UserAPIEndpoint: Endpoint {
     case .getStickerPack: return .GET
     case .getStickerGuild: return .GET
     case .getUserProfile: return .GET
+    case .createRemoteAuthSession: return .POST
+    case .finishRemoteAuthSession: return .POST
+    case .cancelRemoteAuthSession: return .POST
+    case .exchangeRemoteAuthTicket: return .POST
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
         "If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used"
@@ -523,6 +551,10 @@ public enum UserAPIEndpoint: Endpoint {
     case .getStickerPack: return false
     case .getStickerGuild: return true
     case .getUserProfile: return true
+    case .createRemoteAuthSession: return true
+    case .finishRemoteAuthSession: return true
+    case .cancelRemoteAuthSession: return true
+    case .exchangeRemoteAuthTicket: return true
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
         "If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used"
@@ -578,6 +610,10 @@ public enum UserAPIEndpoint: Endpoint {
     case .getStickerPack: return false
     case .getStickerGuild: return true
     case .getUserProfile: return true
+    case .createRemoteAuthSession: return true
+    case .finishRemoteAuthSession: return true
+    case .cancelRemoteAuthSession: return true
+      case .exchangeRemoteAuthTicket: return false
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
         "If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used"
@@ -658,6 +694,10 @@ public enum UserAPIEndpoint: Endpoint {
         params.append("guild_id=\(guildId.rawValue)")
       }
       return params
+    case .createRemoteAuthSession: return []
+    case .finishRemoteAuthSession: return []
+    case .cancelRemoteAuthSession: return []
+    case .exchangeRemoteAuthTicket: return []
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
         "If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used"
@@ -715,6 +755,10 @@ public enum UserAPIEndpoint: Endpoint {
     case .getStickerPack: return 92
     case .getStickerGuild: return 93
     case .getUserProfile: return 101
+    case .createRemoteAuthSession: return 120
+    case .finishRemoteAuthSession: return 121
+    case .cancelRemoteAuthSession: return 122
+    case .exchangeRemoteAuthTicket: return 123
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
         "If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used"
@@ -814,6 +858,10 @@ public enum UserAPIEndpoint: Endpoint {
     ):
       return
         "getUserProfile(userId: \(userId.rawValue), withMutualGuilds: \(withMutualGuilds), withMutualFriends: \(withMutualFriends), withMutualFriendsCount: \(withMutualFriendsCount), guildId: \(guildId?.rawValue ?? "nil"))"
+    case .createRemoteAuthSession: return "createRemoteAuthSession"
+    case .finishRemoteAuthSession: return "finishRemoteAuthSession"
+    case .cancelRemoteAuthSession: return "cancelRemoteAuthSession"
+    case .exchangeRemoteAuthTicket: return "exchangeRemoteAuthTicket"
     case .__DO_NOT_USE_THIS_CASE:
       fatalError(
         "If the case name wasn't already clear enough: '__DO_NOT_USE_THIS_CASE' MUST NOT be used"

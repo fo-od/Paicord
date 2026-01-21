@@ -876,7 +876,6 @@ public struct DefaultDiscordClient: DiscordClient {
     // general
     headers.add(name: "Accept", value: "*/*")
     headers.add(name: "Accept-Language", value: locale)
-    headers.add(name: "Accept-Encoding", value: "gzip, br, deflate")
     headers.add(name: "Priority", value: "u=1, i")
 
     #if os(macOS)

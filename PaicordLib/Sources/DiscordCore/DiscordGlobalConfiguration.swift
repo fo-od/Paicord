@@ -20,6 +20,8 @@ public enum DiscordGlobalConfiguration {
 
   /// https://docs.discord.food/topics/gateway-events#qos-payload-structure
   public static let qosVersion = 27
+  
+  public static let gatewayURL = "wss://gateway.discord.gg"
 
   /// The global decoder to decode JSONs with.
   public static var decoder: any DiscordDecoder {

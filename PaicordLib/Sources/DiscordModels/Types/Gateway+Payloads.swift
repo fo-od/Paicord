@@ -2032,4 +2032,13 @@ extension Gateway {
     public var upload_url: String
     public var upload_filename: String
   }
+  
+  /// https://docs.discord.food/remote-authentication/mobile#create-remote-auth-session
+  public struct CreateRemoteAuthSession: Sendable, Codable {
+    public var handshake_token: String
+  }
+  
+  public struct ExchangeRemoteAuthTicket: Sendable, Codable {
+    public var encrypted_token: String
+  }
 }
