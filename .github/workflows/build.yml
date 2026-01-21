@@ -408,7 +408,7 @@ jobs:
     env:
       REPO: ${{ github.repository }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      SPARKLE_SECRET_NAME: SPARKLE_PRIVATE_KEY
+      SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
