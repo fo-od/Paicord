@@ -55,7 +55,7 @@ jobs:
       - name: Sign macOS .app
         run: |
           codesign --deep --force --options runtime --sign "${{ secrets.DEV_ID_IDENTITY_NAME }}" \
-          output/Paicord.app
+          dist/dmg/Paicord.app
 
       - name: Create DMG
         run: |
