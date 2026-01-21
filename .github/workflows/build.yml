@@ -155,7 +155,18 @@ jobs:
       - name: Gather Info and notify Discord
         id: notify
         run: |
-          set -e
+          set -euo pipefail
+
+          # Ensure webhook is present
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "ERROR: DISCORD_WEBHOOK_URL is not set. Add it to repository secrets." >&2
+            exit 1
+          fi
+
+          # Show downloaded artifacts for debugging
+          echo "Contents of output directory:"
+          ls -al output || true
+
           # Commit info
           COMMIT_HASH=$(git rev-parse --short HEAD)
           COMMIT_TITLE=$(git log -1 --pretty=%s)
@@ -163,49 +174,70 @@ jobs:
           COMMIT_AUTHOR=$(git log -1 --pretty=%an)
           COMMIT_AUTHOR_LOGIN=${{ github.actor }}
 
-          # Artifact sizes (downloaded by download-artifact)
-          MACOS_SIZE=$(ls -lh output | awk '/Paicord-macOS/ {print $5; exit}')
-          IOS_SIZE=$(ls -lh output | awk '/Paicord-iOS/ {print $5; exit}')
+          # Artifact sizes (download-artifact)
+          MACOS_SIZE=$(ls -lh output | awk '/Paicord-macOS/ {print $5; exit}' || echo "unknown")
+          IOS_SIZE=$(ls -lh output | awk '/Paicord-iOS/ {print $5; exit}' || echo "unknown")
 
-          # Nightly.link URLs (same pattern as before)
-          nightly_mac_url="https://nightly.link/llsc12/Paicord/actions/runs/${GITHUB_RUN_ID}/Paicord-macOS.zip?h=${NIGHTLY_LINK_TOKEN}"
-          nightly_ios_url="https://nightly.link/llsc12/Paicord/actions/runs/${GITHUB_RUN_ID}/Paicord-iOS.zip?h=${NIGHTLY_LINK_TOKEN}"
+          # Nightly.link URLs
+          NIGHTLY_MAC_URL="https://nightly.link/llsc12/Paicord/actions/runs/${GITHUB_RUN_ID}/Paicord-macOS.zip?h=${NIGHTLY_LINK_TOKEN}"
+          NIGHTLY_IOS_URL="https://nightly.link/llsc12/Paicord/actions/runs/${GITHUB_RUN_ID}/Paicord-iOS.zip?h=${NIGHTLY_LINK_TOKEN}"
 
-          # Get commit author avatar (use GitHub API)
+          # Get commit author avatar
           author_api="https://api.github.com/users/$COMMIT_AUTHOR_LOGIN"
-          author_icon=$(curl -s "$author_api" | grep '"avatar_url"' | head -1 | cut -d '"' -f4 || echo "")
+          author_icon=$(curl -s "$author_api" | awk -F'"' '/"avatar_url"/ {print $4; exit}' || echo "")
 
-          # Compose and send Discord payload (use unquoted heredoc so variables expand)
+          # Compose payload
           cat > payload.json <<EOF
-            {
-              "content": null,
-              "embeds": [
-                {
-                  "title": "Paicord Build",
-                  "description": "Commit ${COMMIT_HASH}\n\n${COMMIT_TITLE}\n${COMMIT_DESC}",
-                  "url": "https://github.com/${REPO}/commit/${COMMIT_HASH}",
-                  "color": 4063045,
-                  "fields": [
-                    {
-                      "name": "macOS",
-                      "value": "[Download (${MACOS_SIZE})](${nightly_mac_url})",
-                      "inline": true
-                    },
-                    {
-                      "name": "iOS",
-                      "value": "[Download (${IOS_SIZE})](${nightly_ios_url})",
-                      "inline": true
-                    }
-                  ],
-                  "author": {
-                    "name": "${COMMIT_AUTHOR}",
-                    "url": "https://github.com/${COMMIT_AUTHOR_LOGIN}",
-                    "icon_url": "${author_icon}"
+          {
+            "content": null,
+            "embeds": [
+              {
+                "title": "Paicord Build",
+                "description": "Commit ${COMMIT_HASH}\n\n${COMMIT_TITLE}\n${COMMIT_DESC}",
+                "url": "https://github.com/${REPO}/commit/${COMMIT_HASH}",
+                "color": 4063045,
+                "fields": [
+                  {
+                    "name": "macOS",
+                    "value": "[Download (${MACOS_SIZE})](${NIGHTLY_MAC_URL})",
+                    "inline": true
+                  },
+                  {
+                    "name": "iOS",
+                    "value": "[Download (${IOS_SIZE})](${NIGHTLY_IOS_URL})",
+                    "inline": true
                   }
+                ],
+                "author": {
+                  "name": "${COMMIT_AUTHOR}",
+                  "url": "https://github.com/${COMMIT_AUTHOR_LOGIN}",
+                  "icon_url": "${author_icon}"
                 }
-              ],
-              "username": "Paicord Builds",
-              "attachments": []
-            }
-            EOF
-          curl -H "Content-Type: application/json" -X POST -d @payload.json "$DISCORD_WEBHOOK_URL"
+              }
+            ],
+            "username": "Paicord Builds",
+            "attachments": []
+          }
+          EOF
+
+          # Send and capture response
+          RESPONSE_FILE=response.json
+          HTTP_STATUS=$(curl -sS -o "$RESPONSE_FILE" -w "%{http_code}" -H "Content-Type: application/json" -X POST -d @payload.json "$DISCORD_WEBHOOK_URL" || echo "000")
+
+          echo "HTTP status: $HTTP_STATUS"
+          echo "Response body:"
+          cat "$RESPONSE_FILE" || true
+
+          case "$HTTP_STATUS" in
+            2*)
+              echo "Discord webhook POST succeeded."
+              ;;
+            000)
+              echo "ERROR: curl failed to execute." >&2
+              exit 1
+              ;;
+            *)
+              echo "ERROR: Discord webhook POST failed with status $HTTP_STATUS" >&2
+              exit 1
+              ;;
+          esac
