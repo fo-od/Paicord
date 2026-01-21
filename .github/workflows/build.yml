@@ -549,6 +549,7 @@ jobs:
           RAW_BASE="https://github.com/${REPO}/releases/download/${TAG}"
           MAC_URL="${RAW_BASE}/Paicord-macOS-${COMMIT_HASH}.dmg"
           IOS_URL="${RAW_BASE}/Paicord-iOS-${COMMIT_HASH}.ipa"
+          BUILD_NUMBER=$(git rev-list --count HEAD)
 
           # Ensure updates branch exists locally
           git fetch origin "${UPDATES_BRANCH}" || true
