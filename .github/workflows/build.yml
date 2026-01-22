@@ -528,7 +528,7 @@ jobs:
 
           # Use the release download prefix so generated appcast points at the release asset URLs.
           echo "Using release tag: $TAG"
-          RELEASE_BASE="https://test.com/${REPO}/releases/download/$TAG"
+          RELEASE_BASE="https://github.com/${REPO}/releases/download/$TAG/"
           echo "Release base URL: $RELEASE_BASE"
 
           # generate_appcast will sign updates and write an appcast file into the archives directory.
