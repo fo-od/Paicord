@@ -47,12 +47,7 @@ struct PaicordApp: App {
   #endif
 
   init() {
-    //    DiscordGlobalConfiguration.makeLogger = { label in
-    //      let stdoutHandler = StreamLogHandler.standardOutput(label: label) // stdout
-    //      return Logger(label: label, factory: { _ in stdoutHandler })
-    //    }
     console.startIntercepting()
-    //     i foubnd out this rly cool thing if u avoid logging 40mb of data to console the client isnt slow !!!!
     //    #if DEBUG
     //      DiscordGlobalConfiguration.makeLogger = { loggerLabel in
     //        var logger = Logger(label: loggerLabel)
@@ -60,16 +55,16 @@ struct PaicordApp: App {
     //        return logger
     //      }
     //    #endif
-    //    #if os(macOS)
-    //      updaterController = SPUStandardUpdaterController(
-    //        startingUpdater: true,
-    //        updaterDelegate: nil,
-    //        userDriverDelegate: nil
-    //      )
-    //    #endif
+    #if os(macOS)
+      updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: nil,
+        userDriverDelegate: nil
+      )
+    #endif
   }
 
-  //  private let updaterController: SPUStandardUpdaterController
+    private let updaterController: SPUStandardUpdaterController
 
   @Environment(\.openWindow) var openWindow
   @Environment(\.theme) var theme
@@ -88,11 +83,11 @@ struct PaicordApp: App {
     }
     #if os(macOS)
       .windowToolbarStyle(.unified)
-      //      .commands {
-      //        CommandGroup(after: .appInfo) {
-      //          CheckForUpdatesView(updater: updaterController.updater)
-      //        }
-      //      }
+      .commands {
+        CommandGroup(after: .appInfo) {
+          CheckForUpdatesView(updater: updaterController.updater)
+        }
+      }
       .commands {
         PaicordCommands()
         CommandGroup(replacing: .appSettings) {
@@ -119,34 +114,34 @@ struct PaicordApp: App {
 
 // https://sparkle-project.org/documentation/programmatic-setup/
 
-//#if os(macOS)
-//  final class CheckForUpdatesViewModel: ObservableObject {
-//    @Published var canCheckForUpdates = false
-//
-//    init(updater: SPUUpdater) {
-//      updater.publisher(for: \.canCheckForUpdates)
-//        .assign(to: &$canCheckForUpdates)
-//    }
-//  }
-//
-//  // This is the view for the Check for Updates menu item
-//  // Note this intermediate view is necessary for the disabled state on the menu item to work properly before Monterey.
-//  // See https://stackoverflow.com/questions/68553092/menu-not-updating-swiftui-bug for more info
-//  struct CheckForUpdatesView: View {
-//    @ObservedObject private var checkForUpdatesViewModel:
-//      CheckForUpdatesViewModel
-//    private let updater: SPUUpdater
-//
-//    init(updater: SPUUpdater) {
-//      self.updater = updater
-//
-//      // Create our view model for our CheckForUpdatesView
-//      self.checkForUpdatesViewModel = CheckForUpdatesViewModel(updater: updater)
-//    }
-//
-//    var body: some View {
-//      Button("Check for Updates…", action: updater.checkForUpdates)
-//        .disabled(!checkForUpdatesViewModel.canCheckForUpdates)
-//    }
-//  }
-//#endif
+#if os(macOS)
+  final class CheckForUpdatesViewModel: ObservableObject {
+    @Published var canCheckForUpdates = false
+
+    init(updater: SPUUpdater) {
+      updater.publisher(for: \.canCheckForUpdates)
+        .assign(to: &$canCheckForUpdates)
+    }
+  }
+
+  // This is the view for the Check for Updates menu item
+  // Note this intermediate view is necessary for the disabled state on the menu item to work properly before Monterey.
+  // See https://stackoverflow.com/questions/68553092/menu-not-updating-swiftui-bug for more info
+  struct CheckForUpdatesView: View {
+    @ObservedObject private var checkForUpdatesViewModel:
+      CheckForUpdatesViewModel
+    private let updater: SPUUpdater
+
+    init(updater: SPUUpdater) {
+      self.updater = updater
+
+      // Create our view model for our CheckForUpdatesView
+      self.checkForUpdatesViewModel = CheckForUpdatesViewModel(updater: updater)
+    }
+
+    var body: some View {
+      Button("Check for Updates…", action: updater.checkForUpdates)
+        .disabled(!checkForUpdatesViewModel.canCheckForUpdates)
+    }
+  }
+#endif
