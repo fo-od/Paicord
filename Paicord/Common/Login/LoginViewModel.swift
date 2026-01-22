@@ -37,6 +37,8 @@ final class LoginViewModel {
 
   var gw: GatewayStore! = nil  // need to set this in an onAppear
   var appState: PaicordAppState! = nil  // need to set this in an onAppear
+  
+  let remoteAuthGatewayManager
 
   @MainActor
   func fingerprintSetup() async {
