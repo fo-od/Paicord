@@ -27,11 +27,11 @@ struct RootView: View {
   #endif
 
   #if os(iOS)
-    var isConnected: Bool {
+    var isConnecting: Bool {
       hasLaunchedAlready == false && gatewayStore.state != .connected
     }
   #else
-    var isConnected: Bool {
+    var isConnecting: Bool {
       gatewayStore.state != .connected
     }
   #endif
@@ -41,7 +41,7 @@ struct RootView: View {
       if gatewayStore.accounts.currentAccountID == nil {
         LoginView()
           .tint(.primary)  // text tint in buttons etc.
-      } else if isConnected {
+      } else if isConnecting {
         ConnectionStateView(state: gatewayStore.state)
           .transition(.opacity.combined(with: .scale(scale: 1.1)))
           .task { await gatewayStore.connectIfNeeded() }
@@ -82,6 +82,11 @@ struct RootView: View {
     }
     .onDisappear {
       PaicordAppState.instances.removeValue(forKey: appState.id)
+    }
+    .onChange(of: gatewayStore.accounts.currentAccountID) {
+      if gatewayStore.accounts.currentAccountID == nil {
+        self.hasLaunchedAlready = false // when logged out, allow connection screen. else connection wont be attempted.
+      }
     }
     #if os(macOS)
       .introspect(.window, on: .macOS(.v14...)) { window in
