@@ -4,7 +4,7 @@ A new Discord client written in SwiftUI, with a goal of feature parity with cust
 
 > [!NOTE]
 >
-> Paicord is still in development! Expect a number of issues or unimplemented features. If you encounter a bug, please create an issue! Additionally, MFA is supported for login, however only TOTP codes are implemented currently. This will be finished soon.
+> Paicord is still in development! Expect a number of issues or unimplemented features. If you encounter a bug, please create an issue! There was previously a note about MFA support, however MFA has been updated to support SMS and backup codes in addition to the already existing TOTP support.
 
 <img width="371" height="298" alt="screenshot of Paicord" src="https://github.com/user-attachments/assets/d6b73ecb-c008-412e-9715-5817954f93f2" />
 
@@ -20,9 +20,9 @@ This list is not exhaustive but the goal for Paicord is to have parity with the 
 
 ## Installing
 
-There are currently no releases of Paicord, you can download builds built from Actions.
+There nightly releases of Paicord built from source when source successfully compiles.
 
-| iOS (17.4+)                                                  | macOS (14.2+)                                                |
+| iOS (17.0+)                                                  | macOS (14.0+)                                                |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | [Download iOS Artifact](https://nightly.link/llsc12/Paicord/workflows/build/main/Paicord-iOS) | [Download macOS Artifact](https://nightly.link/llsc12/Paicord/workflows/build/main/Paicord-macOS) |
 
