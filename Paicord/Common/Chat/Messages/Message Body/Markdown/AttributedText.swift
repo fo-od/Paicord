@@ -11,7 +11,7 @@ import SwiftUI
 struct AttributedText: View {
   var attributedString: NSAttributedString? = nil
   var body: some View {
-    VStack {
+    Group {
       if let attributedString {
         _AttributedTextView(
           attributedString: attributedString
@@ -30,37 +30,53 @@ struct AttributedText: View {
   private struct _AttributedTextView: NSViewRepresentable {
     var attributedString: NSAttributedString
     @Environment(\.lineLimit) private var lineLimit
-    @Environment(\.openURL) private var openURL  // needed so we can signal that links were tapped.
+    @Environment(\.openURL) private var openURL
 
     func makeCoordinator() -> Coordinator {
       Coordinator(openURL: openURL)
     }
 
     func makeNSView(context: Context) -> ModifiedCopyingTextView {
-      let textView = ModifiedCopyingTextView()
-      textView.customCoordinator = context.coordinator
-      textView.isEditable = false
-      textView.isSelectable = true
-      textView.drawsBackground = false
-      textView.textContainer?.lineFragmentPadding = 0
-      textView.textStorage?.setAttributedString(attributedString)
-      textView.isAutomaticLinkDetectionEnabled = false
-      textView.linkTextAttributes = [:]  // use original attributes
-      textView.delegate = context.coordinator
-      textView.textContainer?.widthTracksTextView = true
-      return textView
+      let textStorage = NSTextStorage()
+      let layoutManager = NSLayoutManager()
+      let textContainer = NSTextContainer()
+      textContainer.maximumNumberOfLines = lineLimit ?? 0
+
+      textStorage.addLayoutManager(layoutManager)
+      layoutManager.addTextContainer(textContainer)
+
+      let tv = ModifiedCopyingTextView(
+        frame: .zero,
+        textContainer: textContainer
+      )
+
+      tv.isEditable = false
+      tv.isSelectable = true
+      tv.drawsBackground = false
+      tv.textContainerInset = .zero
+      tv.textContainer?.lineFragmentPadding = 0
+      tv.textContainer?.widthTracksTextView = true
+      tv.isAutomaticLinkDetectionEnabled = false
+      tv.linkTextAttributes = [:]
+      tv.delegate = context.coordinator
+      tv.customCoordinator = context.coordinator
+      tv.textStorage?.setAttributedString(attributedString)
+      tv.textContainer?.maximumNumberOfLines = lineLimit ?? 0
+      tv.usesAdaptiveColorMappingForDarkAppearance = true
+
+      return tv
     }
 
     func updateNSView(_ nsView: ModifiedCopyingTextView, context: Context) {
       nsView.customCoordinator = context.coordinator
 
-      if !context.coordinator.isSame(as: attributedString) {
+      if nsView.attributedString() != attributedString {
         nsView.textStorage?.setAttributedString(attributedString)
-        context.coordinator.remember(attributedString: attributedString)
       }
 
-      nsView.textContainer?.maximumNumberOfLines = lineLimit ?? 0
-
+      if nsView.textContainer?.maximumNumberOfLines != (lineLimit ?? 0) {
+        nsView.textContainer?.maximumNumberOfLines = lineLimit ?? 0
+      }
     }
 
     func sizeThatFits(
@@ -71,9 +87,9 @@ struct AttributedText: View {
       let targetWidth = proposal.width ?? 400
       guard let layoutManager = nsView.layoutManager,
         let textContainer = nsView.textContainer
-      else {
-        return nil
-      }
+      else { return nil }
+
+      // Set size for calculation
       textContainer.containerSize = CGSize(
         width: targetWidth,
         height: .greatestFiniteMagnitude
@@ -81,46 +97,35 @@ struct AttributedText: View {
       layoutManager.ensureLayout(for: textContainer)
 
       let usedRect = layoutManager.usedRect(for: textContainer)
-      return CGSize(width: targetWidth, height: usedRect.height)
+
+      return CGSize(width: targetWidth, height: ceil(usedRect.height))
     }
 
     final class Coordinator: NSObject, NSTextViewDelegate {
       let openURL: OpenURLAction
-      private var lastAttributedStringHash: Int = 0
+      init(openURL: OpenURLAction) { self.openURL = openURL }
 
-      init(openURL: OpenURLAction) {
-        self.openURL = openURL
-      }
-
-      func isSame(as attributed: NSAttributedString) -> Bool {
-        var hasher = Hasher()
-        hasher.combine(attributed.string)
-        // You can include other attribute-based hashing if necessary; keep it fast.
-        hasher.combine(attributed.length)
-        let h = hasher.finalize()
-        return h == lastAttributedStringHash
-      }
-
-      func remember(attributedString: NSAttributedString) {
-        var hasher = Hasher()
-        hasher.combine(attributedString.string)
-        hasher.combine(attributedString.length)
-        lastAttributedStringHash = hasher.finalize()
+      func textView(
+        _ textView: NSTextView,
+        clickedOnLink link: Any,
+        at charIndex: Int
+      ) -> Bool {
+        if let url = link as? URL {
+          openURL(url)
+          return true
+        }
+        return false
       }
     }
   }
 
-  // custom NSTextView to override copy behavior and additionally right click behavior
-  class ModifiedCopyingTextView: NSTextView {
-
-    // let swiftui handle context menu
-    override func rightMouseDown(with event: NSEvent) {
-      // instead of super.rightMouseDown, pass to next responder
-      self.nextResponder?.rightMouseDown(with: event)
-    }
-    // could also handle mouseDown with control key pressed but i think its good to keep that.
-
+  // Custom NSTextView to preserve rawContent on copy and avoid context-menu conflicts
+  final class ModifiedCopyingTextView: NSTextView {
     weak fileprivate var customCoordinator: _AttributedTextView.Coordinator?
+
+    override func rightMouseDown(with event: NSEvent) {
+      nextResponder?.rightMouseDown(with: event)
+    }
 
     override func clicked(onLink link: Any, at charIndex: Int) {
       if let url = link as? URL {
@@ -134,49 +139,146 @@ struct AttributedText: View {
       to pboard: NSPasteboard,
       type: NSPasteboard.PasteboardType
     ) -> Bool {
-      let selectedAttributedString = attributedString().attributedSubstring(
+      let selected = attributedString().attributedSubstring(
         from: selectedRange()
       )
-      let selectedAttributedStringCopy = NSMutableAttributedString(
-        attributedString: selectedAttributedString
-      )
+      let copy = NSMutableAttributedString(attributedString: selected)
 
-      selectedAttributedStringCopy.enumerateAttribute(
-        NSAttributedString.Key.rawContent,
-        in: NSMakeRange(0, selectedAttributedString.string.count),
+      copy.enumerateAttribute(
+        .rawContent,
+        in: NSRange(location: 0, length: copy.length),
         options: .reverse
       ) { value, range, _ in
         if let customText = value as? String {
-          // Preserve existing attributes
-          var range2 = NSRange(location: 0, length: 0)
-          let attributes = selectedAttributedStringCopy.attributes(
-            at: range.location,
-            effectiveRange: &range2
-          )
-
-          selectedAttributedStringCopy.replaceCharacters(
+          var r = NSRange()
+          let attrs = copy.attributes(at: range.location, effectiveRange: &r)
+          copy.replaceCharacters(
             in: range,
-            with: NSAttributedString(string: customText, attributes: attributes)
+            with: NSAttributedString(string: customText, attributes: attrs)
           )
         }
       }
 
       pboard.clearContents()
-      pboard.writeObjects([selectedAttributedStringCopy.string as NSString])
+      pboard.writeObjects([copy.string as NSString])
       return true
     }
   }
+
 #elseif os(iOS)
   import UIKit
 
-  class ModifiedCopyingTextView: UITextView {
+  private struct _AttributedTextView: UIViewRepresentable {
+    var attributedString: NSAttributedString
+    @Environment(\.lineLimit) private var lineLimit
+    @Environment(\.openURL) private var openURL
 
+    func makeCoordinator() -> Coordinator {
+      Coordinator(openURL: openURL)
+    }
+
+    func makeUIView(context: Context) -> ModifiedCopyingTextView {
+      let textStorage = NSTextStorage()
+      let layoutManager = NSLayoutManager()
+      let textContainer = NSTextContainer()
+
+      textContainer.maximumNumberOfLines = lineLimit ?? 0
+      textStorage.addLayoutManager(layoutManager)
+      layoutManager.addTextContainer(textContainer)
+
+      let tv = ModifiedCopyingTextView(
+        frame: .zero,
+        textContainer: textContainer
+      )
+
+      tv.isEditable = false
+      tv.isSelectable = true
+      tv.isScrollEnabled = false
+      tv.backgroundColor = .clear
+      tv.textContainerInset = .zero
+      tv.textContainer.lineFragmentPadding = 0
+      tv.delegate = context.coordinator
+      tv.dataDetectorTypes = []
+      tv.linkTextAttributes = [:]
+
+      tv.setAttributedTextPreservingSelection(attributedString)
+
+      return tv
+    }
+
+    func updateUIView(_ uiView: ModifiedCopyingTextView, context: Context) {
+      // Simplified update logic: NSAttributedString equality check is more robust than length hashing
+      if uiView.attributedText != attributedString {
+        uiView.setAttributedTextPreservingSelection(attributedString)
+        // Ensure the line limit is updated if it changed via Environment
+        uiView.textContainer.maximumNumberOfLines = lineLimit ?? 0
+      }
+    }
+
+    func sizeThatFits(
+      _ proposal: ProposedViewSize,
+      uiView: ModifiedCopyingTextView,
+      context: Context
+    ) -> CGSize? {
+//      let targetWidth = proposal.width ?? 400
+//      let size = uiView.sizeThatFits(
+//        CGSize(width: targetWidth, height: .greatestFiniteMagnitude)
+//      )
+//      return CGSize(width: targetWidth, height: size.height)
+      
+      let targetWidth = proposal.width ?? 400
+      let layoutManager = uiView.layoutManager
+      let textContainer = uiView.textContainer
+
+      // Set size for calculation
+      textContainer.containerSize = CGSize(
+        width: targetWidth,
+        height: .greatestFiniteMagnitude
+      )
+      layoutManager.ensureLayout(for: textContainer)
+
+      let usedRect = layoutManager.usedRect(for: textContainer)
+
+      return CGSize(width: targetWidth, height: ceil(usedRect.height))
+    }
+
+    final class Coordinator: NSObject, UITextViewDelegate {
+      let openURL: OpenURLAction
+      init(openURL: OpenURLAction) { self.openURL = openURL }
+
+//      func textView(
+//        _ textView: UITextView,
+//        shouldInteractWith URL: URL,
+//        in characterRange: NSRange,
+//        interaction: UITextItemInteraction
+//      ) -> Bool {
+//        openURL(URL)
+//        if PaicordChatLink.init(url: URL) != nil {
+//          return false
+//        }
+//        return true
+//      }
+      
+      func textView(_ textView: UITextView, primaryActionFor textItem: UITextItem, defaultAction: UIAction) -> UIAction? {
+        switch textItem.content {
+        case .link(let url):
+          if PaicordChatLink(url: url) != nil { // if parsing doesnt fail, handle internally
+            openURL(url)
+            return nil
+          }
+          fallthrough
+        default:
+          return defaultAction
+        }
+      }
+    }
+  }
+
+  final class ModifiedCopyingTextView: UITextView {
     override func canPerformAction(_ action: Selector, withSender sender: Any?)
       -> Bool
     {
-      if action == #selector(copy(_:)) {
-        return true
-      }
+      if action == #selector(copy(_:)) { return true }
       return super.canPerformAction(action, withSender: sender)
     }
 
@@ -184,11 +286,10 @@ struct AttributedText: View {
       let attributed = self.attributedText.attributedSubstring(
         from: selectedRange
       )
-
       let mutable = NSMutableAttributedString(attributedString: attributed)
 
       mutable.enumerateAttribute(
-        NSAttributedString.Key.rawContent,
+        .rawContent,
         in: NSRange(location: 0, length: mutable.length),
         options: []
       ) { value, range, _ in
@@ -201,102 +302,14 @@ struct AttributedText: View {
       }
 
       super.copy(sender)
-
       UIPasteboard.general.string = mutable.string
+    }
 
+    /// Convenience to avoid clearing selection/caret flicker when resetting text.
+    func setAttributedTextPreservingSelection(_ text: NSAttributedString) {
+      let sel = selectedRange
+      attributedText = text
+      selectedRange = sel
     }
   }
-
-  private struct _AttributedTextView: UIViewRepresentable {
-    var attributedString: NSAttributedString
-    @Environment(\.lineLimit) private var lineLimit
-    @Environment(\.openURL) private var openURL  // needed so we can signal that links were tapped.
-
-    func makeCoordinator() -> Coordinator {
-      Coordinator(openURL: openURL)
-    }
-
-    func makeUIView(context: Context) -> ModifiedCopyingTextView {
-      let textView = ModifiedCopyingTextView()
-      textView.delegate = context.coordinator
-      textView.isEditable = false
-      textView.isSelectable = true
-      textView.isScrollEnabled = false
-      textView.backgroundColor = .clear
-      textView.textContainerInset = .zero
-      textView.textContainer.lineFragmentPadding = 0
-      textView.textContainer.maximumNumberOfLines = lineLimit ?? 0
-
-      textView.textStorage.setAttributedString(attributedString)
-      textView.dataDetectorTypes = []
-      textView.isUserInteractionEnabled = true
-      textView.linkTextAttributes = [:]
-
-      // access layoutManager to force textkit compatibility mode on
-      _ = textView.layoutManager
-      return textView
-    }
-
-    func updateUIView(_ uiView: ModifiedCopyingTextView, context: Context) {
-      if !context.coordinator.isSame(as: attributedString) {
-        uiView.attributedText = attributedString
-        context.coordinator.remember(attributedString: attributedString)
-      }
-
-      uiView.textContainer.maximumNumberOfLines = lineLimit ?? 0
-      uiView.delegate = context.coordinator
-    }
-
-    func sizeThatFits(
-      _ proposal: ProposedViewSize,
-      uiView: ModifiedCopyingTextView,
-      context: Context
-    ) -> CGSize? {
-      let targetWidth = proposal.width ?? UIScreen.main.bounds.width
-      let fittingSize = CGSize(
-        width: targetWidth,
-        height: .greatestFiniteMagnitude
-      )
-      let size = uiView.sizeThatFits(fittingSize)
-      return CGSize(width: targetWidth, height: size.height)
-    }
-
-    final class Coordinator: NSObject, UITextViewDelegate {
-      let openURL: OpenURLAction
-      private var lastAttributedStringHash: Int = 0
-      init(openURL: OpenURLAction) {
-        self.openURL = openURL
-      }
-
-      func isSame(as attributed: NSAttributedString) -> Bool {
-        var hasher = Hasher()
-        hasher.combine(attributed.string)
-        hasher.combine(attributed.length)
-        let h = hasher.finalize()
-        return h == lastAttributedStringHash
-      }
-
-      func remember(attributedString: NSAttributedString) {
-        var hasher = Hasher()
-        hasher.combine(attributedString.string)
-        hasher.combine(attributedString.length)
-        lastAttributedStringHash = hasher.finalize()
-      }
-
-      // tap link handler
-      func textView(
-        _ textView: UITextView,
-        shouldInteractWith URL: URL,
-        in characterRange: NSRange,
-        interaction: UITextItemInteraction
-      ) -> Bool {
-        openURL(URL)
-        if PaicordChatLink.init(url: URL) != nil {
-          return false
-        }
-        return true
-      }
-    }
-  }
-
 #endif

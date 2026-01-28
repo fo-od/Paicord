@@ -42,7 +42,6 @@
 		AA078FCA2EC8220E00EDFFA8 /* PaicordSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA078FC92EC8220900EDFFA8 /* PaicordSection.swift */; };
 		AA0BAA792ECE9A3600365661 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0BAA782ECE9A3100365661 /* Color.swift */; };
 		AA0C43D72E9F190B000FA834 /* AttributedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0C43D62E9F18AD000FA834 /* AttributedText.swift */; };
-		AA0C43D92E9F1D41000FA834 /* EmojiAttachmentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0C43D82E9F1D41000FA834 /* EmojiAttachmentCell.swift */; };
 		AA1097142E64C181005BC3D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA1097102E64C181005BC3D2 /* Assets.xcassets */; };
 		AA1097152E64C181005BC3D2 /* LargeBaseplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1097042E64C181005BC3D2 /* LargeBaseplate.swift */; };
 		AA1097172E64C181005BC3D2 /* SmallBaseplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1097062E64C181005BC3D2 /* SmallBaseplate.swift */; };
@@ -105,6 +104,10 @@
 		AA7B0B6A2EE5D809003F0CE9 /* ChatHeaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7B0B692EE5D804003F0CE9 /* ChatHeaders.swift */; };
 		AA7B38F22EB37F9B00CA4A3C /* PermsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7B38F12EB37F9500CA4A3C /* PermsHelper.swift */; };
 		AA7B38F42EB50F0100CA4A3C /* MessageDrainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7B38F32EB50EFD00CA4A3C /* MessageDrainStore.swift */; };
+		AA8ABACA2F2A794E00557278 /* SwiftEmoji in Frameworks */ = {isa = PBXBuildFile; productRef = AA8ABAC92F2A794E00557278 /* SwiftEmoji */; };
+		AA8ABACC2F2A794E00557278 /* SwiftEmojiIndex in Frameworks */ = {isa = PBXBuildFile; productRef = AA8ABACB2F2A794E00557278 /* SwiftEmojiIndex */; };
+		AA8ABACF2F2A79B500557278 /* Loupe in Frameworks */ = {isa = PBXBuildFile; productRef = AA8ABACE2F2A79B500557278 /* Loupe */; };
+		AA8ABAD22F2A7A0800557278 /* MijickCamera in Frameworks */ = {isa = PBXBuildFile; platformFilter = ios; productRef = AA8ABAD12F2A7A0800557278 /* MijickCamera */; };
 		AA9C81832E6660BE0086B1DA /* GuildButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9C81822E6660BE0086B1DA /* GuildButton.swift */; };
 		AA9C81862E66670E0086B1DA /* CornerRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9C81852E66670E0086B1DA /* CornerRadius.swift */; };
 		AA9C818C2E6702930086B1DA /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = AA9C818B2E6702930086B1DA /* SwiftUIIntrospect */; };
@@ -180,7 +183,6 @@
 		AA078FC92EC8220900EDFFA8 /* PaicordSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaicordSection.swift; sourceTree = "<group>"; };
 		AA0BAA782ECE9A3100365661 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		AA0C43D62E9F18AD000FA834 /* AttributedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedText.swift; sourceTree = "<group>"; };
-		AA0C43D82E9F1D41000FA834 /* EmojiAttachmentCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiAttachmentCell.swift; sourceTree = "<group>"; };
 		AA1096DB2E63BE84005BC3D2 /* Paicord.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Paicord.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA1097042E64C181005BC3D2 /* LargeBaseplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LargeBaseplate.swift; sourceTree = "<group>"; };
 		AA1097062E64C181005BC3D2 /* SmallBaseplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallBaseplate.swift; sourceTree = "<group>"; };
@@ -282,10 +284,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA8ABACF2F2A79B500557278 /* Loupe in Frameworks */,
 				AA5CA6602E9D435800C7C82A /* SDWebImageSwiftUI in Frameworks */,
+				AA8ABAD22F2A7A0800557278 /* MijickCamera in Frameworks */,
 				5783AA902E6B8F6500F73F6D /* MeshGradient in Frameworks */,
 				AA5CA6582E9D2CBA00C7C82A /* HighlightSwift in Frameworks */,
 				AA1878F92E81FC1A009C7E40 /* FLEX in Frameworks */,
+				AA8ABACC2F2A794E00557278 /* SwiftEmojiIndex in Frameworks */,
+				AA8ABACA2F2A794E00557278 /* SwiftEmoji in Frameworks */,
 				AAD446A22ED07916006CB07C /* SettingsKit in Frameworks */,
 				579DF34B2E6D9B9800BD8B97 /* SwiftUIX in Frameworks */,
 				AA47AF622EDF1FF7008A50C9 /* Conditionals in Frameworks */,
@@ -480,9 +486,8 @@
 		AA0C43D52E9EF91D000FA834 /* Markdown */ = {
 			isa = PBXGroup;
 			children = (
-				AA0C43D82E9F1D41000FA834 /* EmojiAttachmentCell.swift */,
-				AA0C43D62E9F18AD000FA834 /* AttributedText.swift */,
 				57A55C562E7560CC005C8226 /* MarkdownText.swift */,
+				AA0C43D62E9F18AD000FA834 /* AttributedText.swift */,
 			);
 			path = Markdown;
 			sourceTree = "<group>";
@@ -952,6 +957,10 @@
 				AAD446A12ED07916006CB07C /* SettingsKit */,
 				AA47AF612EDF1FF7008A50C9 /* Conditionals */,
 				AAA9EEFC2F23062B00770CAD /* CodeScanner */,
+				AA8ABAC92F2A794E00557278 /* SwiftEmoji */,
+				AA8ABACB2F2A794E00557278 /* SwiftEmojiIndex */,
+				AA8ABACE2F2A79B500557278 /* Loupe */,
+				AA8ABAD12F2A7A0800557278 /* MijickCamera */,
 			);
 			productName = PaiCord;
 			productReference = AA1096DB2E63BE84005BC3D2 /* Paicord.app */;
@@ -998,6 +1007,9 @@
 				AAD446A02ED07916006CB07C /* XCRemoteSwiftPackageReference "SettingsKit" */,
 				AA47AF602EDF1FF7008A50C9 /* XCRemoteSwiftPackageReference "Conditionals" */,
 				AAA9EEFB2F23062B00770CAD /* XCRemoteSwiftPackageReference "CodeScanner" */,
+				AA8ABAC82F2A794E00557278 /* XCRemoteSwiftPackageReference "SwiftEmoji" */,
+				AA8ABACD2F2A79B500557278 /* XCRemoteSwiftPackageReference "Loupe" */,
+				AA8ABAD02F2A7A0800557278 /* XCRemoteSwiftPackageReference "Camera" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AA1096DC2E63BE84005BC3D2 /* Products */;
@@ -1026,7 +1038,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA1378062E967A4A00100969 /* ProcessInfo+previews.swift in Sources */,
-				AA0C43D92E9F1D41000FA834 /* EmojiAttachmentCell.swift in Sources */,
 				AA1097152E64C181005BC3D2 /* LargeBaseplate.swift in Sources */,
 				AAB50A562E9AD4680048E8B0 /* StickersView.swift in Sources */,
 				AA1097172E64C181005BC3D2 /* SmallBaseplate.swift in Sources */,
@@ -1487,6 +1498,30 @@
 				minimumVersion = 3.1.3;
 			};
 		};
+		AA8ABAC82F2A794E00557278 /* XCRemoteSwiftPackageReference "SwiftEmoji" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Aeastr/SwiftEmoji";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+		AA8ABACD2F2A79B500557278 /* XCRemoteSwiftPackageReference "Loupe" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Aeastr/Loupe";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+		AA8ABAD02F2A7A0800557278 /* XCRemoteSwiftPackageReference "Camera" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Mijick/Camera";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.3;
+			};
+		};
 		AA9C818A2E6702930086B1DA /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/siteline/swiftui-introspect";
@@ -1595,6 +1630,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AA5CA65E2E9D435800C7C82A /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
 			productName = SDWebImageSwiftUI;
+		};
+		AA8ABAC92F2A794E00557278 /* SwiftEmoji */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA8ABAC82F2A794E00557278 /* XCRemoteSwiftPackageReference "SwiftEmoji" */;
+			productName = SwiftEmoji;
+		};
+		AA8ABACB2F2A794E00557278 /* SwiftEmojiIndex */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA8ABAC82F2A794E00557278 /* XCRemoteSwiftPackageReference "SwiftEmoji" */;
+			productName = SwiftEmojiIndex;
+		};
+		AA8ABACE2F2A79B500557278 /* Loupe */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA8ABACD2F2A79B500557278 /* XCRemoteSwiftPackageReference "Loupe" */;
+			productName = Loupe;
+		};
+		AA8ABAD12F2A7A0800557278 /* MijickCamera */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA8ABAD02F2A7A0800557278 /* XCRemoteSwiftPackageReference "Camera" */;
+			productName = MijickCamera;
 		};
 		AA9C818B2E6702930086B1DA /* SwiftUIIntrospect */ = {
 			isa = XCSwiftPackageProductDependency;

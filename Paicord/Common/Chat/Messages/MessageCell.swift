@@ -21,7 +21,6 @@ struct MessageCell: View {
   var message: DiscordChannel.Message
   var priorMessage: DiscordChannel.Message?
   var channelStore: ChannelStore
-  @Environment(\.gateway) var gw
   @State var cellHighlighted = false
 
   init(
@@ -35,6 +34,7 @@ struct MessageCell: View {
   }
 
   var userMentioned: Bool {
+    let gw = GatewayStore.shared
     guard let currentUserID = gw.user.currentUser?.id else {
       return false
     }
@@ -60,17 +60,8 @@ struct MessageCell: View {
       priorMessage?.author?.id == message.author?.id
       && message.timestamp.date.timeIntervalSince(
         priorMessage?.timestamp.date ?? .distantPast
-      ) < 300 && message.referenced_message == nil && message.type == .default
-
-    // adding them together can cause arithmetic overflow, so hash instead
-    let cellHash: Int = {
-      var hasher = Hasher()
-      hasher.combine(message)
-      if let priorMessage = priorMessage {
-        hasher.combine(priorMessage)
-      }
-      return hasher.finalize()
-    }()
+      ) < 300 && message.referenced_message == nil
+      && message.type == .default
 
     Group {
       // Content
@@ -81,8 +72,10 @@ struct MessageCell: View {
           channelStore: channelStore,
           inline: inline
         )
+        .equatable()
       case .chatInputCommand:
         ChatInputCommandMessage(message: message, channelStore: channelStore)
+          .equatable()
       default:
         HStack {
           AvatarBalancing()
@@ -101,10 +94,6 @@ struct MessageCell: View {
       Color(hexadecimal6: 0xce9c5c).opacity(userMentioned ? 1 : 0)
         .maxWidth(2)
     }
-    .equatable(by: cellHash)
-    /// stop updates to messages unless messages change.
-    /// prevent updates to messages unless they change
-    /// avoid re-render on message cell highlight
     #if os(macOS)
       .onHover { self.cellHighlighted = $0 }
       .background(
@@ -114,7 +103,6 @@ struct MessageCell: View {
     #endif
     .entityContextMenu(for: message)
     .padding(.top, inline ? 0 : 15)  // adds space between message groups
-
   }
 }
 

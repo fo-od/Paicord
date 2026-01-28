@@ -95,10 +95,10 @@ struct ChatView: View {
         }
         .scrollTargetLayout()
       }
+      .safeAreaPadding(.bottom, 10)
       .scrollPosition(id: $currentScrollPosition, anchor: .bottom)
       .bottomAnchored()
       .maxHeight(.infinity)
-      .safeAreaPadding(.bottom, 15)
       .onReceive(
         NotificationCenter.default.publisher(
           for: .chatViewShouldScrollToBottom
