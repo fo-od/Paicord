@@ -35,6 +35,10 @@ If you've enjoyed using Paicord, I would apprecate a [sponsor](https://github.co
 
 [![Github-sponsors](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA)](https://github.com/sponsors/llsc12)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=llsc12/Paicord&type=date&legend=top-left)](https://www.star-history.com/#llsc12/Paicord&type=date&legend=top-left)
+
 ## References
 
 Paicord uses modified versions of [DiscordBM](https://github.com/DiscordBM/DiscordBM) and [SwiftMarkdownParser](https://github.com/sciasxp/SwiftMarkdownParser). These other references are mentioned since I read their code to learn from others.
