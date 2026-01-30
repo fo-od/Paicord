@@ -1,0 +1,151 @@
+name: PR Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build-macos:
+    name: Build macOS
+    runs-on: macos-26
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Disable Swift macro plugin consent prompt
+        run: |
+          defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
+
+      - name: Cache Xcode DerivedData (macOS)
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+          key: deriveddata-macos-pr-${{ github.event.pull_request.number }}-${{ hashFiles('**/*.swift', '**/*.xcodeproj', '**/*.xcworkspace') }}
+          restore-keys: |
+            deriveddata-macos-pr-${{ github.event.pull_request.number }}-
+            deriveddata-macos-pr-
+
+      - name: Build macOS
+        id: build
+        run: |
+          set -o pipefail
+          xcodebuild -workspace Paicord.xcworkspace \
+            -scheme Paicord \
+            -configuration Debug \
+            -destination "platform=macOS" \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO \
+            2>&1 | tee build-macos.log
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build-logs
+          path: build-macos.log
+          retention-days: 7
+
+      - name: Comment on PR (Failure)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const log = fs.readFileSync('build-macos.log', 'utf8');
+            const truncatedLog = log.length > 60000 ? log.slice(-60000) + '\n\n[Log truncated to last 60000 characters]' : log;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ❌ macOS Build Failed\n\n<details>\n<summary>Build Logs</summary>\n\n\`\`\`\n${truncatedLog}\n\`\`\`\n\n</details>`
+            });
+
+      - name: Comment on PR (Success)
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ✅ macOS Build Succeeded`
+            });
+
+  build-ios:
+    name: Build iOS
+    runs-on: macos-26
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Disable Swift macro plugin consent prompt
+        run: |
+          defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
+
+      - name: Cache Xcode DerivedData (iOS)
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+          key: deriveddata-ios-pr-${{ github.event.pull_request.number }}-${{ hashFiles('**/*.swift', '**/*.xcodeproj', '**/*.xcworkspace') }}
+          restore-keys: |
+            deriveddata-ios-pr-${{ github.event.pull_request.number }}-
+            deriveddata-ios-pr-
+
+      - name: Build iOS
+        id: build
+        run: |
+          set -o pipefail
+          xcodebuild -workspace Paicord.xcworkspace \
+            -scheme Paicord \
+            -configuration Debug \
+            -arch arm64 \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            2>&1 | tee build-ios.log
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-logs
+          path: build-ios.log
+          retention-days: 7
+
+      - name: Comment on PR (Failure)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const log = fs.readFileSync('build-ios.log', 'utf8');
+            const truncatedLog = log.length > 60000 ? log.slice(-60000) + '\n\n[Log truncated to last 60000 characters]' : log;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ❌ iOS Build Failed\n\n<details>\n<summary>Build Logs</summary>\n\n\`\`\`\n${truncatedLog}\n\`\`\`\n\n</details>`
+            });
+
+      - name: Comment on PR (Success)
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ✅ iOS Build Succeeded`
+            });
