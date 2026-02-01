@@ -1,0 +1,45 @@
+name: PR Build Commenter
+
+on:
+  workflow_run:
+    workflows: ["PR Build"]
+    types: [completed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post build status to PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const run = context.payload.workflow_run;
+            const prs = run.pull_requests || [];
+            if (!prs.length) {
+              console.log('No PR associated with this run; nothing to comment on.');
+              return;
+            }
+            // If multiple PRs, post to each
+            for (const pr of prs) {
+              const prNumber = pr.number;
+              const conclusion = run.conclusion; // "success", "failure", etc.
+              const htmlUrl = run.html_url;
+              let body = '';
+              if (conclusion === 'success') {
+                body = `## ✅ PR Build Succeeded\n\nBuild: ${htmlUrl}`;
+              } else {
+                body = `## ❌ PR Build ${conclusion === 'failure' ? 'Failed' : conclusion}\n\nBuild: ${htmlUrl}\n\n(See the workflow run for logs and artifacts.)`;
+              }
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }

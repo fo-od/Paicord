@@ -6,6 +6,8 @@ on:
     paths-ignore:
       - 'README.md'
       - '*.md'
+      - '.github/workflows/**'
+
   workflow_dispatch:
 
 concurrency:
