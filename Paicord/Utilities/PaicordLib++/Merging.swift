@@ -336,7 +336,8 @@ extension Guild.Member {
       flags: self.flags,
       permissions: self.permissions,
       communication_disabled_until: self.communication_disabled_until,
-      avatar_decoration_data: self.avatar_decoration_data
+      avatar_decoration_data: self.avatar_decoration_data,
+      presence: self.presence
     )
   }
 
@@ -358,6 +359,7 @@ extension Guild.Member {
       new.communication_disabled_until ?? self.communication_disabled_until
     self.avatar_decoration_data =
       new.avatar_decoration_data ?? self.avatar_decoration_data
+    self.presence = new.presence ?? self.presence
   }
 }
 

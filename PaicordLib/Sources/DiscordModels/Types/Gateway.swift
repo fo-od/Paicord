@@ -736,6 +736,8 @@ public struct Gateway: Sendable, Codable {
           self.data = try .userGuildSettingsUpdate(decodeData())
         case "USER_SETTINGS_PROTO_UPDATE":
           self.data = try .userSettingsUpdate(decodeData())
+        case "GUILD_MEMBER_LIST_UPDATE":
+          self.data = try .guildMemberListUpdate(decodeData())
         default:
           throw GatewayDecodingError.unhandledDispatchEvent(type: self.type)
         }

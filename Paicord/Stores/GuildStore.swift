@@ -29,7 +29,7 @@ class GuildStore: DiscordDataStore {
   // MARK: - Internal kinda stuff ykyk
   
   // Max of 5 subscribed member lists at a time per guild.
-  var subscribedMemberIDs: [MemberListSnowflake] = []
+  var subscribedMemberListIDs: [MemberListSnowflake] = []
   
   // MARK: - Initializers, setup etc.
   
