@@ -2,292 +2,964 @@
   "sourceLanguage" : "en",
   "strings" : {
     "" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        }
+      }
     },
     " and " : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " ਅਤੇ "
+          }
+        }
+      }
     },
     " are typing..." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " ਟਾਈਪ ਕਰ ਰਹੇ ਹਨ..."
+          }
+        }
+      }
     },
     " Forwarded" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " ਅੱਗੇ ਭੇਜਿਆ"
+          }
+        }
+      }
     },
     " is typing..." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " ਟਾਈਪ ਕਰ ਰਿਹਾ ਹੈ..."
+          }
+        }
+      }
     },
     " Unsupported message type %@" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " ਅਸਮਰਥਿਤ ਸੁਨੇਹਾ ਕਿਸਮ %@"
+          }
+        }
+      }
     },
     ", " : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ", "
+          }
+        }
+      }
     },
     ":3" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ":3"
+          }
+        }
+      }
     },
     "(edited)" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(ਸੰਪਾਦਿਤ)"
+          }
+        }
+      }
     },
     "@%@" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "@%@"
+          }
+        }
+      }
     },
     "%@ unsupported" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ਅਸਮਰਥਿਤ"
+          }
+        }
+      }
     },
     "%lld members" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ਮੈਂਬਰ"
+          }
+        }
+      }
     },
     "1" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1"
+          }
+        }
+      }
     },
     "Account" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਖਾਤਾ"
+          }
+        }
+      }
     },
     "Add Account" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਖਾਤਾ ਜੋੜੋ"
+          }
+        }
+      }
     },
     "Add Theme" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਥੀਮ ਜੋੜੋ"
+          }
+        }
+      }
     },
     "An action required MFA to continue." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਜਾਰੀ ਰੱਖਣ ਲਈ ਇੱਕ ਕਾਰਵਾਈ ਨੂੰ MFA ਦੀ ਲੋੜ ਹੈ।"
+          }
+        }
+      }
     },
     "An unknown error occurred." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਇੱਕ ਅਣਜਾਣ ਗਲਤੀ ਆਈ।"
+          }
+        }
+      }
     },
     "and " : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਅਤੇ "
+          }
+        }
+      }
     },
     "Apps" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਐਪਸ"
+          }
+        }
+      }
     },
     "Authenticator App" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਪ੍ਰਮਾਣਿਕਤਾ ਐਪ"
+          }
+        }
+      }
     },
     "Awaiting READY" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਤਿਆਰ ਦੀ ਉਡੀਕ ਵਿੱਚ"
+          }
+        }
+      }
     },
     "Backup Code" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਬੈਕਅੱਪ ਕੋਡ"
+          }
+        }
+      }
     },
     "Check your phone!" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਆਪਣਾ ਫ਼ੋਨ ਚੈੱਕ ਕਰੋ!"
+          }
+        }
+      }
     },
     "Choose an account" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਇੱਕ ਖਾਤਾ ਚੁਣੋ"
+          }
+        }
+      }
     },
     "ComponentsV2 unsupported" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ComponentsV2 ਅਸਮਰਥਿਤ"
+          }
+        }
+      }
     },
     "Copy Author ID" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਲੇਖਕ ID ਕਾਪੀ ਕਰੋ"
+          }
+        }
+      }
     },
     "Copy Message ID" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਸੁਨੇਹਾ ID ਕਾਪੀ ਕਰੋ"
+          }
+        }
+      }
     },
     "Copy Message Link" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਸੁਨੇਹਾ ਲਿੰਕ ਕਾਪੀ ਕਰੋ"
+          }
+        }
+      }
     },
     "Copy Text" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਟੈਕਸਟ ਕਾਪੀ ਕਰੋ"
+          }
+        }
+      }
     },
     "Copy User ID" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਉਪਭੋਗਤਾ ID ਕਾਪੀ ਕਰੋ"
+          }
+        }
+      }
     },
     "Create Thread" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਥਰਿੱਡ ਬਣਾਓ"
+          }
+        }
+      }
     },
     "Delete" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਮਿਟਾਓ"
+          }
+        }
+      }
     },
     "Direct Messages" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਸਿੱਧੇ ਸੁਨੇਹੇ"
+          }
+        }
+      }
     },
     "Dismiss" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਖਾਰਜ ਕਰੋ"
+          }
+        }
+      }
     },
     "Donate" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਦਾਨ ਕਰੋ"
+          }
+        }
+      }
     },
     "Donors get Discord server roles, and custom profile badges visible to other Paicord users!" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਦਾਨੀਆਂ ਨੂੰ Discord ਸਰਵਰ ਰੋਲ, ਅਤੇ ਹੋਰ Paicord ਉਪਭੋਗਤਾਵਾਂ ਨੂੰ ਦਿਖਾਈ ਦੇਣ ਵਾਲੇ ਕਸਟਮ ਪ੍ਰੋਫਾਈਲ ਬੈਜ ਮਿਲਦੇ ਹਨ!"
+          }
+        }
+      }
     },
     "Edit Message" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਸੁਨੇਹਾ ਸੰਪਾਦਿਤ ਕਰੋ"
+          }
+        }
+      }
     },
     "Edit Profile" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਪ੍ਰੋਫਾਈਲ ਸੰਪਾਦਿਤ ਕਰੋ"
+          }
+        }
+      }
     },
     "Edited at %@" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ਤੇ ਸੰਪਾਦਿਤ"
+          }
+        }
+      }
     },
     "Editing Message" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਸੁਨੇਹਾ ਸੰਪਾਦਿਤ ਕਰ ਰਿਹਾ ਹੈ"
+          }
+        }
+      }
     },
     "Email or Phone Number" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਈਮੇਲ ਜਾਂ ਫ਼ੋਨ ਨੰਬਰ"
+          }
+        }
+      }
     },
     "Enjoying Paicord?" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paicord ਦਾ ਆਨੰਦ ਮਾਣ ਰਹੇ ਹੋ?"
+          }
+        }
+      }
     },
     "Enter a valid login above to send a reset link!" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਰੀਸੈਟ ਲਿੰਕ ਭੇਜਣ ਲਈ ਉੱਪਰ ਇੱਕ ਵੈਧ ਲੌਗਇਨ ਦਰਜ ਕਰੋ!"
+          }
+        }
+      }
     },
     "Enter the code sent to your phone" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਆਪਣੇ ਫ਼ੋਨ ਤੇ ਭੇਜਿਆ ਕੋਡ ਦਰਜ ਕਰੋ"
+          }
+        }
+      }
     },
     "Enter your authentication code" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਆਪਣਾ ਪ੍ਰਮਾਣਿਕਤਾ ਕੋਡ ਦਰਜ ਕਰੋ"
+          }
+        }
+      }
     },
     "Enter your backup code" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਆਪਣਾ ਬੈਕਅੱਪ ਕੋਡ ਦਰਜ ਕਰੋ"
+          }
+        }
+      }
     },
     "Error" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਗਲਤੀ"
+          }
+        }
+      }
     },
     "Forgot Password" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ"
+          }
+        }
+      }
     },
     "Forgot your password?" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਆਪਣਾ ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?"
+          }
+        }
+      }
     },
     "Forward" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਅੱਗੇ ਭੇਜੋ"
+          }
+        }
+      }
     },
     "Further MFA restricted actions will be allowed for the next 5 minutes." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਅਗਲੇ 5 ਮਿੰਟਾਂ ਲਈ ਹੋਰ MFA ਪ੍ਰਤਿਬੰਧਿਤ ਕਾਰਵਾਈਆਂ ਦੀ ਇਜਾਜ਼ਤ ਹੋਵੇਗੀ।"
+          }
+        }
+      }
     },
     "Home" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਘਰ"
+          }
+        }
+      }
     },
     "If you like Paicord and would like to support its development, consider donating! You'll receive a Donator role in the Discord server and you'll receive custom badges!" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਜੇ ਤੁਹਾਨੂੰ Paicord ਪਸੰਦ ਹੈ ਅਤੇ ਤੁਸੀਂ ਇਸਦੇ ਵਿਕਾਸ ਦਾ ਸਮਰਥਨ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ, ਦਾਨ ਕਰਨ ਬਾਰੇ ਸੋਚੋ! ਤੁਹਾਨੂੰ Discord ਸਰਵਰ ਵਿੱਚ ਇੱਕ ਦਾਨੀ ਰੋਲ ਮਿਲੇਗਾ ਅਤੇ ਤੁਹਾਨੂੰ ਕਸਟਮ ਬੈਜ ਮਿਲਣਗੇ!"
+          }
+        }
+      }
     },
     "Installed Themes" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਇੰਸਟਾਲ ਕੀਤੇ ਥੀਮ"
+          }
+        }
+      }
     },
     "Join the [Paicord Server](https://discord.gg/fqhPGHPyaK) to manage badges!" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਬੈਜ ਪ੍ਰਬੰਧਿਤ ਕਰਨ ਲਈ [Paicord ਸਰਵਰ](https://discord.gg/fqhPGHPyaK) ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਵੋ!"
+          }
+        }
+      }
     },
     "Log In" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਲੌਗ ਇਨ"
+          }
+        }
+      }
     },
     "Log in with QR Code" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR ਕੋਡ ਨਾਲ ਲੌਗ ਇਨ ਕਰੋ"
+          }
+        }
+      }
     },
     "Logging in as %@" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ਵਜੋਂ ਲੌਗ ਇਨ ਕਰ ਰਿਹਾ ਹੈ"
+          }
+        }
+      }
     },
     "Login requires MFA to continue." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਜਾਰੀ ਰੱਖਣ ਲਈ ਲੌਗਇਨ ਨੂੰ MFA ਦੀ ਲੋੜ ਹੈ।"
+          }
+        }
+      }
     },
     "Made with ❤️ by llsc12" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "llsc12 ਦੁਆਰਾ ❤️ ਨਾਲ ਬਣਾਇਆ"
+          }
+        }
+      }
     },
     "Mark Unread" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਅਣਪੜ੍ਹਿਆ ਮਾਰਕ ਕਰੋ"
+          }
+        }
+      }
     },
     "Mention" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਜ਼ਿਕਰ"
+          }
+        }
+      }
     },
     "Multi-Factor Authentication" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਬਹੁ-ਕਾਰਕ ਪ੍ਰਮਾਣਿਕਤਾ"
+          }
+        }
+      }
     },
     "Notifications" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਸੂਚਨਾਵਾਂ"
+          }
+        }
+      }
     },
     "Notifications View" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਸੂਚਨਾਵਾਂ ਦ੍ਰਿਸ਼"
+          }
+        }
+      }
     },
     "OFF" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਬੰਦ"
+          }
+        }
+      }
     },
     "OK" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਠੀਕ ਹੈ"
+          }
+        }
+      }
     },
     "ON" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਚਾਲੂ"
+          }
+        }
+      }
     },
     "Paicord" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paicord"
+          }
+        }
+      }
     },
     "Paicord is free and open source software. If you enjoy using Paicord, consider sponsoring its development to help support ongoing improvements and new features!" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paicord ਮੁਫਤ ਅਤੇ ਓਪਨ ਸੋਰਸ ਸਾਫਟਵੇਅਰ ਹੈ। ਜੇ ਤੁਸੀਂ Paicord ਦੀ ਵਰਤੋਂ ਦਾ ਆਨੰਦ ਮਾਣਦੇ ਹੋ, ਤਾਂ ਨਿਰੰਤਰ ਸੁਧਾਰਾਂ ਅਤੇ ਨਵੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦਾ ਸਮਰਥਨ ਕਰਨ ਲਈ ਇਸਦੇ ਵਿਕਾਸ ਨੂੰ ਸਪਾਂਸਰ ਕਰਨ ਬਾਰੇ ਸੋਚੋ!"
+          }
+        }
+      }
     },
     "Paicord Logs" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paicord ਲੌਗ"
+          }
+        }
+      }
     },
     "Password" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਪਾਸਵਰਡ"
+          }
+        }
+      }
     },
     "Playgrounds" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਖੇਡ ਦੇ ਮੈਦਾਨ"
+          }
+        }
+      }
     },
     "Profile" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਪ੍ਰੋਫਾਈਲ"
+          }
+        }
+      }
     },
     "Remind Me Later" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਮੈਨੂੰ ਬਾਅਦ ਵਿੱਚ ਯਾਦ ਕਰਾਓ"
+          }
+        }
+      }
     },
     "Reply" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਜਵਾਬ"
+          }
+        }
+      }
     },
     "Replying to %@" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ਨੂੰ ਜਵਾਬ ਦੇ ਰਿਹਾ ਹੈ"
+          }
+        }
+      }
     },
     "Scan this with the Paicord or Discord mobile app to log in instantly." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਤੁਰੰਤ ਲੌਗ ਇਨ ਕਰਨ ਲਈ Paicord ਜਾਂ Discord ਮੋਬਾਈਲ ਐਪ ਨਾਲ ਇਸਨੂੰ ਸਕੈਨ ਕਰੋ।"
+          }
+        }
+      }
     },
     "Select a channel to start chatting" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਗੱਲਬਾਤ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਇੱਕ ਚੈਨਲ ਚੁਣੋ"
+          }
+        }
+      }
     },
     "Select an account to continue or add a new one." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਜਾਰੀ ਰੱਖਣ ਲਈ ਇੱਕ ਖਾਤਾ ਚੁਣੋ ਜਾਂ ਇੱਕ ਨਵਾਂ ਜੋੜੋ।"
+          }
+        }
+      }
     },
     "Settings" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਸੈਟਿੰਗਾਂ"
+          }
+        }
+      }
     },
     "Sketchy shit" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਸ਼ੱਕੀ ਚੀਜ਼ਾਂ"
+          }
+        }
+      }
     },
     "SMS" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SMS"
+          }
+        }
+      }
     },
     "Something really bad has happened, gateway connections disabled.\nPlease report this." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਕੁਝ ਬਹੁਤ ਬੁਰਾ ਹੋਇਆ ਹੈ, ਗੇਟਵੇ ਕਨੈਕਸ਼ਨ ਅਸਮਰਥ ਹਨ।\nਕਿਰਪਾ ਕਰਕੇ ਇਸਦੀ ਰਿਪੋਰਟ ਕਰੋ।"
+          }
+        }
+      }
     },
     "Sponsor" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਸਪਾਂਸਰ"
+          }
+        }
+      }
     },
     "Swipe on a theme to delete it." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਇਸਨੂੰ ਮਿਟਾਉਣ ਲਈ ਥੀਮ ਤੇ ਸਵਾਈਪ ਕਰੋ।"
+          }
+        }
+      }
     },
     "Switch Account" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਖਾਤਾ ਬਦਲੋ"
+          }
+        }
+      }
     },
     "Toggle Member List" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਮੈਂਬਰ ਸੂਚੀ ਟੌਗਲ ਕਰੋ"
+          }
+        }
+      }
     },
     "Toggle Sidebar" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਸਾਈਡਬਾਰ ਟੌਗਲ ਕਰੋ"
+          }
+        }
+      }
     },
     "Tools" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਔਜ਼ਾਰ"
+          }
+        }
+      }
     },
     "Unimplemented" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਲਾਗੂ ਨਹੀਂ ਕੀਤਾ"
+          }
+        }
+      }
     },
     "Unknown User" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਅਣਜਾਣ ਉਪਭੋਗਤਾ"
+          }
+        }
+      }
     },
     "Unsupported block: %@" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਅਸਮਰਥਿਤ ਬਲਾਕ: %@"
+          }
+        }
+      }
     },
     "Unsupported embed type: %@" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਅਸਮਰਥਿਤ ਏਮਬੈਡ ਕਿਸਮ: %@"
+          }
+        }
+      }
     },
     "Upload Files" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਫਾਈਲਾਂ ਅੱਪਲੋਡ ਕਰੋ"
+          }
+        }
+      }
     },
     "Version %@ (%@)" : {
       "localizations" : {
@@ -296,41 +968,124 @@
             "state" : "new",
             "value" : "Version %1$@ (%2$@)"
           }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਸੰਸਕਰਣ %1$@ (%2$@)"
+          }
         }
       }
     },
     "View Logs" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਲੌਗ ਦੇਖੋ"
+          }
+        }
+      }
     },
     "We're so excited to see you again!" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਅਸੀਂ ਤੁਹਾਨੂੰ ਦੁਬਾਰਾ ਦੇਖ ਕੇ ਬਹੁਤ ਉਤਸ਼ਾਹਿਤ ਹਾਂ!"
+          }
+        }
+      }
     },
     "Welcome Back!" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਜੀ ਆਇਆਂ ਨੂੰ ਵਾਪਸ!"
+          }
+        }
+      }
     },
     "Welcome to the start of #%@" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "#%@ ਦੀ ਸ਼ੁਰੂਆਤ ਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ"
+          }
+        }
+      }
     },
     "Welcome to the start of this channel" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਇਸ ਚੈਨਲ ਦੀ ਸ਼ੁਰੂਆਤ ਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ"
+          }
+        }
+      }
     },
     "wip bro go do totp" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "wip ਭਰਾ totp ਕਰੋ"
+          }
+        }
+      }
     },
     "Yesterday at " : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਕੱਲ੍ਹ "
+          }
+        }
+      }
     },
     "You can only use each backup code once." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਤੁਸੀਂ ਹਰ ਬੈਕਅੱਪ ਕੋਡ ਨੂੰ ਸਿਰਫ਼ ਇੱਕ ਵਾਰ ਵਰਤ ਸਕਦੇ ਹੋ।"
+          }
+        }
+      }
     },
     "You don't have permission to view the message history in this channel." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਤੁਹਾਨੂੰ ਇਸ ਚੈਨਲ ਵਿੱਚ ਸੁਨੇਹਾ ਇਤਿਹਾਸ ਦੇਖਣ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ।"
+          }
+        }
+      }
     },
     "You don't have permission to view the message history of #%@." : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਤੁਹਾਨੂੰ #%@ ਦਾ ਸੁਨੇਹਾ ਇਤਿਹਾਸ ਦੇਖਣ ਦੀ ਇਜਾਜ਼�� ਨਹੀਂ ਹੈ।"
+          }
+        }
+      }
     },
     "You will receive a password reset form shortly!" : {
-
+      "localizations" : {
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਤੁਹਾਨੂੰ ਜਲਦੀ ਹੀ ਇੱਕ ਪਾਸਵਰਡ ਰੀਸੈਟ ਫਾਰਮ ਮਿਲੇਗਾ!"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
