@@ -37,7 +37,7 @@ struct ChatView: View {
 
     let shouldAnimate =
       orderedMessages.last?.author?.id != gw.user.currentUser?.id
-    VStack(spacing: 15) {
+    VStack(spacing: 20) {
       ScrollView {
         LazyVStack(alignment: .leading, spacing: 0) {
           if !vm.messages.isEmpty {
@@ -155,6 +155,8 @@ struct ChatView: View {
       if vm.hasPermission(.sendMessages) {
         InputBar(vm: vm)
           .id(vm.channelId)
+      } else {
+        Spacer().frame(height: 10)
       }
     }
     .animation(
