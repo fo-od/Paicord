@@ -978,9 +978,6 @@ extension ChatView {
     }
   }
 
-  import SwiftUI
-  import UIKit
-
   struct PastableTextField: UIViewRepresentable {
     var placeholder: String
     @Binding var text: String
@@ -1077,6 +1074,19 @@ extension ChatView {
     class PastableUITextView: UITextView {
       var onPasteFiles: (([URL]) -> Void)?
 
+      override func canPerformAction(
+        _ action: Selector,
+        withSender sender: Any?
+      ) -> Bool {
+        if action == #selector(paste(_:)) {
+          if UIPasteboard.general.hasImages {
+            return true
+          }
+        }
+        return super.canPerformAction(action, withSender: sender)
+      }
+
+      // override paste to get data
       override func paste(_ sender: Any?) {
         let pasteboard = UIPasteboard.general
 
@@ -1100,16 +1110,16 @@ extension ChatView {
             return
           }
         }
-
-        if pasteboard.hasURLs, let pasteURLs = pasteboard.urls {
-          let fileURLs = pasteURLs.filter {
-            $0.isFileURL && FileManager.default.fileExists(atPath: $0.path)
-          }
-          if !fileURLs.isEmpty {
-            onPasteFiles?(fileURLs)
-            return
-          }
-        }
+        // difficult to handle file urls, security scoped resources require fileimporter or documentpicker
+        //        if pasteboard.hasURLs, let pasteURLs = pasteboard.urls {
+        //          let fileURLs = pasteURLs.filter {
+        //            $0.isFileURL && FileManager.default.fileExists(atPath: $0.path)
+        //          }
+        //          if !fileURLs.isEmpty {
+        //            onPasteFiles?(fileURLs)
+        //            return
+        //          }
+        //        }
 
         super.paste(sender)
       }
