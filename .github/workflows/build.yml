@@ -131,6 +131,12 @@ jobs:
           codesign --deep --force --options runtime --sign "${{ secrets.DEV_ID_IDENTITY_NAME }}" \
             dist/dmg/Paicord.app
 
+      - name: Upload macOS dSYMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: Paicord-macOS-dSYMs
+          path: build/Build/Products/Release/*.dSYM
+
       - name: Create DMG
         run: |
           mkdir -p dist/out
@@ -242,9 +248,6 @@ jobs:
           rm -rf Payload "$STAGE_DIR"
           mkdir -p "$STAGE_DIR/Payload"
           cp -R "$APP_PATH" "$STAGE_DIR/Payload/Paicord.app"
-          if command -v strip; then
-            strip "$STAGE_DIR/Payload/Paicord.app/Paicord" || true
-          fi
           if [ -f Paicord/Paicord.entitlements ]; then
             ldid -SPaicord/Paicord.entitlements "$STAGE_DIR/Payload/Paicord.app/"
           else
@@ -256,6 +259,12 @@ jobs:
           cd ..
           mkdir -p output
           mv Paicord.ipa output/Paicord.ipa
+
+      - name: Upload iOS dSYMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: Paicord-iOS-dSYMs
+          path: build/Build/Products/Release-iphoneos/*.dSYM
 
       - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4
