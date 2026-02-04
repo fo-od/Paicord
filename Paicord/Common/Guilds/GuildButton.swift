@@ -304,6 +304,7 @@ struct GuildButton: View {
           .popover(isPresented: $guildNamePopover, arrowEdge: .trailing) {
             Text(guild?.name ?? "")
               .padding(10)
+              .foregroundStyle(theme.markdown.text)
           }
           .onHover { isHovering in
             if guildNamePopover != isHovering { guildNamePopover = isHovering }
@@ -327,6 +328,7 @@ struct GuildButton: View {
             .popover(isPresented: $guildNamePopover, arrowEdge: .trailing) {
               Text("Direct Messages")
                 .padding(10)
+                .foregroundStyle(theme.markdown.text)
             }
             .onHover { isHovering in
               if guildNamePopover != isHovering { guildNamePopover = isHovering }
