@@ -35,7 +35,9 @@ extension ChatView.InputBar {
       var inputVM: ChatView.InputBar.InputVM
       var attachment: ChatView.InputBar.InputVM.UploadItem
       var onRemove: () -> Void
+      
       @State var image: Image? = nil
+      @State var interval: TimeInterval? = nil
 
       private var fileInfo: (url: URL, size: Int64)? {
         guard case .file(_, let url, let size) = attachment else { return nil }
@@ -76,6 +78,10 @@ extension ChatView.InputBar {
           guard image == nil else { return }
           self.image = await inputVM.getThumbnail(for: attachment)
         }
+        .task(id: attachment.id) {
+          guard interval == nil else { return }
+          self.interval = await attachment.videoDuration()
+        }
         .clipShape(.rounded)
         .overlay(alignment: .topTrailing) {
           Button {
@@ -83,7 +89,7 @@ extension ChatView.InputBar {
           } label: {
             Image(systemName: "xmark.circle.fill")
               .foregroundStyle(.white)
-              .background(Color.black.opacity(0.7).clipShape(Circle()))
+              .background(.black.opacity(0.7), in: .circle)
           }
           .frame(width: 10, height: 10)
           .offset(x: 2.5, y: -2.5)
@@ -107,6 +113,17 @@ extension ChatView.InputBar {
               .scaledToFill()
               .maxWidth(60)
               .maxHeight(60)
+          }
+        }
+        .overlay(alignment: .bottomTrailing) {
+          if let interval {
+            let duration: Duration = .seconds(interval)
+            Text(duration.formatted(.time(pattern: .minuteSecond)))
+              .font(.caption2)
+              .padding(3)
+              .background(Color.black.opacity(0.7))
+              .clipShape(.rect(cornerRadius: 4))
+              .padding(5)
           }
         }
       }

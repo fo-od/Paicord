@@ -6,6 +6,7 @@
 //  Copyright © 2025 Lakhan Lothiyi.
 //
 
+import AVFoundation
 import ImageIO
 import PaicordLib
 import PhotosUI
@@ -15,10 +16,6 @@ import UniformTypeIdentifiers
 
 #if canImport(AppKit)
   import AppKit
-#endif
-
-#if canImport(AVFoundation)
-  import AVFoundation
 #endif
 
 extension ChatView.InputBar {
@@ -31,26 +28,26 @@ extension ChatView.InputBar {
 
     /// The text field content
     var content: String = ""
-    
+
     private var appCreatedTempFiles: Set<URL> = []
-    
+
     func trackTempFile(_ url: URL) {
       appCreatedTempFiles.insert(url)
     }
-    
+
     private func cleanupTempFile(_ url: URL) {
       guard appCreatedTempFiles.contains(url) else { return }
       try? FileManager.default.removeItem(at: url)
       appCreatedTempFiles.remove(url)
     }
-    
+
     private func cleanupAllTempFiles() {
       for url in appCreatedTempFiles {
         try? FileManager.default.removeItem(at: url)
       }
       appCreatedTempFiles.removeAll()
     }
-    
+
     #if os(iOS)
       /// Photos selected from the system photo picker
       var selectedPhotos: [PhotosPickerItem] = [] {
@@ -94,7 +91,7 @@ extension ChatView.InputBar {
           if uploadItems.count > 10 {
             uploadItems = Array(uploadItems.prefix(10))
           }
-          
+
           // prune selected photos again
           for uploadItem in uploadItems {
             switch uploadItem {
@@ -148,7 +145,7 @@ extension ChatView.InputBar {
         }
       }
     }
-    
+
     /// Contains a reference to the message being replied to or edited, if any, inside of an action enum
     var messageAction: MessageAction? = nil {
       didSet {
@@ -157,7 +154,7 @@ extension ChatView.InputBar {
           switch action {
           case .edit(let message):
             content = message.content
-            uploadItems = [] // cant do anything other than edit text when editing a message
+            uploadItems = []  // cant do anything other than edit text when editing a message
           case .reply:
             break
           }
@@ -168,31 +165,35 @@ extension ChatView.InputBar {
     /// The input bar displays items from this.
     var uploadItems: [UploadItem] = [] {
       didSet {
-        let oldURLs = Set(oldValue.compactMap { item -> URL? in
-          switch item {
-          case .file(_, let url, _): return url
-          #if os(iOS)
-            case .cameraVideo(_, let url): return url
-          #endif
-          default: return nil
+        let oldURLs = Set(
+          oldValue.compactMap { item -> URL? in
+            switch item {
+            case .file(_, let url, _): return url
+            #if os(iOS)
+              case .cameraVideo(_, let url): return url
+            #endif
+            default: return nil
+            }
           }
-        })
-        
-        let newURLs = Set(uploadItems.compactMap { item -> URL? in
-          switch item {
-          case .file(_, let url, _): return url
-          #if os(iOS)
-            case .cameraVideo(_, let url): return url
-          #endif
-          default: return nil
+        )
+
+        let newURLs = Set(
+          uploadItems.compactMap { item -> URL? in
+            switch item {
+            case .file(_, let url, _): return url
+            #if os(iOS)
+              case .cameraVideo(_, let url): return url
+            #endif
+            default: return nil
+            }
           }
-        })
-        
+        )
+
         let removedURLs = oldURLs.subtracting(newURLs)
         for url in removedURLs {
           cleanupTempFile(url)
         }
-        
+
         #if os(iOS)
           let uploadItemsPhotoItems = uploadItems.compactMap {
             item -> PhotosPickerItem? in
@@ -244,10 +245,12 @@ extension ChatView.InputBar.InputVM {
     case reply(message: DiscordChannel.Message, mention: Bool)
     case edit(message: DiscordChannel.Message)
   }
-  
+
   enum UploadItem: Identifiable, Equatable {
-    static func == (lhs: ChatView.InputBar.InputVM.UploadItem, rhs: ChatView.InputBar.InputVM.UploadItem) -> Bool
-    {
+    static func == (
+      lhs: ChatView.InputBar.InputVM.UploadItem,
+      rhs: ChatView.InputBar.InputVM.UploadItem
+    ) -> Bool {
       return lhs.id == rhs.id
     }
 
@@ -306,8 +309,46 @@ extension ChatView.InputBar.InputVM {
       #endif
       }
     }
+    
+    func videoDuration() async -> TimeInterval? {
+      switch self {
+#if os(iOS)
+      case .cameraVideo(_, let url):
+        let asset = AVURLAsset(url: url)
+        return try? await asset.load(.duration).seconds
+#endif
+      case .file(_, let url, _):
+        let canAccess = url.startAccessingSecurityScopedResource()
+        defer {
+          if canAccess { url.stopAccessingSecurityScopedResource() }
+        }
+        
+        guard
+          let typeIdentifier = try? url.resourceValues(forKeys: [.typeIdentifierKey]
+          ).typeIdentifier,
+          let utType = UTType(typeIdentifier)
+        else {
+          return nil
+        }
+        
+        let videoTypes: [UTType] = [
+          .movie, .video, .mpeg4Movie, .quickTimeMovie, .avi,
+        ]
+        if videoTypes.contains(where: { utType.conforms(to: $0) }) {
+          let asset = AVURLAsset(url: url)
+          return try? await asset.load(.duration).seconds
+        } else {
+          return nil
+        }
+      default:
+        return nil
+      }
+    }
   }
+}
 
+fileprivate let maxDimension: CGFloat = 240
+extension ChatView.InputBar.InputVM {
   func getThumbnail(for item: UploadItem) async -> Image? {
     switch item {
     case .pickerItem(_, let photoItem):
@@ -337,61 +378,67 @@ extension ChatView.InputBar.InputVM {
       if canAccess { url.stopAccessingSecurityScopedResource() }
     }
 
-    guard let typeIdentifier = try? url.resourceValues(forKeys: [.typeIdentifierKey]).typeIdentifier,
-          let utType = UTType(typeIdentifier) else {
+    guard
+      let typeIdentifier = try? url.resourceValues(forKeys: [.typeIdentifierKey]
+      ).typeIdentifier,
+      let utType = UTType(typeIdentifier)
+    else {
       return await generateQuickLookThumbnail(from: url)
     }
 
-    let imageTypes: [UTType] = [.image, .png, .jpeg, .gif, .webP, .heic, .heif, .tiff, .bmp]
+    let imageTypes: [UTType] = [
+      .image, .png, .jpeg, .gif, .webP, .heic, .heif, .tiff, .bmp,
+    ]
     if imageTypes.contains(where: { utType.conforms(to: $0) }) {
       if let thumbnail = generateDownsampledImageThumbnail(from: url) {
         return thumbnail
       }
     }
 
-    #if canImport(AVFoundation)
-      let videoTypes: [UTType] = [.movie, .video, .mpeg4Movie, .quickTimeMovie, .avi]
+      let videoTypes: [UTType] = [
+        .movie, .video, .mpeg4Movie, .quickTimeMovie, .avi,
+      ]
       if videoTypes.contains(where: { utType.conforms(to: $0) }) {
         if let image = await generateVideoThumbnail(from: url) {
           return image
         }
       }
-    #endif
 
     return await generateQuickLookThumbnail(from: url)
   }
 
-  #if canImport(AVFoundation)
-    private func generateVideoThumbnail(from url: URL) async -> Image? {
-      let asset = AVURLAsset(url: url)
-      let generator = AVAssetImageGenerator(asset: asset)
-      generator.appliesPreferredTrackTransform = true
-      generator.maximumSize = CGSize(width: 120, height: 120)
+  private func generateVideoThumbnail(from url: URL) async -> Image? {
+    let asset = AVURLAsset(url: url)
+    let generator = AVAssetImageGenerator(asset: asset)
+    generator.appliesPreferredTrackTransform = true
+    generator.maximumSize = CGSize(width: maxDimension, height: maxDimension)
 
-      do {
-        let (cgImage, _) = try await generator.image(at: .zero)
-        #if canImport(AppKit)
-          let nsImage = NSImage(cgImage: cgImage, size: NSSize(width: cgImage.width, height: cgImage.height))
-          return Image(nsImage: nsImage)
-        #elseif canImport(UIKit)
-          let uiImage = UIImage(cgImage: cgImage)
-          return Image(uiImage: uiImage)
-        #else
-          return nil
-        #endif
-      } catch {
+    do {
+      let (cgImage, _) = try await generator.image(at: .zero)
+      #if canImport(AppKit)
+        let nsImage = NSImage(
+          cgImage: cgImage,
+          size: NSSize(width: cgImage.width, height: cgImage.height)
+        )
+        return Image(nsImage: nsImage)
+      #elseif canImport(UIKit)
+        let uiImage = UIImage(cgImage: cgImage)
+        return Image(uiImage: uiImage)
+      #else
         return nil
-      }
+      #endif
+    } catch {
+      return nil
     }
-  #endif
+  }
 
   private func generateQuickLookThumbnail(from url: URL) async -> Image? {
-    let size = CGSize(width: 120, height: 120)
+   let size = CGSize(width: maxDimension, height: maxDimension)
     let scale: CGFloat
     #if canImport(AppKit)
       scale = NSScreen.main?.backingScaleFactor ?? 2.0
     #else
-      scale = UIScreen.main.scale
+    scale = await UIScreen.main.scale
     #endif
 
     let request = QLThumbnailGenerator.Request(
@@ -402,7 +449,8 @@ extension ChatView.InputBar.InputVM {
     )
 
     do {
-      let representation = try await QLThumbnailGenerator.shared.generateBestRepresentation(for: request)
+      let representation = try await QLThumbnailGenerator.shared
+        .generateBestRepresentation(for: request)
       #if canImport(AppKit)
         return Image(nsImage: representation.nsImage)
       #elseif canImport(UIKit)
@@ -416,7 +464,6 @@ extension ChatView.InputBar.InputVM {
   }
 
   private func generateDownsampledImageThumbnail(from url: URL) -> Image? {
-    let maxDimension: CGFloat = 120
     guard let imageSource = CGImageSourceCreateWithURL(url as CFURL, nil) else {
       return nil
     }
@@ -424,15 +471,24 @@ extension ChatView.InputBar.InputVM {
     let options: [CFString: Any] = [
       kCGImageSourceThumbnailMaxPixelSize: maxDimension,
       kCGImageSourceCreateThumbnailFromImageAlways: true,
-      kCGImageSourceCreateThumbnailWithTransform: true
+      kCGImageSourceCreateThumbnailWithTransform: true,
     ]
 
-    guard let cgImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary) else {
+    guard
+      let cgImage = CGImageSourceCreateThumbnailAtIndex(
+        imageSource,
+        0,
+        options as CFDictionary
+      )
+    else {
       return nil
     }
 
     #if canImport(AppKit)
-      let nsImage = NSImage(cgImage: cgImage, size: NSSize(width: cgImage.width, height: cgImage.height))
+      let nsImage = NSImage(
+        cgImage: cgImage,
+        size: NSSize(width: cgImage.width, height: cgImage.height)
+      )
       return Image(nsImage: nsImage)
     #elseif canImport(UIKit)
       let uiImage = UIImage(cgImage: cgImage)
