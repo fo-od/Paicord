@@ -29,6 +29,9 @@ struct ChatView: View {
 
   #if os(macOS)
     @FocusState private var isChatFocused: Bool
+
+    @State private var isScrolling: Bool = false
+    @State private var scrollStopWorkItem: DispatchWorkItem?
   #endif
 
   var body: some View {
@@ -58,7 +61,7 @@ struct ChatView: View {
           ForEach(orderedMessages) { msg in
             let prior = vm.getMessage(before: msg)
             if messageAllowed(msg) {
-              MessageCell(for: msg, prior: prior, channel: vm)
+              MessageCell(for: msg, prior: prior, channel: vm, scrolling: isScrolling)
             }
           }
 
@@ -109,6 +112,25 @@ struct ChatView: View {
             object: ["channelId": vm.channelId, "immediate": true]
           )
           return .handled
+        }
+        .introspect(.scrollView, on: .macOS(.v14...)) { scrollView in
+          let clipView = scrollView.contentView
+          clipView.postsBoundsChangedNotifications = true
+
+          NotificationCenter.default.addObserver(
+            forName: NSView.boundsDidChangeNotification,
+            object: clipView,
+            queue: .main
+          ) { _ in
+            isScrolling = true
+
+            scrollStopWorkItem?.cancel()
+            let work = DispatchWorkItem {
+              isScrolling = false
+            }
+            scrollStopWorkItem = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12, execute: work)
+          }
         }
       #endif
       .scrollPosition(id: $currentScrollPosition, anchor: .bottom)  // causes issues with input bar height changes:
