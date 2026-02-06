@@ -41,7 +41,8 @@ extension ChatView.InputBar {
       appCreatedTempFiles.remove(url)
     }
 
-    private func cleanupAllTempFiles() {
+    func cleanupAllTempFiles() {
+      print("cleaned files")
       for url in appCreatedTempFiles {
         try? FileManager.default.removeItem(at: url)
       }
@@ -161,6 +162,8 @@ extension ChatView.InputBar {
         }
       }
     }
+    
+    var isResetting = false
 
     /// The input bar displays items from this.
     var uploadItems: [UploadItem] = [] {
@@ -189,9 +192,13 @@ extension ChatView.InputBar {
           }
         )
 
-        let removedURLs = oldURLs.subtracting(newURLs)
-        for url in removedURLs {
-          cleanupTempFile(url)
+        if !isResetting {
+          // prevent deletion of files on reset
+          // else the copied vm wont have the files.
+          let removedURLs = oldURLs.subtracting(newURLs)
+          for url in removedURLs {
+            cleanupTempFile(url)
+          }
         }
 
         #if os(iOS)
@@ -228,7 +235,7 @@ extension ChatView.InputBar {
     }
 
     func reset() {
-      cleanupAllTempFiles()
+      isResetting = true
       #if os(iOS)
         selectedPhotos = []
       #endif
@@ -236,7 +243,9 @@ extension ChatView.InputBar {
       uploadItems = []
       messageAction = nil
       content = ""
+      isResetting = false
     }
+
   }
 }
 

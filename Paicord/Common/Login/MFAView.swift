@@ -260,7 +260,7 @@ struct MFAView: View {
           }
         }
       default:
-        Text("wip bro go do totp")
+        Text("This MFA method is not currently supported.")
       }
     }
   }
