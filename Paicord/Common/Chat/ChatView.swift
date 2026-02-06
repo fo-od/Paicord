@@ -18,7 +18,9 @@ struct ChatView: View {
   @Environment(\.accessibilityReduceMotion) var accessibilityReduceMotion
   @Environment(\.userInterfaceIdiom) var idiom
   @Environment(\.theme) var theme
+  
   @State private var currentScrollPosition: MessageSnowflake?
+  @State private var isScrolling: Bool = false
 
   var drain: MessageDrainStore { gw.messageDrain }
 
@@ -30,8 +32,8 @@ struct ChatView: View {
   #if os(macOS)
     @FocusState private var isChatFocused: Bool
 
-    @State private var isScrolling: Bool = false
     @State private var scrollStopWorkItem: DispatchWorkItem?
+    @State private var scrollObserver: NSObjectProtocol?
   #endif
 
   var body: some View {
@@ -114,22 +116,28 @@ struct ChatView: View {
           return .handled
         }
         .introspect(.scrollView, on: .macOS(.v14...)) { scrollView in
+
           let clipView = scrollView.contentView
+
+          guard scrollObserver == nil else { return }
           clipView.postsBoundsChangedNotifications = true
 
-          NotificationCenter.default.addObserver(
-            forName: NSView.boundsDidChangeNotification,
-            object: clipView,
-            queue: .main
-          ) { _ in
-            isScrolling = true
+          // defer to avoid "Modifying state during view update" warning
+          DispatchQueue.main.async {
+            scrollObserver = NotificationCenter.default.addObserver(
+              forName: NSView.boundsDidChangeNotification,
+              object: clipView,
+              queue: .main
+            ) { _ in
+              isScrolling = true
 
-            scrollStopWorkItem?.cancel()
-            let work = DispatchWorkItem {
-              isScrolling = false
+              scrollStopWorkItem?.cancel()
+              let work = DispatchWorkItem {
+                isScrolling = false
+              }
+              scrollStopWorkItem = work
+              DispatchQueue.main.asyncAfter(deadline: .now() + 0.12, execute: work)
             }
-            scrollStopWorkItem = work
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12, execute: work)
           }
         }
       #endif
@@ -189,6 +197,19 @@ struct ChatView: View {
     .scrollDismissesKeyboard(.interactively)
     .background(theme.common.secondaryBackground)
     .ignoresSafeArea(.keyboard, edges: .all)
+
+    #if os(macOS)
+      .onDisappear {
+        if let observer = scrollObserver {
+          NotificationCenter.default.removeObserver(observer)
+          scrollObserver = nil
+        }
+        
+        scrollStopWorkItem?.cancel()
+        scrollStopWorkItem = nil
+      }
+    #endif
+
     .toolbar {
       ToolbarItem(placement: .navigation) {
         ChannelHeader(vm: vm)
