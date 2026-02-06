@@ -31,6 +31,18 @@ class ChannelStore: DiscordDataStore {
 
   var typingTimeoutTokens: [UserSnowflake: UUID] = [:]
 
+  var memberList: MemberListAccumulator? = nil
+  private var _memberListID: MemberListSnowflake?
+  var memberListID: MemberListSnowflake? {
+    if let _memberListID {
+      return _memberListID
+    }
+    guard let guild = guildStore?.guild else { return nil }
+    let id = channel?.getMemberListID(with: guild)
+    _memberListID = id
+    return id
+  }
+
   // MARK: - State Properties
   /// Ensures further pagination is possible unless we're at the start of the channel.
   var hasMoreHistory = true
@@ -52,6 +64,16 @@ class ChannelStore: DiscordDataStore {
     self.channelId = id
     self.channel = channel
     self.guildStore = guildStore
+
+    // check if the guildStore contains a reference to an existing channel with a matching member list id, if so use the same member list instance for consistency across channels, otherwise make a new one
+    guard let memberListID else { return }  // if this doesnt exist then the channel probably doesnt need a member list.
+    if let list = guildStore?.memberLists[memberListID] {
+      self.memberList = list
+    } else {
+      let accumulator = MemberListAccumulator(primaryChannelStore: self)
+      guildStore?.memberLists[memberListID] = accumulator
+      self.memberList = accumulator
+    }
   }
 
   static let LoadedMessageLimit = 200
@@ -115,7 +137,9 @@ class ChannelStore: DiscordDataStore {
           }
         // reactions
         case .messageReactionAdd(let reactionAdd):
-          guard guildStore?.guildId == reactionAdd.guild_id else { continue }
+          guard guildStore?.guildId == reactionAdd.guild_id else {
+            continue
+          }
           if reactionAdd.channel_id == channelId {
             handleMessageReactionAdd(reactionAdd)
           }
@@ -127,20 +151,25 @@ class ChannelStore: DiscordDataStore {
             handleMessageReactionAddMany(reactionAddMany)
           }
         case .messageReactionRemove(let reactionRemove):
-          guard guildStore?.guildId == reactionRemove.guild_id else { continue }
+          guard guildStore?.guildId == reactionRemove.guild_id else {
+            continue
+          }
           if reactionRemove.channel_id == channelId {
             handleMessageReactionRemove(reactionRemove)
           }
         case .messageReactionRemoveAll(let removeAll):
-          guard guildStore?.guildId == removeAll.guild_id else { continue }
+          guard guildStore?.guildId == removeAll.guild_id else {
+            continue
+          }
           if removeAll.channel_id == channelId {
             handleMessageReactionRemoveAll(removeAll)
           }
-        // typing
         case .typingStart(let typing):
           if typing.channel_id == channelId {
             handleTypingStart(typing)
           }
+        case .guildMemberListUpdate(let update):
+          handleMemberListUpdate(update)
         default:
           break
         }
@@ -405,6 +434,19 @@ class ChannelStore: DiscordDataStore {
     channel = currentChannel
   }
 
+  private func handleMemberListUpdate(_ update: Gateway.GuildMemberListUpdate) {
+    guard
+      let accumulator = self.memberList,
+      let guild = self.guildStore?.guild, update.guild_id == guild.id,
+      let channel,
+      channel.id == accumulator.primaryChannelStore.channelId,  // ensure only the channel that owns the accumulator can update it, otherwise we might have multiple channels with the same member list id updating the same accumulator (race condition)
+      let currentMemberListID = channel.getMemberListID(with: guild),
+      update.id == currentMemberListID
+    else { return }
+
+    accumulator.update(with: update)
+  }
+
   // MARK: - Helpers
 
   func checkUserBlocked(_ userId: UserSnowflake) -> Bool {
@@ -572,7 +614,9 @@ class ChannelStore: DiscordDataStore {
             gatewayReactionAdd: nil,
             gatewayReactionAddMany: nil
           )
-          self.reactions[message.id, default: [:]][messageReaction.emoji] =
+          self.reactions[message.id, default: [:]][
+            messageReaction.emoji
+          ] =
             reaction
         }
       }
@@ -581,7 +625,9 @@ class ChannelStore: DiscordDataStore {
       for message in fetched {
         for mention in message.mentions {
           let user = mention.toPartialUser()
-          self.gateway?.user.users[user.id, default: user].update(with: user)
+          self.gateway?.user.users[user.id, default: user].update(
+            with: user
+          )
         }
       }
 
@@ -589,9 +635,10 @@ class ChannelStore: DiscordDataStore {
       if let guildStore {
         let unknownMembers = Set(
           fetched.map { message in
-            ([message.author?.id] + message.mentions.map(\.id)).compactMap {
-              $0
-            }
+            ([message.author?.id] + message.mentions.map(\.id))
+              .compactMap {
+                $0
+              }
           }.flatMap { $0 }.filter { guildStore.members[$0] == nil }
         )
         if !unknownMembers.isEmpty {
@@ -731,7 +778,8 @@ extension ChannelStore {
         self.emoji = gatewayReactionAddManyData.emoji
         self.isBurst = false  // debounced reactions are always normal reactions
         self.selfReacted = gatewayReactionAddManyData.users.contains(
-          GatewayStore.shared.user.currentUser?.id ?? UserSnowflake("0")
+          GatewayStore.shared.user.currentUser?.id
+            ?? UserSnowflake("0")
         )
         // add all user ids to known user ids
         for userId in gatewayReactionAddManyData.users {
@@ -838,7 +886,8 @@ extension ChannelStore {
           self.userIds.insert(userId)
         }
         if react.users.contains(
-          GatewayStore.shared.user.currentUser?.id ?? UserSnowflake("0")
+          GatewayStore.shared.user.currentUser?.id
+            ?? UserSnowflake("0")
         ) {
           self.selfReacted = true
         }
@@ -870,16 +919,20 @@ extension ChannelStore {
       } else {
         // we have no record of this user reacting, so we just reduce the count from rest api data
         if isBurst {
-          if let currentCount = messageReactionData?.count_details.burst,
+          if let currentCount = messageReactionData?.count_details
+            .burst,
             currentCount > 0
           {
-            messageReactionData?.count_details.burst = currentCount - 1
+            messageReactionData?.count_details.burst =
+              currentCount - 1
           }
         } else {
-          if let currentCount = messageReactionData?.count_details.normal,
+          if let currentCount = messageReactionData?.count_details
+            .normal,
             currentCount > 0
           {
-            messageReactionData?.count_details.normal = currentCount - 1
+            messageReactionData?.count_details.normal =
+              currentCount - 1
           }
         }
       }
@@ -890,5 +943,241 @@ extension ChannelStore {
         self.selfReacted = false
       }
     }
+  }
+}
+
+extension ChannelStore {
+  /// Sends a bulk guild subscription update for updating the member list subscriptions in this guild.
+  /// - Parameter threeIntPairs: Either three pairs representing the ranges of the member list to subscribe to, or an empty array to subscribe to the default top 100 members.
+  func requestMemberListRange(_ threeIntPairs: [IntPair] = []) async {
+    guard let memberListID = self.memberListID,
+      let guildStore, threeIntPairs.count <= 3
+    else {
+      return print(
+        "[ChannelStore MemberList] Requested range invalid: \(threeIntPairs)"
+      )
+    }
+    // max 3 ranges, first one is always the top of the list
+    // the other two are wherever the user is scrolled to.
+    guildStore.subscribedMemberListIDs[memberListID] = (
+      channelId, threeIntPairs
+    )
+
+    await guildStore.updateSubscriptions()
+  }
+}
+
+extension ChannelStore {
+  // class representing member list items and where the groups lie
+  @Observable
+  class MemberListAccumulator {
+    var primaryChannelStore: ChannelStore!
+
+    // previously just had a dictionary. switched to a positions array and items array to avoid array shifts.
+    // the positions array holds the "position" of each item in the logical member list, allowing us to
+    // insert items at specific positions without needing to shift large arrays around. we can just insert a new
+    // position between two existing positions.
+    // note that I have tried to comment stuff bc this took a while to get working.
+    // ikik very rare but ykyk
+    private var positions: [Double] = []
+    private var items: [MixedItem] = []
+
+    var groups:
+      OrderedDictionary<RoleSnowflake, Gateway.GuildMemberListUpdate.GroupCount> =
+        [:]
+    var memberCount: Int = 0
+    var onlineCount: Int = 0
+
+    /// Total number of items in the member list, groups and members. Used to pregen rows.
+    var rowCount: Int {
+      groups.values.reduce(0) { $0 + $1.count } + groups.count
+    }
+
+    init(primaryChannelStore: ChannelStore?) {
+      self.primaryChannelStore = primaryChannelStore
+    }
+
+    func update(with update: Gateway.GuildMemberListUpdate) {
+      self.memberCount = update.member_count
+      self.onlineCount = update.online_count
+      self.groups = update.groups.reduce(into: [:]) { partial, group in
+        partial[group.id] = group
+      }
+
+      for op in update.ops {
+        switch op {
+        case .sync(let pair, let newItems):
+          var pos = Double(pair.first)
+
+          for item in newItems {
+            let idx = indexForPosition(pos)
+            positions.insert(pos, at: idx)
+            items.insert(item, at: idx)
+            pos += 1
+          }
+
+          if positions.count > 2 && needsRebalance(around: positions.count - 1)
+          {
+            rebalanceAll()
+          }
+
+          let members = newItems.compactMap { item -> Guild.Member? in
+            if case .member(let member) = item {
+              return member
+            }
+            return nil
+          }
+          handleMemberData(members)
+        case .insert(let index, let item):
+          let before = position(at: index - 1)
+          let after = position(at: index)
+
+          let newPos = makePosition(before: before, after: after)
+          let idx = indexForPosition(newPos)
+
+          positions.insert(newPos, at: idx)
+          items.insert(item, at: idx)
+
+          if needsRebalance(around: idx) {
+            rebalance(around: idx)
+          }
+
+          if case .member(let member) = item {
+            handleMemberData(member)
+          }
+        case .update(let index, let item):
+          setRow(index, to: item)
+          if case .member(let member) = item {
+            handleMemberData(member)
+          }
+        case .delete(let index):
+          guard index < items.count else { return }
+          positions.remove(at: index)
+          items.remove(at: index)
+        case .invalidate(_):
+          // happens when we unsub from a range. we dont need to react to this.
+          // we rely on the row count to pregen rows then as the user scrolls, the rows fill with data
+          break
+        }
+      }
+    }
+
+    /// Sets the item at the specified index to a new value, ensuring that the index is within bounds of the current items array.
+    /// - Parameters:
+    ///   - index: The logical index of the item to update in the member list.
+    ///   - item: The new `MixedItem` value to set at the specified index.
+    private func setRow(_ index: Int, to item: MixedItem) {
+      guard index >= 0 && index < items.count else { return }
+      items[index] = item
+    }
+
+    subscript(row index: Int) -> MixedItem? {
+      guard index >= 0 && index < items.count else { return nil }
+      return items[index]
+    }
+
+    /// Retrieves the position value for a given logical index in the member list, returning `nil` if the index is out of bounds.
+    /// - Parameter logicalIndex: The logical index of the item in the member list for which to retrieve the position.
+    /// - Returns: The position value corresponding to the specified logical index, or `nil` if the index is out of bounds.
+    private func position(at logicalIndex: Int) -> Double? {
+      guard logicalIndex >= 0 && logicalIndex < positions.count else {
+        return nil
+      }
+      return positions[logicalIndex]
+    }
+
+    /// Retrieves the logical index in the member list for a given position value using a binary search algorithm.
+    /// - Parameter position: The position value for which to find the corresponding logical index in the member list.
+    /// - Returns: The logical index corresponding to the specified position value.
+    private func indexForPosition(_ position: Double) -> Int {
+      var low = 0
+      var high = positions.count
+
+      while low < high {
+        let mid = (low + high) / 2
+        if positions[mid] < position {
+          low = mid + 1
+        } else {
+          high = mid
+        }
+      }
+      return low
+    }
+
+    /// Calculates a new position value for an item being inserted between two existing items in the member list.
+    /// - Parameters:
+    ///   - before: The position value of the item immediately before the insertion point, or `nil` if inserting at the beginning of the list.
+    ///   - after: The position value of the item immediately after the insertion point, or `nil` if inserting at the end of the list.
+    /// - Returns: A new position value that can be assigned to the item being inserted.
+    private func makePosition(before: Double?, after: Double?) -> Double {
+      switch (before, after) {
+      case (nil, nil): return 0
+      case (nil, let b?): return b - 1
+      case (let a?, nil): return a + 1
+      case (let a?, let b?): return (a + b) / 2
+      }
+    }
+
+    /// The minimum gap between positions to avoid precision issues.
+    private let minGap: Double = 1e-9
+
+    /// Checks if the gap between the position at the given index and its neighbors is too small, indicating that a rebalance is needed to maintain precision for future inserts.
+    /// - Parameter index: The index around which to check for the need to rebalance.
+    /// - Returns: `true` if a rebalance is needed, `false` otherwise.
+    func needsRebalance(around index: Int) -> Bool {
+      guard index > 0, index < positions.count else { return false }
+      return abs(positions[index] - positions[index - 1]) < minGap
+    }
+
+    /// Rebalances the positions around a specific index, ensuring that there is sufficient gap between
+    /// positions to allow for future inserts without immediate need for another rebalance.
+    /// Not a good idea to rebalance the entire list on larger member lists.
+    func rebalanceAll() {
+      guard !positions.isEmpty else { return }
+
+      for i in positions.indices {
+        positions[i] = Double(i)
+      }
+    }
+
+    /// Rebalances the positions around a specific index, ensuring that there is sufficient gap between positions to allow for future inserts without immediate need for another rebalance.
+    /// - Parameters:
+    ///   - center: The index around which to rebalance the positions.
+    ///   - radius: The number of positions on either side of the center index to include in the rebalance.
+    func rebalance(around center: Int, radius: Int = 200) {
+      guard !positions.isEmpty else { return }
+
+      let lower = max(0, center - radius)
+      let upper = min(positions.count - 1, center + radius)
+
+      var value = positions[lower]
+
+      for i in lower...upper {
+        positions[i] = value
+        value += 1
+      }
+    }
+
+    /// Handles incoming member data from either a single member update or a batch of members.
+    func handleMemberData(_ member: Guild.Member) {
+      handleMemberData([member])
+    }
+    /// Handles incoming member data from either a single member update or a batch of members.
+    func handleMemberData(_ members: [Guild.Member]) {
+      for member in members {  // combine single member and multiple members into one array
+        // add member data to guildstore and user data to user store
+        guard let user = member.user?.toPartialUser() else { continue }
+        let member = member.toPartialMember()
+        primaryChannelStore.guildStore?.members[user.id, default: member]
+          .update(with: member)
+        primaryChannelStore.gateway?.user.users[user.id, default: user].update(
+          with: user
+        )
+        primaryChannelStore.gateway?.user.presences[user.id] = member.presence
+      }
+    }
+
+    typealias MixedItem = Gateway.GuildMemberListUpdate.MemberListOp
+      .GuildMemberListMixedItem
   }
 }

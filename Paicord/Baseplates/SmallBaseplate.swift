@@ -7,8 +7,8 @@
 //
 
 import PaicordLib
-import SwiftUIX
 @_spi(Advanced) import SwiftUIIntrospect
+import SwiftUIX
 
 @available(macOS, unavailable)
 struct SmallBaseplate: View {
@@ -56,24 +56,24 @@ struct SmallBaseplate: View {
         }
         .tint(theme.common.tertiaryButton)
         #if os(iOS)
-        .introspect(.tabView, on: .iOS(.v17...)) { tabBarController in
-          addLongPress(to: tabBarController)
-        }
-        .onReceive(
-          NotificationCenter.default.publisher(for: .tabBarLongPressed)
-        ) { notification in
-          if let index = notification.object as? Int {
-            // Only profile tab
-            if index == 2 {
-              ImpactGenerator.impact(style: .light)
-              showSheet = true
+          .introspect(.tabView, on: .iOS(.v17...)) { tabBarController in
+            addLongPress(to: tabBarController)
+          }
+          .onReceive(
+            NotificationCenter.default.publisher(for: .tabBarLongPressed)
+          ) { notification in
+            if let index = notification.object as? Int {
+              // Only profile tab
+              if index == 2 {
+                ImpactGenerator.impact(style: .light)
+                showSheet = true
+              }
             }
           }
-        }
-        .sheet(isPresented: $showSheet) {
-          ProfileBar.ProfileButtonPopout()
+          .sheet(isPresented: $showSheet) {
+            ProfileBar.ProfileButtonPopout()
             .presentationDetents([.medium])
-        }
+          }
         #endif
       }
       .environment(\.guildStore, currentGuildStore)
@@ -82,7 +82,7 @@ struct SmallBaseplate: View {
       NavigationStack {
         if let currentChannelStore {
           ChatView(vm: currentChannelStore)
-            .id(currentChannelStore.channelId) // force view update
+            .id(currentChannelStore.channelId)  // force view update
             .environment(\.guildStore, currentGuildStore)
             .environment(\.channelStore, currentChannelStore)
             #if os(iOS)
@@ -162,7 +162,7 @@ struct SmallBaseplate: View {
 
         button.tag = index
         button.addGestureRecognizer(recognizer)
-        
+
         for existing in button.gestureRecognizers ?? [] {
           if existing !== recognizer {
             existing.require(toFail: recognizer)

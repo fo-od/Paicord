@@ -15,7 +15,7 @@ extension SettingsView {
     CustomSettingsGroup("Theming", systemImage: "paintbrush") {
       ThemingSection()
     }
-    
+
     SettingsGroup("Appearance", systemImage: "display") {
       SettingsItem("Animate Chat Messages", icon: "circle.grid.2x1.right.filled") {
         Toggle(isOn: $chatMessagesAnimated) {

@@ -248,8 +248,7 @@ extension ChatView.InputBar.InputVM {
 
   enum UploadItem: Identifiable, Equatable {
     static func == (
-      lhs: ChatView.InputBar.InputVM.UploadItem,
-      rhs: ChatView.InputBar.InputVM.UploadItem
+      lhs: ChatView.InputBar.InputVM.UploadItem, rhs: ChatView.InputBar.InputVM.UploadItem
     ) -> Bool {
       return lhs.id == rhs.id
     }

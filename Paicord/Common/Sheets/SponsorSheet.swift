@@ -126,21 +126,25 @@ private struct SponsorSheetModifier: ViewModifier {
           .onTapGesture {
             trigger = false
           }
-          
+
           Text("Enjoying Paicord?")
             .font(.title)
             .fontWeight(.semibold)
             .padding(.vertical, 8)
-            
+
           VStack(spacing: 12) {
-            Text("Paicord is free and open source software. If you enjoy using Paicord, consider sponsoring its development to help support ongoing improvements and new features!")
-              .frame(maxWidth: .infinity, alignment: .leading)
-              .padding(.horizontal)
-            
-            Text("Donors get Discord server roles, and custom profile badges visible to other Paicord users!")
-              .frame(maxWidth: .infinity, alignment: .leading)
-              .padding(.horizontal)
-              .font(.subheadline)
+            Text(
+              "Paicord is free and open source software. If you enjoy using Paicord, consider sponsoring its development to help support ongoing improvements and new features!"
+            )
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
+
+            Text(
+              "Donors get Discord server roles, and custom profile badges visible to other Paicord users!"
+            )
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
+            .font(.subheadline)
           }
         }
       }
@@ -148,10 +152,10 @@ private struct SponsorSheetModifier: ViewModifier {
         VStack {
           Text("Join the [Paicord Server](https://discord.gg/fqhPGHPyaK) to manage badges!")
             .foregroundStyle(.secondary)
-          
+
           Divider()
             .padding(.horizontal, -20)
-          
+
           Button {
             sponsorNow()
           } label: {
@@ -162,7 +166,7 @@ private struct SponsorSheetModifier: ViewModifier {
           .controlSize(.extraLarge)
           .font(.title2)
           .fontWeight(.semibold)
-          
+
           Button {
             remindMeLater()
           } label: {
@@ -173,7 +177,7 @@ private struct SponsorSheetModifier: ViewModifier {
           .controlSize(.extraLarge)
           .font(.title2)
           .fontWeight(.semibold)
-          
+
           Button("Never Show Again") {
             neverShowAgain()
           }

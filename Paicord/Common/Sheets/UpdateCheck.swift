@@ -20,7 +20,7 @@ import SwiftUIX
 
   struct UpdateSheetModifier: ViewModifier {
     @State var update: UpdateMeta?
-    
+
     struct UpdateMeta: Identifiable {
       var id: Int { latest }
       let current: Int
@@ -50,17 +50,17 @@ import SwiftUIX
           else {
             return
           }
-          
+
           do {
             let (data, _) = try await URLSession.shared.data(from: feedURL)
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             let info = try decoder.decode(UpdateInfo.self, from: data)
-            
+
             let ignoredBuild = UserDefaults.standard.integer(
               forKey: "Paicord.UpdateCheck.IgnoredBuild"
             )
-            
+
             // compare the mac version with the current build number
             if info.ios.version > currentBuild, info.ios.version != ignoredBuild {
               self.update = .init(
@@ -160,7 +160,7 @@ import SwiftUIX
             .controlSize(.extraLarge)
             .font(.title2)
             .fontWeight(.semibold)
-            
+
             Button {
               remindMeLater()
             } label: {
@@ -171,7 +171,7 @@ import SwiftUIX
             .controlSize(.extraLarge)
             .font(.title2)
             .fontWeight(.semibold)
-            
+
             Button("Skip this update") {
               skipThisUpdate()
             }
@@ -210,10 +210,10 @@ import SwiftUIX
   }
 
 #else
-extension View {
-  func updateSheet() -> some View {
-    self
+  extension View {
+    func updateSheet() -> some View {
+      self
+    }
   }
-}
 
 #endif

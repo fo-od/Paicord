@@ -404,8 +404,7 @@ extension MessageCell {
           // set up session delegate to track progress
           final class SessionDelegate: NSObject, URLSessionDownloadDelegate {
             let proxy: DownloadProxyType
-            nonisolated(unsafe) var continuation:
-              CheckedContinuation<String, Error>?
+            nonisolated(unsafe) var continuation: CheckedContinuation<String, Error>?
 
             func urlSession(
               _ session: URLSession,
@@ -676,8 +675,7 @@ extension MessageCell {
           DownloadButton { proxy in
             final class SessionDelegate: NSObject, URLSessionDownloadDelegate {
               let proxy: DownloadButton<URL>.DownloadProxy
-              nonisolated(unsafe) var continuation:
-                CheckedContinuation<URL, Error>?
+              nonisolated(unsafe) var continuation: CheckedContinuation<URL, Error>?
               let destinationURL: URL
 
               func urlSession(
@@ -686,8 +684,7 @@ extension MessageCell {
                 didFinishDownloadingTo location: URL
               ) {
                 do {
-                  if FileManager.default.fileExists(atPath: destinationURL.path)
-                  {
+                  if FileManager.default.fileExists(atPath: destinationURL.path) {
                     try FileManager.default.removeItem(at: destinationURL)
                   }
                   try FileManager.default.moveItem(

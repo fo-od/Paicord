@@ -31,20 +31,24 @@ class MessageDrainStore: DiscordDataStore {
           // when a message is created, we check if its in pendingMessages, and its nonce matches.
           // the nonce of the message received will match a key of pendingMessages if its one we sent.
           if let nonce = message.nonce?.asString,
-            let messageNonceSnowflake = Optional(MessageSnowflake(nonce))
+            let messageNonceSnowflake = Optional(
+              MessageSnowflake(nonce))
           {
             // remove from pending as its been sent successfully
             //            var transaction = Transaction()
             //            transaction.disablesAnimations = true
             //            _ = withTransaction(transaction) {
-            pendingMessages[message.channel_id, default: [:]].removeValue(
-              forKey: messageNonceSnowflake
-            )
+            pendingMessages[message.channel_id, default: [:]]
+              .removeValue(
+                forKey: messageNonceSnowflake
+              )
             //            }
             // also remove from failed messages if it was there
-            failedMessages.removeValue(forKey: messageNonceSnowflake)
+            failedMessages.removeValue(
+              forKey: messageNonceSnowflake)
             // also remove from message tasks if it was there
-            messageTasks.removeValue(forKey: messageNonceSnowflake)
+            messageTasks.removeValue(
+              forKey: messageNonceSnowflake)
           }
           break
         default:
@@ -110,22 +114,27 @@ class MessageDrainStore: DiscordDataStore {
       _enqueueMessage(vm, in: channel)
     }
   }
-  
+
   private func _editMessage(_ vm: ChatView.InputBar.InputVM, in channel: ChannelSnowflake) {
     guard let gateway = gateway?.gateway else { return }
     guard case .edit(let origMessage) = vm.messageAction else { return }
-    let message = Payloads.EditMessage.init(content:  vm.content)
+    let message = Payloads.EditMessage.init(content: vm.content)
 
     Task {
       do {
-        try await gateway.client.updateMessage(channelId: channel, messageId: origMessage.id, payload: message)
-          .guardSuccess()
+        try await gateway.client.updateMessage(
+          channelId: channel, messageId: origMessage.id,
+          payload: message
+        )
+        .guardSuccess()
       } catch {
-        print("[MessageDrainStore EditMessage] Failed to edit message:", error)
+        print(
+          "[MessageDrainStore EditMessage] Failed to edit message:",
+          error)
       }
     }
   }
-  
+
   private func _enqueueMessage(_ vm: ChatView.InputBar.InputVM, in channel: ChannelSnowflake) {
     // the message instance will die inside the task
     guard let gateway = gateway?.gateway else { return }
@@ -163,11 +172,16 @@ class MessageDrainStore: DiscordDataStore {
         }
 
         if !vm.uploadItems.isEmpty {
-          print("[SendTask Attachments] Preparing upload attachment metadata")
+          print(
+            "[SendTask Attachments] Preparing upload attachment metadata"
+          )
 
           let uploadAttachments = try await withThrowingTaskGroup(
-            of: Payloads.CreateAttachments.UploadAttachment.self,
-            returning: [Payloads.CreateAttachments.UploadAttachment].self
+            of: Payloads.CreateAttachments.UploadAttachment
+              .self,
+            returning: [
+              Payloads.CreateAttachments.UploadAttachment
+            ].self
           ) { group in
             for (index, item) in vm.uploadItems.enumerated() {
               group.addTask {
@@ -176,11 +190,16 @@ class MessageDrainStore: DiscordDataStore {
                 switch item {
                 case .pickerItem(_, let pickerItem):
                   let fileExt =
-                    pickerItem.supportedContentTypes.first?
-                    .preferredFilenameExtension ?? "png"
+                    pickerItem
+                    .supportedContentTypes
+                    .first?
+                    .preferredFilenameExtension
+                    ?? "png"
                   let filename =
                     "\(pickerItem.itemIdentifier ?? UUID().uuidString).\(fileExt)"
-                  let filesize = await item.filesize() ?? 0
+                  let filesize =
+                    await item
+                    .filesize() ?? 0
 
                   return .init(
                     id: .init(idString),
@@ -191,31 +210,50 @@ class MessageDrainStore: DiscordDataStore {
                 case .file(_, let url, let size):
                   return .init(
                     id: .init(idString),
-                    filename: url.lastPathComponent,
+                    filename: url
+                      .lastPathComponent,
                     file_size: Int(size)
                   )
                 #if os(iOS)
                   case .cameraPhoto:
-                    let filesize = await item.filesize() ?? 0
+                    let filesize =
+                      await item
+                      .filesize()
+                      ?? 0
                     return .init(
-                      id: .init(idString),
-                      filename: "\(UUID().uuidString).png",
-                      file_size: filesize
+                      id: .init(
+                        idString
+                      ),
+                      filename:
+                        "\(UUID().uuidString).png",
+                      file_size:
+                        filesize
                     )
 
-                  case .cameraVideo(_, let url):
-                    let filesize = await item.filesize() ?? 0
+                  case .cameraVideo(
+                    _, let url):
+                    let filesize =
+                      await item
+                      .filesize()
+                      ?? 0
                     return .init(
-                      id: .init(idString),
-                      filename: url.lastPathComponent,
-                      file_size: filesize
+                      id: .init(
+                        idString
+                      ),
+                      filename:
+                        url
+                        .lastPathComponent,
+                      file_size:
+                        filesize
                     )
                 #endif
                 }
               }
             }
 
-            var results: [Payloads.CreateAttachments.UploadAttachment] = []
+            var results:
+              [Payloads.CreateAttachments
+                .UploadAttachment] = []
             for try await attachment in group {
               results.append(attachment)
             }
@@ -226,7 +264,9 @@ class MessageDrainStore: DiscordDataStore {
             return results
           }
 
-          print("[SendTask Attachments] Creating attachments via Discord API")
+          print(
+            "[SendTask Attachments] Creating attachments via Discord API"
+          )
 
           let createdAttachmentsReq = try await self
             .gateway!.client
@@ -261,67 +301,129 @@ class MessageDrainStore: DiscordDataStore {
 
                 switch item {
                 case .pickerItem(_, let pickerItem):
-                  let data = try await pickerItem.loadTransferable(
-                    type: Data.self
-                  )
-                  guard let data else {
-                    throw "Failed to load picker item data."
-                  }
-
-                  var req = URLRequest(url: URL(string: attachment.upload_url)!)
-                  req.httpMethod = "PUT"
-                  let (_, res) = try await URLSession.shared.upload(
-                    for: req,
-                    from: data
-                  )
-                  print(
-                    "[SendTask Upload] pickerItem status:",
-                    (res as? HTTPURLResponse)?.statusCode ?? -1
-                  )
-
-                case .file(_, let fileURL, _):
-                  let access = fileURL.startAccessingSecurityScopedResource()
-                  var req = URLRequest(url: URL(string: attachment.upload_url)!)
-                  req.httpMethod = "PUT"
-                  let (_, res) = try await URLSession.shared.upload(
-                    for: req,
-                    fromFile: fileURL
-                  )
-                  print(
-                    "[SendTask Upload] file status:",
-                    (res as? HTTPURLResponse)?.statusCode ?? -1
-                  )
-                  if access {
-                    fileURL.stopAccessingSecurityScopedResource()
-                  }
-                #if os(iOS)
-                  case .cameraPhoto(_, let image):
-                    let data = image.pngData()!
-                    var req = URLRequest(
-                      url: URL(string: attachment.upload_url)!
+                  let data =
+                    try await pickerItem
+                    .loadTransferable(
+                      type: Data
+                        .self
                     )
-                    req.httpMethod = "PUT"
-                    let (_, res) = try await URLSession.shared.upload(
+                  guard let data else {
+                    throw
+                      "Failed to load picker item data."
+                  }
+
+                  var req = URLRequest(
+                    url: URL(
+                      string:
+                        attachment
+                        .upload_url
+                    )!)
+                  req.httpMethod = "PUT"
+                  let (_, res) =
+                    try await URLSession
+                    .shared.upload(
                       for: req,
                       from: data
                     )
+                  print(
+                    "[SendTask Upload] pickerItem status:",
+                    (res
+                      as? HTTPURLResponse)?
+                      .statusCode
+                      ?? -1
+                  )
+
+                case .file(_, let fileURL, _):
+                  let access =
+                    fileURL
+                    .startAccessingSecurityScopedResource()
+                  var req = URLRequest(
+                    url: URL(
+                      string:
+                        attachment
+                        .upload_url
+                    )!)
+                  req.httpMethod = "PUT"
+                  let (_, res) =
+                    try await URLSession
+                    .shared.upload(
+                      for: req,
+                      fromFile:
+                        fileURL
+                    )
+                  print(
+                    "[SendTask Upload] file status:",
+                    (res
+                      as? HTTPURLResponse)?
+                      .statusCode
+                      ?? -1
+                  )
+                  if access {
+                    fileURL
+                      .stopAccessingSecurityScopedResource()
+                  }
+                #if os(iOS)
+                  case .cameraPhoto(
+                    _, let image):
+                    let data =
+                      image
+                      .pngData()!
+                    var req =
+                      URLRequest(
+                        url:
+                          URL(
+                            string:
+                              attachment
+                              .upload_url
+                          )!
+                      )
+                    req.httpMethod =
+                      "PUT"
+                    let (_, res) =
+                      try await URLSession
+                      .shared
+                      .upload(
+                        for:
+                          req,
+                        from:
+                          data
+                      )
                     print(
                       "[SendTask Upload] cameraPhoto status:",
-                      (res as? HTTPURLResponse)?.statusCode ?? -1
+                      (res
+                        as? HTTPURLResponse)?
+                        .statusCode
+                        ?? -1
                     )
 
-                  case .cameraVideo(_, let videoURL):
-                    var req = URLRequest(
-                      url: URL(string: attachment.upload_url)!
-                    )
-                    req.httpMethod = "PUT"
-                    let (_, res) = try await URLSession.shared.upload(
-                      for: req,
-                      fromFile: videoURL
-                    )
+                  case .cameraVideo(
+                    _, let videoURL):
+                    var req =
+                      URLRequest(
+                        url:
+                          URL(
+                            string:
+                              attachment
+                              .upload_url
+                          )!
+                      )
+                    req.httpMethod =
+                      "PUT"
+                    let (_, res) =
+                      try await URLSession
+                      .shared
+                      .upload(
+                        for:
+                          req,
+                        fromFile:
+                          videoURL
+                      )
                     print(
                       "[SendTask Upload] cameraVideo status:",
-                      (res as? HTTPURLResponse)?.statusCode ?? -1
+                      (res
+                        as? HTTPURLResponse)?
+                        .statusCode
+                        ?? -1
                     )
                 #endif
                 }
@@ -329,9 +431,15 @@ class MessageDrainStore: DiscordDataStore {
                 message.attachments?.append(
                   .init(
                     index: index,
-                    filename: URL(string: attachment.upload_url)!
-                      .lastPathComponent,
-                    uploaded_filename: attachment.upload_filename
+                    filename: URL(
+                      string:
+                        attachment
+                        .upload_url
+                    )!
+                    .lastPathComponent,
+                    uploaded_filename:
+                      attachment
+                      .upload_filename
                   )
                 )
 
@@ -364,7 +472,8 @@ class MessageDrainStore: DiscordDataStore {
         //        var transaction = Transaction()
         //        transaction.disablesAnimations = true
         //        _ = withTransaction(transaction) {
-        self.pendingMessages[channel, default: [:]].removeValue(forKey: nonce)
+        self.pendingMessages[channel, default: [:]].removeValue(
+          forKey: nonce)
         //        }
         self.failedMessages.removeValue(forKey: nonce)
         self.messageTasks.removeValue(forKey: nonce)
@@ -381,7 +490,7 @@ class MessageDrainStore: DiscordDataStore {
       .updateValue(message, forKey: nonce)
     // store task
     messageTasks[nonce] = task
-    
+
     // notify ui to scroll to the newly pending message
     NotificationCenter.default.post(
       name: .chatViewShouldScrollToBottom,

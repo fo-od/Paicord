@@ -4,7 +4,7 @@
 //
 //  Created by Lakhan Lothiyi on 17/12/2025.
 //  Copyright © 2025 Lakhan Lothiyi.
-//  
+//
 
 import PaicordLib
 
@@ -16,7 +16,7 @@ extension DiscordUser.PremiumKind {
   /// - Returns: Whether the user can upload the file, and the upload limit in bytes.
   func fileUpload(size: Int, to channel: ChannelStore) -> (allowed: Bool, limit: Int) {
     // https://docs.discord.food/reference#uploading-files
-    
+
     let nitroLimit: Int = {
       switch self {
       case .none, .__undocumented:
@@ -30,24 +30,24 @@ extension DiscordUser.PremiumKind {
         return 500 * 1024 * 1024
       }
     }()
-    
+
     let serverLimit: Int = {
       if let guildStore = channel.guildStore {
         switch guildStore.guild?.premium_tier ?? .none {
         case .none, .tier1, .__undocumented:
           return 10 * 1024 * 1024
         case .tier2:
-          return 50 * 1024 * 1024 // 50MiB limit
+          return 50 * 1024 * 1024  // 50MiB limit
         case .tier3:
-          return 100 * 1024 * 1024 // 100MiB limit
+          return 100 * 1024 * 1024  // 100MiB limit
         }
       } else {
-        return 10 * 1024 * 1024 // 10MiB limit
+        return 10 * 1024 * 1024  // 10MiB limit
       }
     }()
-    
+
     let uploadLimit = max(nitroLimit, serverLimit)
-    
+
     return (size <= uploadLimit, uploadLimit)
   }
 }

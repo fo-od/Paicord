@@ -220,12 +220,12 @@ struct AttributedText: View {
       uiView: ModifiedCopyingTextView,
       context: Context
     ) -> CGSize? {
-//      let targetWidth = proposal.width ?? 400
-//      let size = uiView.sizeThatFits(
-//        CGSize(width: targetWidth, height: .greatestFiniteMagnitude)
-//      )
-//      return CGSize(width: targetWidth, height: size.height)
-      
+      //      let targetWidth = proposal.width ?? 400
+      //      let size = uiView.sizeThatFits(
+      //        CGSize(width: targetWidth, height: .greatestFiniteMagnitude)
+      //      )
+      //      return CGSize(width: targetWidth, height: size.height)
+
       let targetWidth = proposal.width ?? 400
       let layoutManager = uiView.layoutManager
       let textContainer = uiView.textContainer
@@ -246,23 +246,25 @@ struct AttributedText: View {
       let openURL: OpenURLAction
       init(openURL: OpenURLAction) { self.openURL = openURL }
 
-//      func textView(
-//        _ textView: UITextView,
-//        shouldInteractWith URL: URL,
-//        in characterRange: NSRange,
-//        interaction: UITextItemInteraction
-//      ) -> Bool {
-//        openURL(URL)
-//        if PaicordChatLink.init(url: URL) != nil {
-//          return false
-//        }
-//        return true
-//      }
-      
-      func textView(_ textView: UITextView, primaryActionFor textItem: UITextItem, defaultAction: UIAction) -> UIAction? {
+      //      func textView(
+      //        _ textView: UITextView,
+      //        shouldInteractWith URL: URL,
+      //        in characterRange: NSRange,
+      //        interaction: UITextItemInteraction
+      //      ) -> Bool {
+      //        openURL(URL)
+      //        if PaicordChatLink.init(url: URL) != nil {
+      //          return false
+      //        }
+      //        return true
+      //      }
+
+      func textView(
+        _ textView: UITextView, primaryActionFor textItem: UITextItem, defaultAction: UIAction
+      ) -> UIAction? {
         switch textItem.content {
         case .link(let url):
-          if PaicordChatLink(url: url) != nil { // if parsing doesnt fail, handle internally
+          if PaicordChatLink(url: url) != nil {  // if parsing doesnt fail, handle internally
             openURL(url)
             return nil
           }

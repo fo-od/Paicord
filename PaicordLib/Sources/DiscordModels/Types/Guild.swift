@@ -134,6 +134,8 @@ public struct Guild: Sendable, Codable {
     public var permissions: StringBitField<Permission>?
     public var communication_disabled_until: DiscordTimestamp?
     public var avatar_decoration_data: DiscordUser.AvatarDecoration?
+    // presence data only included with member list data
+    public var presence: Gateway.PresenceUpdate?
 
     public init(
       user: DiscordUser?,
@@ -151,6 +153,7 @@ public struct Guild: Sendable, Codable {
       permissions: StringBitField<Permission>?,
       communication_disabled_until: DiscordTimestamp?,
       avatar_decoration_data: DiscordUser.AvatarDecoration?,
+      presence: Gateway.PresenceUpdate? = nil
     ) {
       self.user = user
       self.nick = nick
@@ -167,6 +170,7 @@ public struct Guild: Sendable, Codable {
       self.permissions = permissions
       self.communication_disabled_until = communication_disabled_until
       self.avatar_decoration_data = avatar_decoration_data
+      self.presence = presence
     }
 
     public init(guildMemberAdd: Gateway.GuildMemberAdd) {
@@ -183,6 +187,7 @@ public struct Guild: Sendable, Codable {
       self.communication_disabled_until =
         guildMemberAdd.communication_disabled_until
       self.avatar_decoration_data = guildMemberAdd.avatar_decoration_data
+      self.presence = nil
     }
 
     public init(from decoder: any Decoder) throws {
@@ -218,6 +223,10 @@ public struct Guild: Sendable, Codable {
       self.avatar_decoration_data = try container.decodeIfPresent(
         DiscordUser.AvatarDecoration.self,
         forKey: .avatar_decoration_data
+      )
+      self.presence = try container.decodeIfPresent(
+        Gateway.PresenceUpdate.self,
+        forKey: .presence
       )
     }
   }
@@ -450,7 +459,8 @@ public struct PartialGuild: Sendable, Codable, Equatable, Hashable {
   public var widget_enabled: Bool?
   public var widget_channel_id: ChannelSnowflake?
   public var verification_level: Guild.VerificationLevel?
-  public var default_message_notifications: Guild.DefaultMessageNotificationLevel?
+  public var default_message_notifications:
+    Guild.DefaultMessageNotificationLevel?
   public var explicit_content_filter: Guild.ExplicitContentFilterLevel?
   public var roles: [Role]?
   public var emojis: [Emoji]?
@@ -506,7 +516,8 @@ extension Guild {
       flags: IntBitField<Member.Flag>? = nil,
       permissions: StringBitField<Permission>? = nil,
       communication_disabled_until: DiscordTimestamp? = nil,
-      avatar_decoration_data: DiscordUser.AvatarDecoration? = nil
+      avatar_decoration_data: DiscordUser.AvatarDecoration? = nil,
+      presence: Gateway.PresenceUpdate? = nil
     ) {
       self.user = user
       self.nick = nick
@@ -523,6 +534,7 @@ extension Guild {
       self.permissions = permissions
       self.communication_disabled_until = communication_disabled_until
       self.avatar_decoration_data = avatar_decoration_data
+      self.presence = presence
     }
 
     public var user: DiscordUser?
@@ -540,6 +552,8 @@ extension Guild {
     public var permissions: StringBitField<Permission>?
     public var communication_disabled_until: DiscordTimestamp?
     public var avatar_decoration_data: DiscordUser.AvatarDecoration?
+    // presence data only included with member list data
+    public var presence: Gateway.PresenceUpdate?
   }
 
   /// https://discord.com/developers/docs/resources/guild#guild-onboarding-object-guild-onboarding-structure

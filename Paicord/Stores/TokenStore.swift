@@ -53,7 +53,8 @@ final class TokenStore {
   private var _currentAccountID: UserSnowflake? {
     get {
       guard
-        let str = UserDefaults.standard.string(forKey: Self.currentAccountIDKey)
+        let str = UserDefaults.standard.string(
+          forKey: Self.currentAccountIDKey)
       else { return nil }
       return UserSnowflake(str)
     }
@@ -82,7 +83,8 @@ final class TokenStore {
     }
     // this one should kick user back to fallback account picker if their current account doesnt exist
     if let currentID = currentAccountID,
-       accounts.first(where: { $0.user.id == currentID }) == nil {
+      accounts.first(where: { $0.user.id == currentID }) == nil
+    {
       currentAccountID = nil
     }
   }

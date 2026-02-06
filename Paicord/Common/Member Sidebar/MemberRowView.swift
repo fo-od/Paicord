@@ -5,8 +5,8 @@
 //  Created by plzdonthaxme on 23/10/2025.
 //
 
-import DiscordModels
-import SwiftUI
+import PaicordLib
+import SwiftUIX
 
 extension MemberSidebarView {
   struct MemberRowView: View {
@@ -28,10 +28,13 @@ extension MemberSidebarView {
           )
           .profileShowsAvatarDecoration()
           .padding(2)
+
           Text(member?.nick ?? user.global_name ?? user.username)
+            .foregroundStyle(.primary)
+            .lineLimit(1)
+            .truncationMode(.tail)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 38)
         .padding(4)
         .background {
           if let nameplate = user.collectibles?.nameplate {
@@ -45,13 +48,13 @@ extension MemberSidebarView {
             if isHovering {
               Color.gray.opacity(0.2)
             } else {
-              Color.clear
+              Color.almostClear
             }
           }
         )
         .clipShape(.rounded)
       }
-      .buttonStyle(.borderless)
+      .buttonStyle(.plain)
       .onHover { self.isHovering = $0 }
       .popover(isPresented: $showPopover) {
         ProfilePopoutView(

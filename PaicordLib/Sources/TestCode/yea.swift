@@ -6,22 +6,16 @@
 // Copyright © 2025 Lakhan Lothiyi.
 //
 
-import PaicordLib
 import Foundation
-import Logging
+import PaicordLib
 
 @main
 struct Test {
   static func main() async {
-//    DiscordGlobalConfiguration.makeLogger = { label in
-//      let stdoutHandler = StreamLogHandler.standardOutput(label: label)
-//      var logger = Logger(label: label, factory: { _ in stdoutHandler })
-//      logger.logLevel = .debug
-//      return logger
-//    }
     do {
       let manager = RemoteAuthGatewayManager()
-        await manager.connect()
+      await manager.connect()
+      let client = await DefaultDiscordClient(authentication: .userNone)
       for await event in await manager.events {
         switch event.op {
         case .pending_remote_init:
@@ -37,7 +31,7 @@ struct Test {
           // login pending, user confirmed on remote device, need to send ticket
           // exchanging it for token.
           guard let ticket = event.ticket else { break }
-          let token = try await manager.exchange(ticket: ticket)
+          let token = try await manager.exchange(ticket: ticket, client: client)
           print(token)
           await manager.disconnect()
           exit(0)

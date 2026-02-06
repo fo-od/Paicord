@@ -19,7 +19,7 @@ struct GuildScrollBar: View {
 
         Divider()
           .padding(.horizontal, 8)
-        
+
         // the usersettings guild folders can sometimes not cover all guilds
         // in this case, we need to find the unlisted guilds, and order by join date, newest first
         // this code covers the case where the user never reordered their guilds.
@@ -34,9 +34,10 @@ struct GuildScrollBar: View {
           }.sorted(by: { a, b in
             let aMember = gw.user.guilds[a.id]?.members?.first(where: { $0.user?.id == userID })
             let bMember = gw.user.guilds[b.id]?.members?.first(where: { $0.user?.id == userID })
-            return (bMember?.joined_at ?? .init(date: .now)) < (aMember?.joined_at ?? .init(date: .now))
+            return (bMember?.joined_at ?? .init(date: .now))
+              < (aMember?.joined_at ?? .init(date: .now))
           })
-          
+
           ForEach(unlistedGuilds, id: \.id) { guild in
             GuildButton(guild: guild)
           }

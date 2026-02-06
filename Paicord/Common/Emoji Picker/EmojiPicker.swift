@@ -126,8 +126,7 @@ struct EmojiPicker: View {
     return copy
   }
 
-  func onPickedEmoji(_ action: @escaping (DiscordModels.Emoji) -> Void) -> Self
-  {
+  func onPickedEmoji(_ action: @escaping (DiscordModels.Emoji) -> Void) -> Self {
     var copy = self
     copy.onEmojiPicked = action
     return copy
@@ -158,30 +157,29 @@ struct EmojiPicker: View {
     case sticker
   }
 
-  
   #if os(iOS)
-  // Views iOS
-  @ViewBuilder
-  var emojiPickerTab: some View {
-    EmojiGridView(detent: $detent) { emoji in
-      onEmojiPicked?(emoji)
+    // Views iOS
+    @ViewBuilder
+    var emojiPickerTab: some View {
+      EmojiGridView(detent: $detent) { emoji in
+        onEmojiPicked?(emoji)
+      }
     }
-  }
 
-  @ViewBuilder
-  var gifPickerTab: some View {
-    GifGridView(detent: $detent) { gifURL in
-      onGIFPicked?(gifURL)
+    @ViewBuilder
+    var gifPickerTab: some View {
+      GifGridView(detent: $detent) { gifURL in
+        onGIFPicked?(gifURL)
+      }
     }
-  }
 
-  @ViewBuilder
-  var stickerPickerTab: some View {
-    StickerGridView(detent: $detent) { sticker in
-      onStickerPicked?(sticker)
+    @ViewBuilder
+    var stickerPickerTab: some View {
+      StickerGridView(detent: $detent) { sticker in
+        onStickerPicked?(sticker)
+      }
     }
-  }
-  
+
     struct EmojiGridView: View {
       // grid of emojis, with a safe area inset at the bottom to select categories
       // categories are: favorites, all discord servers, then unicode categories

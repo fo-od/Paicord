@@ -236,8 +236,7 @@ extension ChatView {
       }
       .buttonStyle(.borderless)
       .popover(isPresented: $profileOpen) {
-        if let userId = gw.user.currentUser?.id, let user = gw.user.currentUser
-        {
+        if let userId = gw.user.currentUser?.id, let user = gw.user.currentUser {
           ProfilePopoutView(
             guild: channelStore.guildStore,
             member: channelStore.guildStore?.members[userId],

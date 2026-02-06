@@ -20,7 +20,7 @@ extension MessageCell {
 
     private let maxWidth: CGFloat = 500
     private let maxHeight: CGFloat = 300
-    
+
     var body: some View {
       #warning(
         "redo this to support all embed types properly, eg gifs, embeds with multiple images."
@@ -258,7 +258,7 @@ extension MessageCell {
 
       private let maxWidth: CGFloat = 500
       private let maxHeight: CGFloat = 300
-      
+
       init(media: Embed.Media, staticMedia: Embed.Media? = nil) {
         self.media = media
         self.staticMedia = staticMedia

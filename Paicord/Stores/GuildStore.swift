@@ -26,6 +26,8 @@ class GuildStore: DiscordDataStore {
   var presences: [UserSnowflake: Gateway.PresenceUpdate] = [:]
   var voiceStates: [UserSnowflake: VoiceState] = [:]
 
+  // MARK: - Initializers, setup etc.
+
   init(id: GuildSnowflake, from guild: Guild?) {
     self.guildId = id
     self.guild = guild
@@ -244,7 +246,11 @@ class GuildStore: DiscordDataStore {
           || (newRole.position == existingRole.position
             && newRole.id.rawValue < existingRole.id.rawValue)
         {
-          roles.updateValue(newRole, forKey: newRole.id, insertingAt: index)
+          roles.updateValue(
+            newRole,
+            forKey: newRole.id,
+            insertingAt: index
+          )
           inserted = true
           break
         }
@@ -276,31 +282,6 @@ class GuildStore: DiscordDataStore {
     }
   }
 
-  //	/// Gets the member for a user ID
-  //	func getMember(for userId: UserSnowflake) -> DiscordGuild.Member? {
-  //		return members[userId]
-  //	}
-  //
-  //	/// Gets the role for a role ID
-  //	func getRole(for roleId: RoleSnowflake) -> DiscordRole? {
-  //		return roles[roleId]
-  //	}
-  //
-  //	/// Gets the channel for a channel ID
-  //	func getChannel(for channelId: ChannelSnowflake) -> DiscordChannel? {
-  //		return channels[channelId]
-  //	}
-  //
-  //	/// Gets the presence for a user ID
-  //	func getPresence(for userId: UserSnowflake) -> Gateway.PresenceUpdate? {
-  //		return presences[userId]
-  //	}
-  //
-  //	/// Gets the voice state for a user ID
-  //	func getVoiceState(for userId: UserSnowflake) -> Gateway.VoiceState? {
-  //		return voiceStates[userId]
-  //	}
-
   // MARK: - Helpers
 
   // Track requested member IDs to avoid duplicate requests
@@ -318,6 +299,59 @@ class GuildStore: DiscordDataStore {
         guild_id: guildId,
         presences: false,
         user_ids: Array(ids)
+      )
+    )
+  }
+
+  /// Stores references to existing member lists.
+  var memberLists: [MemberListSnowflake: ChannelStore.MemberListAccumulator] =
+    [:]
+  // Max of 5 subscribed member lists at a time per guild.
+  // Ordered so that we can evict the oldest one when subscribing to a new one after reaching the limit.
+  var subscribedMemberListIDs:
+    OrderedDictionary<
+      MemberListSnowflake, (channelID: ChannelSnowflake, ranges: [IntPair])
+    > = [:]
+
+  /// Sends discord what member lists we're tracking and where in the list we want updates for.
+  /// Call this after updating `subscribedMemberListIDs` to sync with the gateway.
+  func updateSubscriptions() async {
+    guard let gateway = gateway?.gateway, let guild else { return }
+    // for subscriptions, we just have to push one dictionary with our
+    // current subscriptions. no need to unsubscribe from prior channels since
+    // its implied if it isnt in the new list.
+
+    // evict oldest subscription if at limit
+    if subscribedMemberListIDs.count >= 5 {
+      // suffix to top 5, new subscriptions will be added to the end, so the oldest one is at the start
+      subscribedMemberListIDs = subscribedMemberListIDs.suffix(5).reduce(
+        into: [:]) { partialResult, element in
+          partialResult[element.key] = element.value
+        }
+    }
+
+    print("[MemberListSubscriptions] Member list ids", subscribedMemberListIDs)
+
+    // channels can share member lists. this often happens for public channels which everyone can access.
+    // channels with permission overwrites for specific roles or members will have unique member lists though.
+    // channels with matching permission overwrites will also share member lists.
+    // if we subscribe to two channels with the same member list, this will cause issues.
+    // this is why we dedupe via memberlistsnowflake then find channel snowflakes for each member list snowflake.
+    // also the gateway doesnt take member list ids, we send channel snowflakes
+    let subscriptions: [ChannelSnowflake: [IntPair]] =
+      subscribedMemberListIDs.reduce(into: [:]) { partialResult, element in
+        let memberListId = element.key
+        let channelSnowflake = element.value.channelID
+        partialResult[channelSnowflake] = element.value.ranges
+      }
+
+    print("[MemberListSubscriptions] Subscriptions", subscriptions)
+
+    await gateway.updateGuildSubscriptions(
+      payload: .init(
+        subscriptions: [
+          guild.id: .init(channels: subscriptions)
+        ]
       )
     )
   }

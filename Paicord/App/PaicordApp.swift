@@ -138,8 +138,7 @@ struct PaicordApp: App {
   // Note this intermediate view is necessary for the disabled state on the menu item to work properly before Monterey.
   // See https://stackoverflow.com/questions/68553092/menu-not-updating-swiftui-bug for more info
   struct CheckForUpdatesView: View {
-    @ObservedObject private var checkForUpdatesViewModel:
-      CheckForUpdatesViewModel
+    @ObservedObject private var checkForUpdatesViewModel: CheckForUpdatesViewModel
     private let updater: SPUUpdater
 
     init(updater: SPUUpdater) {

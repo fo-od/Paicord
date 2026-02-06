@@ -207,7 +207,7 @@ struct MFAView: View {
               .padding(10)
               .frame(maxWidth: .infinity)
               .focused($inputFocused)
-            
+
             Divider()
               .maxHeight(10)
 
@@ -217,11 +217,11 @@ struct MFAView: View {
                 fingerprint: fingerprint
               )
               if let error = req.asError() { throw error }
-              try? await Task.sleep(for: .seconds(30)) // throttle
+              try? await Task.sleep(for: .seconds(30))  // throttle
             } catch: { error in
               self.appState.error = error
             }
-              .padding(.trailing, 8)
+            .padding(.trailing, 8)
           }
           .background(theme.common.primaryBackground.opacity(0.75))
           .clipShape(.rounded)

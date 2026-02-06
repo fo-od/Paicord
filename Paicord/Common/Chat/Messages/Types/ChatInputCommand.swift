@@ -64,9 +64,9 @@ extension MessageCell {
     }()
 
     static func == (lhs: ChatInputCommandMessage, rhs: ChatInputCommandMessage) -> Bool {
-      lhs.message.id == rhs.message.id &&
-      lhs.message.edited_timestamp == rhs.message.edited_timestamp &&
-      lhs.message.embeds == rhs.message.embeds
+      lhs.message.id == rhs.message.id
+        && lhs.message.edited_timestamp == rhs.message.edited_timestamp
+        && lhs.message.embeds == rhs.message.embeds
     }
 
     var body: some View {
@@ -79,7 +79,7 @@ extension MessageCell {
             profileOpen: $profileOpen
           )
           #if os(macOS)
-          .padding(.trailing, 4) // balancing
+            .padding(.trailing, 4)  // balancing
           #endif
           userAndMessage
         }
