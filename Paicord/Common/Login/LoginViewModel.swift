@@ -36,7 +36,7 @@ final class LoginViewModel {
             )
             let user = try await TokenStore.getSelf(token: token)
             gw.accounts.addAccount(token: token, user: user)
-            
+
             self.raUser = nil
             self.raFingerprint = nil
             await remoteAuthGatewayManager.disconnect()

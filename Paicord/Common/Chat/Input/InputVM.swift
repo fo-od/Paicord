@@ -63,7 +63,7 @@ extension ChatView.InputBar {
           if uploadItems.count > 10 {
             uploadItems = Array(uploadItems.prefix(10))
           }
-          
+
           // prune selected photos again
           for uploadItem in uploadItems {
             switch uploadItem {
@@ -117,7 +117,7 @@ extension ChatView.InputBar {
         }
       }
     }
-    
+
     /// Contains a reference to the message being replied to or edited, if any, inside of an action enum
     var messageAction: MessageAction? = nil {
       didSet {
@@ -126,7 +126,7 @@ extension ChatView.InputBar {
           switch action {
           case .edit(let message):
             content = message.content
-            uploadItems = [] // cant do anything other than edit text when editing a message
+            uploadItems = []  // cant do anything other than edit text when editing a message
           case .reply:
             break
           }
@@ -188,10 +188,11 @@ extension ChatView.InputBar.InputVM {
     case reply(message: DiscordChannel.Message, mention: Bool)
     case edit(message: DiscordChannel.Message)
   }
-  
+
   enum UploadItem: Identifiable, Equatable {
-    static func == (lhs: ChatView.InputBar.InputVM.UploadItem, rhs: ChatView.InputBar.InputVM.UploadItem) -> Bool
-    {
+    static func == (
+      lhs: ChatView.InputBar.InputVM.UploadItem, rhs: ChatView.InputBar.InputVM.UploadItem
+    ) -> Bool {
       return lhs.id == rhs.id
     }
 
@@ -266,7 +267,7 @@ extension ChatView.InputBar.InputVM {
       case .cameraVideo(_, _):
         return nil  // TODO: generate thumbnail from video
     #endif
-    case .file(_, _, _): // TODO: add file thumbnail support
+    case .file(_, _, _):  // TODO: add file thumbnail support
       return nil
     }
   }

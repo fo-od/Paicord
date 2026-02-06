@@ -106,7 +106,7 @@ struct ReactionsView: View {
             .padding(2)
             .padding(.horizontal, -2)
         }
-        
+
         let count = reaction.count + (currentUserReacted ? 1 : 0)
         Text("\(count)")
           .contentTransition(.numericText(value: .init(count)))

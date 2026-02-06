@@ -2017,21 +2017,21 @@ extension Gateway {
     }
 
     public struct GuildSubscription: Sendable, Codable {
-      // features you can choose to subscribe to
-      public var typing: Bool
-      public var activities: Bool
-      public var threads: Bool
-      public var member_updates: Bool
+      // features you can choose to subscribe to, all optional
+      public var typing: Bool?
+      public var activities: Bool?
+      public var threads: Bool?
+      public var member_updates: Bool?
 
-      public var channels: [ChannelSnowflake: [IntPair]]
+      public var channels: [ChannelSnowflake: [IntPair]]?
       public var thread_member_lists: [ChannelSnowflake]?
 
       public init(
-        typing: Bool,
-        activities: Bool,
-        threads: Bool,
-        member_updates: Bool,
-        channels: [ChannelSnowflake: [IntPair]],
+        typing: Bool? = nil,
+        activities: Bool? = nil,
+        threads: Bool? = nil,
+        member_updates: Bool? = nil,
+        channels: [ChannelSnowflake: [IntPair]]? = nil,
         thread_member_lists: [ChannelSnowflake]? = nil
       ) {
         self.typing = typing
@@ -2124,8 +2124,6 @@ extension Gateway {
         }
       }
 
-      // note that only sync is truly mixed, others are just member items
-      // the mixed type is used bc the other ops item property has the member field
       case sync(
         range: IntPair,
         items: [GuildMemberListMixedItem]
@@ -2145,7 +2143,7 @@ extension Gateway {
         range: IntPair
       )
 
-      public enum GuildMemberListMixedItem: Sendable, Codable {
+      public enum GuildMemberListMixedItem: Sendable, Codable, Identifiable {
         public init(from decoder: any Decoder) throws {
           let container = try decoder.container(keyedBy: CodingKeys.self)
           if container.contains(.member) {
@@ -2183,6 +2181,15 @@ extension Gateway {
           case member
           case group
         }
+        
+        public var id: AnySnowflake {
+          switch self {
+          case .member(let member):
+            return .init(member.user?.id.rawValue ?? "0")
+          case .group(let group):
+            return .init(group.id.rawValue)
+          }
+        }
       }
 
       @UnstableEnum<String>
@@ -2211,48 +2218,3 @@ extension Gateway {
     }
   }
 }
-
-//class GuildMemberListSyncOP(TypedDict):
-//    op: Literal['SYNC']
-//    range: Tuple[int, int]
-//    items: List[GuildMemberListItem]
-//
-//
-//class GuildMemberListUpdateOP(TypedDict):
-//    op: Literal['UPDATE']
-//    index: int
-//    item: _GuildMemberListMemberItem
-//
-//
-//class GuildMemberListInsertOP(TypedDict):
-//    op: Literal['INSERT']
-//    index: int
-//    item: _GuildMemberListMemberItem
-//
-//
-//class GuildMemberListDeleteOP(TypedDict):
-//    op: Literal['DELETE']
-//    index: int
-//
-//
-//class GuildMemberListInvalidateOP(TypedDict):
-//    op: Literal['INVALIDATE']
-//    range: Tuple[int, int]
-//
-//
-//GuildMemberListOP = Union[
-//    GuildMemberListSyncOP,
-//    GuildMemberListUpdateOP,
-//    GuildMemberListInsertOP,
-//    GuildMemberListDeleteOP,
-//    GuildMemberListInvalidateOP,
-//]
-//
-//
-//class GuildMemberListUpdateEvent(TypedDict):
-//    id: Union[Snowflake, Literal['everyone']]
-//    guild_id: Snowflake
-//    member_count: int
-//    online_count: int
-//    groups: List[GuildMemberListGroup]
-//    ops: List[GuildMemberListOP]

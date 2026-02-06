@@ -458,38 +458,26 @@ extension DiscordChannel {
       return .everyone
     }
 
-    var overwrites: [DiscordChannel.Overwrite] = []
+    var overwrites: [String] = []
     for overwrite in self.permission_overwrites ?? [] {
-      if overwrite.allow.contains(.readMessageHistory) {
-        overwrites.append(overwrite)
-      } else if overwrite.deny.contains(.readMessageHistory) {
-        overwrites.append(overwrite)
+      if overwrite.allow.contains(.viewChannel) {
+        overwrites.append("allow:\(overwrite.id.rawValue)")
+      } else if overwrite.deny.contains(.viewChannel) {
+        overwrites.append("deny:\(overwrite.id.rawValue)")
       }
     }
-    
-    let sorted = overwrites.sorted { lhs, rhs in
-      lhs.id.rawValue < rhs.id.rawValue
-    }
-    
-    let overwriteStrings = sorted.map { overwrite -> String in
-      if overwrite.allow.contains(.readMessageHistory) {
-        return "allow:\(overwrite.id.rawValue)"
-      } else if overwrite.deny.contains(.readMessageHistory) {
-        return "deny:\(overwrite.id.rawValue)"
-      }
-      fatalError("This should not happen :c")
-    }
-    
-    let joined = overwriteStrings.joined(separator: ",")
-    return .init(
+
+    let joined = overwrites
+      .sorted()
+      .joined(separator: ",")
+    let snowflake: MemberListSnowflake = .init(
       "\(murmurhash32(key: joined, signed: false))"
     )
+    return snowflake
   }
 
   private func isEveryoneMemberList(with guild: Guild) -> Bool {
     //    def _is_everyone_member_list(self) -> bool:
-    //        # This should use _can_everyone(Permissions.read_messages) but Discord's implementation is flawed
-    //        # so we must use the flawed implementation to be compatible
     //        if not self.guild.default_role.permissions.read_messages:
     //            return False
     //        for overwrite in self._overwrites:
@@ -498,9 +486,7 @@ extension DiscordChannel {
     //        return True
 
     // get everyone role
-    guard let guildID = self.guild_id else {
-      return false
-    }
+    let guildID = guild.id
     let everyoneRoleID: RoleSnowflake = .init(guildID.rawValue)
 
     guard
@@ -509,12 +495,11 @@ extension DiscordChannel {
       return false
     }
 
-
-    if !everyoneRole.permissions.contains(.readMessageHistory) {
+    if !everyoneRole.permissions.contains(.viewChannel) {
       return false
     }
     for overwrite in self.permission_overwrites ?? [] {
-      if overwrite.deny.contains(.readMessageHistory) {
+      if overwrite.deny.contains(.viewChannel) {
         return false
       }
     }
@@ -537,7 +522,7 @@ public func murmurhash32(
   var h1 = UInt32(seed)
   let c1: UInt32 = 0xCC9E_2D51
   let c2: UInt32 = 0x1B87_3593
-  
+
   for block_start in 0..<nblocks {
     let i = block_start * 4
     var k1: UInt32 = 0
@@ -554,11 +539,11 @@ public func murmurhash32(
     h1 = (h1 << 13) | (h1 >> (32 - 13))
     h1 = h1 &* 5 &+ 0xE654_6B64
   }
-  
+
   let tailIndex = nblocks * 4
   var k1: UInt32 = 0
   let tailSize = length & 3
-  
+
   if tailSize >= 3 {
     k1 ^= UInt32(keyData[tailIndex + 2]) << 16
   }

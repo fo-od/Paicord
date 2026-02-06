@@ -28,10 +28,13 @@ extension MemberSidebarView {
           )
           .profileShowsAvatarDecoration()
           .padding(2)
+
           Text(member?.nick ?? user.global_name ?? user.username)
+            .foregroundStyle(.primary)
+            .lineLimit(1)
+            .truncationMode(.tail)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 38)
         .padding(4)
         .background {
           if let nameplate = user.collectibles?.nameplate {
@@ -49,7 +52,7 @@ extension MemberSidebarView {
             }
           }
         )
-        .clipShape(.rounded)
+        .clipShape(.rect(cornerRadius: 4))
       }
       .buttonStyle(.borderless)
       .onHover { self.isHovering = $0 }

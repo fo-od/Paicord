@@ -62,11 +62,11 @@ class Theming {
             .compactMap { $0 }
             .flatMap { $0.windows }
             .forEach { window in
-            // set accent color
-            window.tintColor = AppKitOrUIKitColor(
-              self.currentTheme.common.accent
-            )
-          }
+              // set accent color
+              window.tintColor = AppKitOrUIKitColor(
+                self.currentTheme.common.accent
+              )
+            }
         }
       } else {
         // update appearance
@@ -74,11 +74,11 @@ class Theming {
           .compactMap { $0 }
           .flatMap(\.windows)
           .forEach { window in
-          // set accent color
-          window.tintColor = AppKitOrUIKitColor(
-            self.currentTheme.common.accent
-          )
-        }
+            // set accent color
+            window.tintColor = AppKitOrUIKitColor(
+              self.currentTheme.common.accent
+            )
+          }
       }
     #endif
   }

@@ -101,7 +101,7 @@ final class GatewayStore {
     errorTask = Task { @MainActor in
       guard let gateway else { return }
       for await (error, buffer) in await gateway.eventFailures {
-        print(String(buffer: buffer), error)
+        print("[GatewayStore Error]", String(buffer: buffer), error)
       }
     }
 
@@ -170,7 +170,9 @@ final class GatewayStore {
   func getGuildStore(for id: GuildSnowflake) -> GuildStore {
     defer {
       if !subscribedGuilds.contains(id) {
-        print("[GatewayStore] Subscribing for guild store to \(id.rawValue)")
+        print(
+          "[GatewayStore] Subscribing for guild store to \(id.rawValue)"
+        )
         subscribedGuilds.insert(id)
         Task {
           await gateway?.updateGuildSubscriptions(
@@ -219,7 +221,7 @@ final class GatewayStore {
         )
       )
     }
-    
+
     // update user data in account storage
     accounts.updateProfile(for: data.user.id, data.user)
 
@@ -254,18 +256,20 @@ final class GatewayStore {
     var previousSubscribedGuilds = self.subscribedGuilds
     // remove values from previousSubscribedGuilds that don't exist anymore
     let existingGuildIds = Set(data.guilds.map(\.id))
-    previousSubscribedGuilds = previousSubscribedGuilds.filter { existingGuildIds.contains($0) }
-    
+    previousSubscribedGuilds = previousSubscribedGuilds.filter {
+      existingGuildIds.contains($0)
+    }
+
     self.subscribedGuilds = []
     // dont subscribing only to focused guilds. resubscribe to all previous guilds
     for guildId in previousSubscribedGuilds {
       _ = getGuildStore(for: guildId)
     }
-//    // get all active window states, and get their selected guilds to resubscribe to guilds that are open
-//    PaicordAppState.instances.compactMap(\.value.selectedGuild).forEach {
-//      guildId in
-//      _ = getGuildStore(for: guildId)
-//    }
+    //    // get all active window states, and get their selected guilds to resubscribe to guilds that are open
+    //    PaicordAppState.instances.compactMap(\.value.selectedGuild).forEach {
+    //      guildId in
+    //      _ = getGuildStore(for: guildId)
+    //    }
 
     // Now that we've done that, we need to use this ready data to update any internal stores that need it
     // guilds need repopulating. also guilds could have been left during the client down time. remove guilds if they don't exist anymore then repopulate.
@@ -283,7 +287,7 @@ final class GatewayStore {
         guilds.removeValue(forKey: guildId)
       }
     }
-    
+
     // repopulate guildstores
     for guildStore in self.guilds.values {
       if let guild = data.guilds.first(where: { $0.id == guildStore.guildId }) {

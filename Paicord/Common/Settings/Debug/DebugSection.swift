@@ -39,11 +39,11 @@ extension SettingsView {
             object: nil
           )
         }
-//        NavigationLink {
-//          TestMessageView().eraseToAnyView()
-//        } label: {
-//          Label("Message Attachments Playground", systemImage: "app.dashed")
-//        }
+        //        NavigationLink {
+        //          TestMessageView().eraseToAnyView()
+        //        } label: {
+        //          Label("Message Attachments Playground", systemImage: "app.dashed")
+        //        }
       }
 
       Section("Sketchy shit") {

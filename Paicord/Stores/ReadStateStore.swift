@@ -46,6 +46,6 @@ class ReadStateStore: DiscordDataStore {
   }
 
   private func handleMessageAcknowledge(_ ackData: Gateway.MessageAcknowledge) {
-    
+
   }
 }

@@ -59,7 +59,7 @@ struct GuildButton: View {
             .fill(.primary)
             .frame(width: 8)
             .frame(height: height)
-//            .opacity(height == 0 ? 0 : 1)
+            //            .opacity(height == 0 ? 0 : 1)
             .offset(x: -14 + (height == 0 ? -8 : 0))
         }
         .animation(.default, value: height)

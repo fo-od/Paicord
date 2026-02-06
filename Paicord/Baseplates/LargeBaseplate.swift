@@ -54,16 +54,16 @@ struct LargeBaseplate: View {
       Group {
         if let currentChannelStore {
           ChatView(vm: currentChannelStore)
-            .id(currentChannelStore.channelId)  // force view update
-            .environment(\.guildStore, currentGuildStore)
-            .environment(\.channelStore, currentChannelStore)
             .inspector(isPresented: $showingInspector) {
               MemberSidebarView(
                 guildStore: currentGuildStore,
                 channelStore: currentChannelStore
               )
-              .inspectorColumnWidth(min: 280, ideal: 300, max: 360)
+              .inspectorColumnWidth(min: 250, ideal: 250, max: 360)
             }
+            .id(currentChannelStore.channelId)  // force view update
+            .environment(\.guildStore, currentGuildStore)
+            .environment(\.channelStore, currentChannelStore)
         } else {
           // placeholder
           VStack {

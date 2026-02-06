@@ -38,11 +38,12 @@ class ExternalBadgeStore {
               let icon = badgeDict["badge"]
             {
 
-              let badge: DiscordUser.Profile.Badge = .init(
-                id: try! .makeFake(),
-                description: tooltip,
-                icon: icon
-              )
+              let badge: DiscordUser.Profile.Badge =
+                .init(
+                  id: try! .makeFake(),
+                  description: tooltip,
+                  icon: icon
+                )
               userBadges.append(badge)
             }
           }
@@ -70,11 +71,12 @@ class ExternalBadgeStore {
               let icon = badgeDict["badge"]
             {
 
-              let badge: DiscordUser.Profile.Badge = .init(
-                id: try! .makeFake(),
-                description: tooltip,
-                icon: icon
-              )
+              let badge: DiscordUser.Profile.Badge =
+                .init(
+                  id: try! .makeFake(),
+                  description: tooltip,
+                  icon: icon
+                )
               userBadges.append(badge)
             }
           }

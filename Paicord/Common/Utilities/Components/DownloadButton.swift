@@ -57,7 +57,7 @@ struct DownloadButton<T: Sendable>: View {
     case stayCompleted(allowsInteraction: Bool)
     case resetToInactive
   }
-  
+
   var _errorTitle: String = "Download Failed"
   var downloadButtonSymbolName = "icloud.and.arrow.down"
   var completionButtonSymbolName = "checkmark.circle"

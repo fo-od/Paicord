@@ -14,7 +14,7 @@ struct SettingsView: SettingsContainer {
   @Environment(\.gateway) var gw
 
   @Environment(\.openURL) var openURL
-  
+
   @AppStorage("Paicord.Appearance.ChatMessagesAnimated") var chatMessagesAnimated: Bool = false
 
   var settingsBody: some SettingsContent {

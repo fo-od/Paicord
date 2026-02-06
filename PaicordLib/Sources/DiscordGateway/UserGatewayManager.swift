@@ -212,12 +212,12 @@ public actor UserGatewayManager: GatewayManager {
 
     await self.sendQueue.reset()
     let gatewayURL = await getGatewayURL()
+//    #if DEBUGo
     let queries: [(String, String)] = [
       ("v", "\(DiscordGlobalConfiguration.apiVersion)"),
       ("encoding", "json"),
       ("compress", "zlib-stream"),
     ]
-
     let decompressorWSExtension: ZlibDecompressorWSExtension
     do {
       decompressorWSExtension = try ZlibDecompressorWSExtension(
@@ -230,19 +230,33 @@ public actor UserGatewayManager: GatewayManager {
       )
       return
     }
+//    #endif
 
+//    #if DEBUG
+//    let configuration = WebSocketClientConfiguration(
+//      maxFrameSize: self.maxFrameSize,
+//      additionalHeaders: [
+//        .userAgent: SuperProperties.useragent(ws: false)!,
+//        .origin: "https://discord.com",
+//        .cacheControl: "no-cache",
+//        .acceptLanguage: SuperProperties.GenerateLocaleHeader(),
+//
+//      ],
+//      extensions: []
+//    )
+//    #else
     let configuration = WebSocketClientConfiguration(
       maxFrameSize: self.maxFrameSize,
       additionalHeaders: [
         .userAgent: SuperProperties.useragent(ws: false)!,
         .origin: "https://discord.com",
         .cacheControl: "no-cache",
-        .acceptEncoding: "gzip, deflate, br, deflate",
         .acceptLanguage: SuperProperties.GenerateLocaleHeader(),
 
       ],
       extensions: [.nonNegotiatedExtension { decompressorWSExtension }]
     )
+//    #endif
 
     logger.trace("Will try to connect to Discord through web-socket")
     let connectionId = self.connectionId.wrappingIncrementThenLoad(

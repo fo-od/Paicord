@@ -6,24 +6,24 @@
 //  Copyright © 2026 Lakhan Lothiyi.
 //
 
-import SwiftUIX
 import PaicordLib
+import SwiftUIX
 
 extension MemberSidebarView {
-  
+
   struct GroupDMsMemberList: View {
     var channelStore: ChannelStore
     var recipients: [DiscordUser]
     var body: some View {
       ScrollView {
-        LazyVStack {
+        LazyVStack(alignment: .leading, spacing: 2) {
           ForEach(recipients) { recipient in
             MemberRowView(user: recipient)
+              .frame(height: 40)
           }
         }
+        .padding(.horizontal, 2)
       }
-      .scrollClipDisabled()
-      .padding(4)
     }
   }
 }

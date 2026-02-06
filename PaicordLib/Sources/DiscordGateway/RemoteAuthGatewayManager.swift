@@ -253,7 +253,6 @@ public actor RemoteAuthGatewayManager {
         .userAgent: SuperProperties.useragent(ws: false)!,
         .origin: "https://discord.com",
         .cacheControl: "no-cache",
-        .acceptEncoding: "gzip, deflate, br, deflate",
         .acceptLanguage: SuperProperties.GenerateLocaleHeader(),
 
       ]

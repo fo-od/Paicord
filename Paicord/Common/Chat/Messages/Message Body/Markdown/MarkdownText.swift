@@ -985,8 +985,7 @@ class MarkdownRendererVM {
             attrs[.font] = FontHelpers.makeFontBold(font)
           }
           attrs[.rawContent] = "<#\(c.id.rawValue)>"
-          if let url = URL(string: "paicord://mention/channel/\(c.id.rawValue)")
-          {
+          if let url = URL(string: "paicord://mention/channel/\(c.id.rawValue)") {
             attrs[.link] = url
           }
           attrs[.backgroundColor] = AppKitOrUIKitColor(
@@ -1003,8 +1002,7 @@ class MarkdownRendererVM {
           container.append(s)
         } else {
           var attrs = baseAttributes
-          if let url = URL(string: "paicord://mention/channel/\(c.id.rawValue)")
-          {
+          if let url = URL(string: "paicord://mention/channel/\(c.id.rawValue)") {
             attrs[.link] = url
           }
           let s = NSAttributedString(

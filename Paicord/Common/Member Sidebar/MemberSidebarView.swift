@@ -23,8 +23,9 @@ struct MemberSidebarView: View {
           let recipients = channelStore.channel?.recipients
         {
           GroupDMsMemberList(channelStore: channelStore, recipients: recipients)
-        } else if let guildStore {
-          GuildMemberList(guildStore: guildStore, channelStore: channelStore)
+        } else if let guildStore, let accumulator = channelStore.memberList {
+          GuildMemberList(
+            guildStore: guildStore, channelStore: channelStore, accumulator: accumulator)
         } else if channelStore.channel?.type == .dm,
           let user = channelStore.channel?.recipients?.first
         {
@@ -36,6 +37,5 @@ struct MemberSidebarView: View {
         EmptyView()
       }
     }
-    .ignoresSafeArea()
   }
 }
