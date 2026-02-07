@@ -200,10 +200,18 @@ public enum AST {
     public let nodeType: ASTNodeType = .listItem
     public let children: [ASTNode]
     public let sourceLocation: SourceLocation?
+    
+    /// Indentation level
+    public let level: Int
+    
+    /// Number of the item in the ordered list
+    public let listNumber: Int?
 
-    public init(children: [ASTNode], sourceLocation: SourceLocation? = nil) {
+    public init(level: Int, itemNumber: Int? = nil, children: [ASTNode], sourceLocation: SourceLocation? = nil) {
       self.children = children
       self.sourceLocation = sourceLocation
+      self.level = level
+      self.listNumber = itemNumber
     }
   }
 
