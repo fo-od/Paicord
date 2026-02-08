@@ -1049,6 +1049,7 @@ extension ChannelStore {
         case .invalidate(let range):
           for i in range.first..<range.second {
             items.removeValue(forKey: i)
+          }
         }
       }
     }
