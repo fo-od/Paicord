@@ -422,6 +422,9 @@ public typealias SKUSnowflake = Snowflake<SKU>
 /// Convenience type-alias for `Snowflake<SoundboardSound>`
 public typealias SoundSnowflake = Snowflake<SoundboardSound>
 
+/// Convenience type-alias for `Snowflake<Subscription>`
+public typealias SubscriptionSnowflake = Snowflake<Subscription>
+
 /// Convenience type-alias for `Snowflake<Gateway.GuildMemberListUpdate>`
 public typealias MemberListSnowflake = Snowflake<Gateway.GuildMemberListUpdate>
 

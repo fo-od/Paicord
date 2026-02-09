@@ -890,8 +890,7 @@ extension Gateway {
     public var flags: IntBitField<DiscordChannel.Message.Flag>?
     public var referenced_message: DereferenceBox<MessageCreate>?
     public var message_snapshots: [DiscordChannel.MessageSnapshot]?
-    //		@_spi(UserInstallableApps) @DecodeOrNil
-    //		public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?
+    public var interaction_metadata: DiscordChannel.Message.InteractionMetadata?
     public var interaction: MessageInteraction?
     public var thread: DiscordChannel?
     public var components: Interaction.ComponentSwitch?
@@ -1215,7 +1214,7 @@ extension Gateway {
     /// https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
     @UnstableEnum<Int>
     public enum Kind: Sendable, Codable {
-      case game  // 0
+      case playing  // 0
       case streaming  // 1
       case listening  // 2
       case watching  // 3
@@ -2267,7 +2266,7 @@ extension Gateway {
     public var status: Status
     public var request: GuildJoinRequest
     public var guild_id: GuildSnowflake
-    
+
     public struct GuildJoinRequest: Sendable, Codable {
       public var user_id: UserSnowflake
       public var user: PartialUser
@@ -2283,9 +2282,9 @@ extension Gateway {
       public var actioned_by_user: PartialUser?
       public var actioned_at: AnySnowflake?
     }
-    
+
     public struct MemberVerificationFormField: Sendable, Codable {
-      
+
     }
 
     @UnstableEnum<String>

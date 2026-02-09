@@ -41,7 +41,9 @@ public struct ApplicationCommand: Sendable, Codable {
       public var name_localized: String?
 
       public init(
-        name: String, name_localizations: [DiscordLocale: String]? = nil, value: StringIntDoubleBool
+        name: String,
+        name_localizations: [DiscordLocale: String]? = nil,
+        value: StringIntDoubleBool
       ) {
         self.name = name
         self.name_localizations = .init(name_localizations)
@@ -112,16 +114,32 @@ public struct ApplicationCommand: Sendable, Codable {
     }
 
     public func validate() -> [ValidationFailure] {
-      validateNumberInRangeOrNil(min_length, min: 0, max: 6_000, name: "min_length")
-      validateNumberInRangeOrNil(max_length, min: 0, max: 6_000, name: "max_length")
+      validateNumberInRangeOrNil(
+        min_length,
+        min: 0,
+        max: 6_000,
+        name: "min_length"
+      )
+      validateNumberInRangeOrNil(
+        max_length,
+        min: 0,
+        max: 6_000,
+        name: "max_length"
+      )
       validateElementCountDoesNotExceed(choices, max: 25, name: "choices")
       validateCharacterCountInRange(name, min: 1, max: 32, name: "name")
-      validateCharacterCountInRange(description, min: 1, max: 100, name: "description")
+      validateCharacterCountInRange(
+        description,
+        min: 1,
+        max: 100,
+        name: "description"
+      )
       validateHasPrecondition(
         condition: autocomplete == true,
         allowedIf: [.string, .integer, .number].contains(type),
         name: "autocomplete",
-        reason: "'autocomplete' is only allowed if 'type' is 'string' or 'integer' or 'number'"
+        reason:
+          "'autocomplete' is only allowed if 'type' is 'string' or 'integer' or 'number'"
       )
       validateHasPrecondition(
         condition: autocomplete == true,
@@ -133,19 +151,22 @@ public struct ApplicationCommand: Sendable, Codable {
         condition: (min_value != nil) || (max_value != nil),
         allowedIf: [.integer, .number].contains(type),
         name: "min_value+max_value",
-        reason: "'min_value' or 'max_value' are only allowed if 'type' is 'integer' or 'number'"
+        reason:
+          "'min_value' or 'max_value' are only allowed if 'type' is 'integer' or 'number'"
       )
       validateHasPrecondition(
         condition: (min_length != nil) || (max_length != nil),
         allowedIf: type == .string,
         name: "min_length+max_length",
-        reason: "'min_length' or 'max_length' are only allowed if 'type' is 'string'"
+        reason:
+          "'min_length' or 'max_length' are only allowed if 'type' is 'string'"
       )
       validateHasPrecondition(
         condition: choices?.isEmpty == false,
         allowedIf: [.string, .integer, .number].contains(type),
         name: "choices",
-        reason: "'choices' is only allowed if 'type' is 'string' or 'integer' or 'number'"
+        reason:
+          "'choices' is only allowed if 'type' is 'string' or 'integer' or 'number'"
       )
       choices?.validate()
       validateElementCountDoesNotExceed(options, max: 25, name: "options")
@@ -169,9 +190,7 @@ public struct ApplicationCommand: Sendable, Codable {
   public var default_member_permissions: StringBitField<Permission>?
   public var dm_permission: Bool?
   public var nsfw: Bool?
-  @_spi(UserInstallableApps) @DecodeOrNil
   public var integration_types: [DiscordApplication.IntegrationKind]?
-  @_spi(UserInstallableApps) @DecodeOrNil
   public var contexts: [Interaction.ContextKind]?
   public var version: String?
 }

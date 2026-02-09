@@ -116,6 +116,11 @@ public struct Guild: Sendable, Codable {
       case completedOnboarding  // 1
       case bypassVerification  // 2
       case startedOnboarding  // 3
+      case isGuest  // 4
+      case startedHomeActions  // 5
+      case completedHomeActions  // 6
+      case automodQuarantinedUsername  // 7
+      case dmSettingsUpsellAcknowledged  // 9
       case __undocumented(UInt)
     }
 
@@ -276,6 +281,7 @@ public struct Guild: Sendable, Codable {
     case invitesDisabled  // "INVITES_DISABLED"
     case inviteSplash  // "INVITE_SPLASH"
     case memberVerificationGateEnabled  // "MEMBER_VERIFICATION_GATE_ENABLED"
+    case moreSoundboard  // "MORE_SOUNDBOARD"
     case moreStickers  // "MORE_STICKERS"
     case news  // "NEWS"
     case partnered  // "PARTNERED"
@@ -284,30 +290,27 @@ public struct Guild: Sendable, Codable {
     case roleIcons  // "ROLE_ICONS"
     case roleSubscriptionsAvailableForPurchase  // "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE"
     case roleSubscriptionsEnabled  // "ROLE_SUBSCRIPTIONS_ENABLED"
+    case soundboard  // "SOUNDBOARD"
     case ticketedEventsEnabled  // "TICKETED_EVENTS_ENABLED"
     case vanityURL  // "VANITY_URL"
     case verified  // "VERIFIED"
     case vipRegions  // "VIP_REGIONS"
     case welcomeScreenEnabled  // "WELCOME_SCREEN_ENABLED"
+    case commerce  // "COMMERCE"
+    case privateThreads  // "PRIVATE_THREADS"
+    case sevenDayThreadArchive  // "SEVEN_DAY_THREAD_ARCHIVE"
+    case threeDayThreadArchive  // "THREE_DAY_THREAD_ARCHIVE"
+    case guildWebPageVanityUrl  // "GUILD_WEB_PAGE_VANITY_URL"
+    case textInVoiceEnabled  // "TEXT_IN_VOICE_ENABLED"
+    case memberProfiles  // "MEMBER_PROFILES"
+    case threadsEnabled  // "THREADS_ENABLED"
+    case exposedToActivitiesWtpExperiment  // "EXPOSED_TO_ACTIVITIES_WTP_EXPERIMENT"
+    case newThreadPermissions  // "NEW_THREAD_PERMISSIONS"
+    case enabledDiscoverableBefore  // "ENABLED_DISCOVERABLE_BEFORE"
+    case communityExpMedium  // "COMMUNITY_EXP_MEDIUM"
+    case communityExpLargeUngated  // "COMMUNITY_EXP_LARGE_UNGATED"
+    case monetizationEnabled  // "MONETIZATION_ENABLED"
     case __undocumented(String)
-
-    /// These ones are not mentioned in the Discord docs (There are even more of these).
-    /// Might not even be valid anymore.
-    //        case commerce = "COMMERCE"
-    //        case privateThreads = "PRIVATE_THREADS"
-    //        case sevenDayThreadArchive = "SEVEN_DAY_THREAD_ARCHIVE"
-    //        case threeDayThreadArchive = "THREE_DAY_THREAD_ARCHIVE"
-    //        case guildWebPageVanityUrl = "GUILD_WEB_PAGE_VANITY_URL"
-    //        case textInVoiceEnabled = "TEXT_IN_VOICE_ENABLED"
-    //        case memberProfiles = "MEMBER_PROFILES"
-    //        case threadsEnabled = "THREADS_ENABLED"
-    //        case exposedToActivitiesWtpExperiment = "EXPOSED_TO_ACTIVITIES_WTP_EXPERIMENT"
-    //        case newThreadPermissions = "NEW_THREAD_PERMISSIONS"
-    //        case enabledDiscoverableBefore = "ENABLED_DISCOVERABLE_BEFORE"
-    //        case communityExpMedium = "COMMUNITY_EXP_MEDIUM"
-    //        case communityExpLargeUngated = "COMMUNITY_EXP_LARGE_UNGATED"
-    //        case soundboard = "SOUNDBOARD"
-    //        case monetizationEnabled = "MONETIZATION_ENABLED"
   }
 
   /// https://discord.com/developers/docs/resources/guild#guild-object-mfa-level
@@ -790,4 +793,21 @@ public struct IntegrationApplication: Sendable, Codable {
   public var icon: String?
   public var description: String
   public var bot: DiscordUser?
+}
+
+extension Guild.Member.Flag {
+  public var isEditable: Bool {
+    switch self {
+    case .didRejoin, .completedOnboarding, .startedOnboarding, .isGuest,
+      .startedHomeActions,
+      .completedHomeActions, .automodQuarantinedUsername,
+      .dmSettingsUpsellAcknowledged:
+      return false
+    case .bypassVerification:
+      return true
+    case .__undocumented:
+      /// Likely `false`, but really: not sure
+      return false
+    }
+  }
 }
