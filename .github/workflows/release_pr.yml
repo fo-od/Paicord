@@ -263,5 +263,5 @@ jobs:
             await github.rest.issues.createComment({
               ...context.repo,
               issue_number: pr,
-              body: `✅ PR /release build finished for commit \`${commit}\`.\n\nArtifacts (unsigned) uploaded as workflow artifacts. Download them from the workflow run: ${runUrl}\n\nNote: the IPA is unsigned / lightly ldid-signed and cannot be installed on non-jailbroken devices.`
+              body: `✅ PR /release build finished for commit \`${commit}\`.\n\nArtifacts (unsigned) uploaded as workflow artifacts. Download them from the workflow run: ${runUrl}`
             });
