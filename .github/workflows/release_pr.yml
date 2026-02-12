@@ -259,9 +259,31 @@ jobs:
           script: |
             const pr = context.issue.number;
             const commit = '${{ needs.comment-start.outputs.commit }}';
-            const runUrl = `https://github.com/${{ github.repository }}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+
+            // Fetch artifacts for this run
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
+            });
+
+            const macArtifact = artifacts.data.find(a => a.name.startsWith('Paicord-macOS-PR-'));
+            const iosArtifact = artifacts.data.find(a => a.name.startsWith('Paicord-iOS-PR-'));
+
+            let body = `✅ PR /release build finished for commit \`${commit}\`.\n\n`;
+
+            if (macArtifact) {
+              body += `Download macOS artifact: [Paicord-macOS.zip](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/artifacts/${macArtifact.id})\n`;
+            }
+
+            if (iosArtifact) {
+              body += `Download iOS artifact: [Paicord-iOS.ipa](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/artifacts/${iosArtifact.id})\n`;
+            }
+
+            body += `\nNote: the IPA is unsigned / lightly ldid-signed and cannot be installed on non-jailbroken devices.`;
+
             await github.rest.issues.createComment({
               ...context.repo,
               issue_number: pr,
-              body: `✅ PR /release build finished for commit \`${commit}\`.\n\nArtifacts (unsigned) uploaded as workflow artifacts. Download them from the workflow run: ${runUrl}\n\nNote: the IPA is unsigned / lightly ldid-signed and cannot be installed on non-jailbroken devices.`
+              body: body
             });
